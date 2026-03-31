@@ -9,6 +9,17 @@ dependencyManagement {
     }
 }
 
+publishing {
+    publications {
+        maven(MavenPublication) {
+            pom {
+                name = 'Resilient Client Spring Boot Starter'
+                description = 'Spring Boot 자동 설정 (Properties + MeterRegistry 자동 바인딩)'
+            }
+        }
+    }
+}
+
 dependencies {
     api project(':resilient-client:resilient-client-core')
     api project(':resilient-client:resilient-client-metrics')

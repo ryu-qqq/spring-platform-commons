@@ -4,7 +4,7 @@ plugins {
 
 allprojects {
     group = 'com.ryuqqq.platform'
-    version = '0.1.0-SNAPSHOT'
+    version = '0.1.0'
 
     repositories {
         mavenCentral()
@@ -13,10 +13,13 @@ allprojects {
 
 subprojects {
     apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
 
     java {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
+        withSourcesJar()
+        withJavadocJar()
     }
 
     tasks.withType(JavaCompile).configureEach {
@@ -24,7 +27,47 @@ subprojects {
         options.compilerArgs << '-parameters'
     }
 
+    tasks.withType(Javadoc).configureEach {
+        options.encoding = 'UTF-8'
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+
     test {
         useJUnitPlatform()
+    }
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                from components.java
+
+                versionMapping {
+                    usage('java-api') {
+                        fromResolutionOf('runtimeClasspath')
+                    }
+                    usage('java-runtime') {
+                        fromResolutionResult()
+                    }
+                }
+
+                pom {
+                    url = 'https://github.com/ryu-qqq/spring-platform-commons'
+
+                    licenses {
+                        license {
+                            name = 'MIT License'
+                            url = 'https://opensource.org/licenses/MIT'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = 'ryuqq'
+                            name = 'Sangwon Ryu'
+                        }
+                    }
+                }
+            }
+        }
     }
 }

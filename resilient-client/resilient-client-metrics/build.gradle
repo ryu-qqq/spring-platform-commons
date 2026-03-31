@@ -1,3 +1,14 @@
+publishing {
+    publications {
+        maven(MavenPublication) {
+            pom {
+                name = 'Resilient Client Metrics'
+                description = 'Micrometer Binder 패턴 기반 메트릭 통합 모듈'
+            }
+        }
+    }
+}
+
 dependencies {
     api project(':resilient-client:resilient-client-core')
     api libs.micrometer.core

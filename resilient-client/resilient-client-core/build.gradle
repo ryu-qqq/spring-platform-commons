@@ -1,3 +1,14 @@
+publishing {
+    publications {
+        maven(MavenPublication) {
+            pom {
+                name = 'Resilient Client Core'
+                description = 'CB + Retry + 예외 분류가 내장된 HTTP 클라이언트 SDK 코어 모듈'
+            }
+        }
+    }
+}
+
 dependencies {
     api libs.resilience4j.circuitbreaker
     api libs.resilience4j.retry
