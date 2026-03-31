@@ -1,0 +1,53 @@
+[versions]
+# Spring Boot
+springBoot = "3.5.6"
+
+# Resilience
+resilience4j = "2.2.0"
+
+# Serialization
+jackson = "2.18.2"
+
+# Logging
+slf4j = "2.0.16"
+logback = "1.5.15"
+
+# Monitoring
+micrometer = "1.14.3"
+
+# Testing
+junit = "5.11.4"
+assertj = "3.27.3"
+mockito = "5.15.2"
+
+[libraries]
+# Resilience
+resilience4j-circuitbreaker = { module = "io.github.resilience4j:resilience4j-circuitbreaker", version.ref = "resilience4j" }
+resilience4j-retry = { module = "io.github.resilience4j:resilience4j-retry", version.ref = "resilience4j" }
+
+# Serialization
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+
+# Logging
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+
+# Monitoring
+micrometer-core = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
+
+# Spring Boot
+spring-boot-autoconfigure = { module = "org.springframework.boot:spring-boot-autoconfigure", version.ref = "springBoot" }
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "springBoot" }
+
+# Testing
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+
+[bundles]
+testing = [
+    "junit-jupiter",
+    "assertj-core",
+    "mockito-core",
+]

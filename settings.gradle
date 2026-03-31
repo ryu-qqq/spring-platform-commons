@@ -1,0 +1,5 @@
+rootProject.name = 'ryu-qqq-sdk'
+
+include 'resilient-client:resilient-client-core'
+include 'resilient-client:resilient-client-metrics'
+include 'resilient-client:resilient-client-spring-boot-starter'
