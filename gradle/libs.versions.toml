@@ -37,13 +37,19 @@ micrometer-core = { module = "io.micrometer:micrometer-core", version.ref = "mic
 
 # Spring Boot
 spring-boot-autoconfigure = { module = "org.springframework.boot:spring-boot-autoconfigure", version.ref = "springBoot" }
+spring-boot-dependencies = { group = "org.springframework.boot", name = "spring-boot-dependencies", version.ref = "springBoot" }
+spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "springBoot" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "springBoot" }
+spring-context = { module = "org.springframework:spring-context", version.ref = "springBoot" }
 
 # Testing
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+
+[plugins]
+spring-boot = { id = "org.springframework.boot", version.ref = "springBoot" }
 
 [bundles]
 testing = [

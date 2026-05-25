@@ -1,5 +1,30 @@
-rootProject.name = 'ryu-qqq-sdk'
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
 
+rootProject.name = 'spring-platform-commons'
+
+// ========================================
+// SDK (publishable libraries)
+// ========================================
 include 'resilient-client:resilient-client-core'
 include 'resilient-client:resilient-client-metrics'
 include 'resilient-client:resilient-client-spring-boot-starter'
+include 'platform-common-domain'
+
+// ========================================
+// Hexagonal template (reference skeleton)
+// ========================================
+include 'domain'
+include 'application'
+include 'adapter-in:rest-api'
+include 'bootstrap:bootstrap-web-api'
+
+project(':platform-common-domain').projectDir = file('platform-common-domain')
+project(':domain').projectDir = file('domain')
+project(':application').projectDir = file('application')
+project(':adapter-in:rest-api').projectDir = file('adapter-in/rest-api')
+project(':bootstrap:bootstrap-web-api').projectDir = file('bootstrap/bootstrap-web-api')

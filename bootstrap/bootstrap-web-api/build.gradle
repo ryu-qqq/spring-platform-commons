@@ -1,0 +1,25 @@
+// Bootstrap Web API — runnable Spring Boot app; wires all template modules
+
+plugins {
+    id 'org.springframework.boot' version '3.5.6'
+}
+
+dependencies {
+    implementation project(':domain')
+    implementation project(':application')
+    implementation project(':adapter-in:rest-api')
+
+    implementation libs.spring.boot.starter.web
+
+    testImplementation platform(libs.junit.bom)
+    testImplementation libs.bundles.testing
+    testImplementation libs.spring.boot.starter.test
+}
+
+tasks.bootJar {
+    enabled = false
+}
+
+tasks.bootRun {
+    enabled = false
+}
