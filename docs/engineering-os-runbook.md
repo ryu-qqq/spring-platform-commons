@@ -10,7 +10,7 @@
 | 구분 | 위치 | 버전 |
 |------|------|------|
 | **공통 (agent-crew v0.4.0)** | `.claude/agents/` · `skills/` · `references/java-spring/` · `references/notion/` | `agent-crew.lock` + git tag |
-| **프로젝트 고유** | `resilience-reviewer`, `resilient-client-dev`, `references/resilient-client/` | **이 레포 git commit** |
+| **프로젝트 고유** | `resilience-reviewer`, `resilient-client-dev`, `platform-backlog`, `references/resilient-client/` | **이 레포 git commit** |
 | **설정** | `.claude/project.yaml` | 이 레포 |
 
 구 SDK 에셋(`feature-designer`, `sdk-feature-dev` 등)은 **제거됨** — 무시.
@@ -33,6 +33,7 @@ engineering-os eo-start — Notion Task URL (또는 TASK-n)
 | 작업 유형 | 진입 |
 |-----------|------|
 | SDK 코드·테스트 | `resilient-client-dev` skill |
+| **백로그·우선순위·Task 발행** | **`platform-backlog` skill** |
 | 테스트 계획만 | `test-plan` skill |
 | ADR·의사결정 | `adr` skill |
 | Notion Task 갱신 | `engineering-os` / `notion-manager` |
