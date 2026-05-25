@@ -159,3 +159,10 @@ ExternalCallException (최상위)
 - Resilience4j 2.2.0 (CircuitBreaker, Retry)
 - Micrometer 1.14.3
 - Spring Boot 3.5.6 (Starter 모듈만)
+
+## Harness & Engineering OS
+
+일상 SDK 작업은 Cursor + agent-crew Harness(`resilient-client-dev`, `resilience-reviewer`)와 Notion Engineering OS Task 루프로 진행한다.
+
+- 실행 가이드: [`docs/engineering-os-runbook.md`](docs/engineering-os-runbook.md)
+- OpsPilot 피드백: [`docs/opspilot-feedback-loop.md`](docs/opspilot-feedback-loop.md)
