@@ -47,3 +47,4 @@ agentCrew:
   version: v0.4.0
   source: git@github.com:ryu-qqq/agent-crew.git
   syncedAt: "2026-05-25"
+  # 공통 Harness: agent-crew sync. 프로젝트 Harness: resilience-reviewer, resilient-client-dev

@@ -1,0 +1,15 @@
+# agent-crew 핀 — spring-platform-commons .claude/ 동기화 기준
+# ops-pilot 제품 sync 구현 전까지: agent-crew 태그에서 수동 rsync
+version: v0.4.0
+commit: 3139410
+source: git@github.com:ryu-qqq/agent-crew.git
+tag: v0.4.0
+syncedAt: "2026-05-25"
+includes:
+  - agents/
+  - skills/
+  - references/
+# 프로젝트 고유 (agent-crew에 없음 — 이 레포에서 버전 관리):
+#   agents/resilience-reviewer.md
+#   skills/resilient-client-dev/
+#   references/resilient-client/
