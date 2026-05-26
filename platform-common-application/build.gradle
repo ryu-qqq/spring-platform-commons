@@ -1,0 +1,21 @@
+publishing {
+    publications {
+        maven(MavenPublication) {
+            pom {
+                name = 'Platform Common Application'
+                description = 'Hexagonal common application helpers — CommonVoFactory (query VO assembly, APP-IN-001)'
+            }
+        }
+    }
+}
+
+dependencies {
+    api project(':platform-common-domain')
+
+    implementation platform(libs.spring.boot.dependencies)
+    implementation libs.spring.context
+
+    testImplementation platform(libs.junit.bom)
+    testImplementation libs.bundles.testing
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

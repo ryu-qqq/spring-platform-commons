@@ -14,6 +14,7 @@ include 'resilient-client:resilient-client-core'
 include 'resilient-client:resilient-client-metrics'
 include 'resilient-client:resilient-client-spring-boot-starter'
 include 'platform-common-domain'
+include 'platform-common-application'
 
 // ========================================
 // Hexagonal template (reference skeleton)
@@ -24,6 +25,7 @@ include 'adapter-in:rest-api'
 include 'bootstrap:bootstrap-web-api'
 
 project(':platform-common-domain').projectDir = file('platform-common-domain')
+project(':platform-common-application').projectDir = file('platform-common-application')
 project(':domain').projectDir = file('domain')
 project(':application').projectDir = file('application')
 project(':adapter-in:rest-api').projectDir = file('adapter-in/rest-api')

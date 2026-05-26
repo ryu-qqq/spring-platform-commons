@@ -1,0 +1,35 @@
+---
+description: Java Spring Boot 헥사고날 멀티모듈 컨벤션 — Obsidian wiki가 source of truth
+alwaysApply: true
+---
+
+# Java Spring Boot 헥사고날 컨벤션
+
+**ConventionHub MCP는 사용하지 않는다.** 컨벤션은 Obsidian wiki vault를 따른다.
+
+## Wiki 진입점
+
+| 항목 | 경로 |
+|------|------|
+| **Overview (여기서 시작)** | `wiki/conventions/java-springboot-hexagonal/_overview.md` |
+| Vault root | `/Users/ryu-qqq/Documents/ryu-qqq-wiki` |
+| 레이어 상세 | `wiki/conventions/java-springboot-hexagonal/layers/` |
+| 모듈 상세 | `wiki/conventions/java-springboot-hexagonal/modules/` |
+| 패턴 | `wiki/conventions/java-springboot-hexagonal/patterns/` |
+
+5레이어: `domain` · `application` · `adapter-in` · `adapter-out` · `bootstrap`
+
+## 조회 방법 (우선순위)
+
+1. **Obsidian MCP** (`MCP_DOCKER`): `obsidian_get_file_contents`, `obsidian_simple_search`
+2. **로컬 Read**: vault 절대 경로 + 위 상대 경로
+3. **Harness**: `.claude/agents/wiki-lookup.md` — `knowledge.vault.conventionsPath` (`wiki/conventions`)
+
+## 코드 작성 전
+
+Overview에서 **레이어 · 모듈 · 클래스 타입**을 확인한 뒤, 해당 `layers/` / `modules/` / `patterns/` 페이지를 Read한다.
+
+- DOMAIN은 외부 의존 없음 (Spring·JPA 금지)
+- APPLICATION Factory·CommonVoFactory: **null/default/HTTP parse 금지 (APP-IN-001)** — optional query·sort·page default는 adapter-in mapper 책임. Factory는 adapter가 넘긴 완성 VO·enum만 조합. wiki: `layers/application/factory.md`
+- ADAPTER_IN → APPLICATION만, ADAPTER_OUT → DOMAIN(+ Port 구현)
+- ArchUnit 의존 규칙 위반 금지
