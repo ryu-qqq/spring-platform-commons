@@ -1,0 +1,37 @@
+---
+description: Git 커밋·PR subject — SPC 티켓 + Conventional Commits (agent-crew v0.6.0)
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# 커밋·PR 제목 (spring-platform-commons)
+
+SSOT: `.claude/references/conventions/commit-format.md` · 설정: `.claude/project.yaml` → `git.commit`
+
+## Subject (필수)
+
+```
+<type>(<scope>): SPC-<번호> <한 줄 요약>
+```
+
+- **type:** feat · fix · docs · refactor · test · chore · ops
+- **scope:** platform · docs · sdk · harness 등 (소문자)
+- **SPC-** 티켓은 Notion Task / platform backlog와 맞출 것
+- **PR 제목** = squash merge 시 동일 subject
+
+## 예
+
+```
+docs(platform): SPC-120 Atlantis gap 문서 보강
+feat(sdk): SPC-45 Resilience4j circuit breaker 설정 API
+```
+
+## OpsPilot ingest
+
+`git.commit.requireOnIngest: true` — subject가 위 형식이 아니면 ingest가 거부된다.  
+ingest 전: `git log -1 --format=%s` 로 확인.
+
+## Harness 커밋 (ops)
+
+OpsPilot apply·자산 버전은 `ops(...):` 형식 — 앱 커밋과 구분됨.

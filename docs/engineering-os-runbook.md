@@ -9,9 +9,10 @@
 
 | 구분 | 위치 | 버전 |
 |------|------|------|
-| **공통 (agent-crew v0.4.0)** | `.claude/agents/` · `skills/` · `references/java-spring/` · `references/notion/` | `agent-crew.lock` + git tag |
+| **공통 (agent-crew v0.6.0)** | `.claude/agents/` · `skills/` · `references/` (conventions·java-spring·notion·infra-aws) | `agent-crew.lock` + git tag |
 | **프로젝트 고유** | `resilience-reviewer`, `resilient-client-dev`, `platform-backlog`, `references/resilient-client/` | **이 레포 git commit** |
-| **설정** | `.claude/project.yaml` | 이 레포 |
+| **설정** | `.claude/project.yaml` | 이 레포 (`git.commit` → SPC 티켓) |
+| **Cursor** | `.cursor/rules/commit-format-spc.mdc` | SPC subject 규칙 |
 
 구 SDK 에셋(`feature-designer`, `sdk-feature-dev` 등)은 **제거됨** — 무시.
 
@@ -46,6 +47,7 @@ engineering-os eo-done — 산출물 요약, commit hash, wiki raw 경로
 ```
 
 - Notion: `완료` · Wiki ADR · Commit
+- **커밋 subject**는 `.claude/references/conventions/commit-format.md` — `docs(platform): SPC-123 …` 형식
 
 ### 4. OpsPilot 검증 (코드/SDK 작업 후)
 
@@ -64,25 +66,37 @@ Harness 변경 후 **레지스트리 → 스캔** 필수.
 
 ---
 
-## agent-crew 재동기화
+## agent-crew 재동기화 (권장: OpsPilot API)
+
+```bash
+curl -s -X POST http://localhost:3001/api/projects/9f83dd39-85e2-4fb2-807c-b565c27d82b3/sync-agent-crew \
+  -H 'content-type: application/json' \
+  -d '{"tag":"v0.6.0","scan":true}'
+```
+
+MCP: `sync_agent_crew({ projectId: "9f83dd39-...", tag: "v0.6.0", scan: true })`
+
+`cpSync` 방식이라 **프로젝트 고유** `resilience-reviewer` · `resilient-client-dev` · `platform-backlog` · `references/resilient-client/` 는 그대로 유지된다.  
+수동 rsync 시에만 `--exclude` 로 보호 (아래 레거시).
+
+<details>
+<summary>레거시 rsync (오프라인)</summary>
 
 ```bash
 AC=~/Documents/ryu-qqq/agent-crew
 SPC=~/Documents/ryu-qqq/spring-platform-commons/.claude
 
 rsync -av --delete "$AC/agents/" "$SPC/agents/" \
-  --exclude resilience-reviewer.md   # 프로젝트 고유 보존은 수동 merge 권장
+  --exclude resilience-reviewer.md
 
 rsync -av --delete "$AC/skills/" "$SPC/skills/" \
-  --exclude resilient-client-dev/
+  --exclude resilient-client-dev/ --exclude platform-backlog/
 
 rsync -av "$AC/references/" "$SPC/references/" \
   --exclude resilient-client/
-
-# agent-crew.lock 의 version/commit/tag 갱신 후 커밋
 ```
 
-공통 에이전트 sync 시 **프로젝트 고유 3종은 덮어쓰지 않는다.**
+</details>
 
 ---
 

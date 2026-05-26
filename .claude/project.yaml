@@ -44,7 +44,15 @@ docs:
   adrPath: docs/adr
 
 agentCrew:
-  version: v0.5.0
+  version: v0.6.0
   source: git@github.com:ryu-qqq/agent-crew.git
   syncedAt: "2026-05-26"
   # 공통 Harness: agent-crew sync. 프로젝트 Harness: resilience-reviewer, resilient-client-dev
+
+git:
+  commit:
+    requireTicket: true
+    ticketSource: literal
+    ticketPrefix: SPC
+    requireOnIngest: true
+    scopesHint: [platform, docs, sdk, harness]
