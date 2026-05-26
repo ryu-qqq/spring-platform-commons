@@ -85,6 +85,7 @@ Notion MCP `search` / `fetch`로 Task 목록 조회.
 | `wiki-curator` | raw → wiki/projects 합성 |
 | `adr` skill | in-repo 또는 wiki pivot ADR 파이프라인 |
 | `work-evaluator` | 완료 후 4원칙 채점 (선택) |
+| `feedback-loop` skill / OpsPilot fixture ingest | `eo-done` 시 fixture ingest (best-effort) · 수동은 `/opspilot-ingest-*` |
 | `jira-manager` | **사용 안 함** — Engineering OS 프로젝트 |
 
 ## 참고
