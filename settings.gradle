@@ -25,6 +25,7 @@ include 'domain'
 include 'application'
 include 'adapter-in:rest-api'
 include 'bootstrap:bootstrap-web-api'
+include 'architecture-tests'
 
 project(':platform-common-domain').projectDir = file('platform-common-domain')
 project(':platform-common-application').projectDir = file('platform-common-application')
@@ -34,3 +35,4 @@ project(':domain').projectDir = file('domain')
 project(':application').projectDir = file('application')
 project(':adapter-in:rest-api').projectDir = file('adapter-in/rest-api')
 project(':bootstrap:bootstrap-web-api').projectDir = file('bootstrap/bootstrap-web-api')
+project(':architecture-tests').projectDir = file('architecture-tests')

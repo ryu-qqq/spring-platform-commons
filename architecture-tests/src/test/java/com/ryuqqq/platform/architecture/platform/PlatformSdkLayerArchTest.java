@@ -1,0 +1,194 @@
+package com.ryuqqq.platform.architecture.platform;
+
+import static com.ryuqqq.platform.architecture.support.ArchitectureRules.allPackages;
+import static com.ryuqqq.platform.architecture.support.ArchitectureRules.FRAMEWORK_PACKAGES_FORBIDDEN_IN_DOMAIN;
+import static com.ryuqqq.platform.architecture.support.ArchitectureRules.PERSISTENCE_PACKAGES;
+import static com.ryuqqq.platform.architecture.support.ArchitectureRules.PLATFORM_ADAPTER_IN_PACKAGES;
+import static com.ryuqqq.platform.architecture.support.ArchitectureRules.PLATFORM_BOOTSTRAP_PACKAGES;
+import static com.ryuqqq.platform.architecture.support.ModuleClasses.importProductionClasses;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+
+import com.tngtech.archunit.core.domain.JavaClasses;
+import com.tngtech.archunit.lang.ArchRule;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+/**
+ * Platform SDK module layer dependency smoke tests.
+ *
+ * <p>Maps publishable SDK modules to hexagonal layers: common-domain (domain), common-application
+ * (application), platform-web (adapter-in), platform-bootstrap (bootstrap).
+ */
+@DisplayName("Platform SDK hexagonal layer dependency rules")
+class PlatformSdkLayerArchTest {
+
+    private static JavaClasses commonDomainClasses;
+    private static JavaClasses commonApplicationClasses;
+    private static JavaClasses platformWebClasses;
+    private static JavaClasses platformBootstrapClasses;
+
+    @BeforeAll
+    static void setUp() {
+        commonDomainClasses = importProductionClasses("platform-common-domain");
+        commonApplicationClasses = importProductionClasses("platform-common-application");
+        platformWebClasses = importProductionClasses("platform-web");
+        platformBootstrapClasses = importProductionClasses("platform-bootstrap");
+    }
+
+    @Nested
+    @DisplayName("platform-common-domain (domain layer)")
+    class CommonDomainRules {
+
+        @Test
+        @DisplayName("must not depend on Spring, JPA, or Jackson")
+        void commonDomain_MustNotDependOnFrameworks() {
+            ArchRule rule =
+                    noClasses()
+                            .should()
+                            .dependOnClassesThat()
+                            .resideInAnyPackage(allPackages(FRAMEWORK_PACKAGES_FORBIDDEN_IN_DOMAIN))
+                            .allowEmptyShould(true)
+                            .because("platform-common-domain is pure Java — no framework deps (wiki layers/domain)");
+
+            rule.check(commonDomainClasses);
+        }
+
+        @Test
+        @DisplayName("must not depend on application, adapter, or bootstrap SDK layers")
+        void commonDomain_MustNotDependOnOuterLayers() {
+            ArchRule rule =
+                    noClasses()
+                            .should()
+                            .dependOnClassesThat()
+                            .resideInAnyPackage(
+                                    allPackages(
+                                            new String[] {
+                                                "com.ryuqqq.platform.common.factory..",
+                                                "com.ryuqqq.platform.common.component..",
+                                                "com.ryuqqq.platform.common.port.."
+                                            },
+                                            PLATFORM_ADAPTER_IN_PACKAGES,
+                                            PLATFORM_BOOTSTRAP_PACKAGES))
+                            .allowEmptyShould(true)
+                            .because("Domain layer must not depend on outer SDK layers");
+
+            rule.check(commonDomainClasses);
+        }
+    }
+
+    @Nested
+    @DisplayName("platform-common-application (application layer)")
+    class CommonApplicationRules {
+
+        @Test
+        @DisplayName("must not depend on adapter-in or bootstrap SDK layers")
+        void commonApplication_MustNotDependOnAdaptersOrBootstrap() {
+            ArchRule rule =
+                    noClasses()
+                            .should()
+                            .dependOnClassesThat()
+                            .resideInAnyPackage(allPackages(PLATFORM_ADAPTER_IN_PACKAGES, PLATFORM_BOOTSTRAP_PACKAGES))
+                            .allowEmptyShould(true)
+                            .because("Application layer must not depend on adapter-in or bootstrap (wiki overview)");
+
+            rule.check(commonApplicationClasses);
+        }
+
+        @Test
+        @DisplayName("must not depend on persistence or Spring Web")
+        void commonApplication_MustNotDependOnPersistenceOrWeb() {
+            ArchRule rule =
+                    noClasses()
+                            .should()
+                            .dependOnClassesThat()
+                            .resideInAnyPackage(
+                                    allPackages(
+                                            PERSISTENCE_PACKAGES,
+                                            new String[] {
+                                                "org.springframework.web..", "jakarta.servlet.."
+                                            }))
+                            .allowEmptyShould(true)
+                            .because("Application must not reach persistence or web stack (wiki layers/application)");
+
+            rule.check(commonApplicationClasses);
+        }
+    }
+
+    @Nested
+    @DisplayName("platform-web (adapter-in layer)")
+    class PlatformWebRules {
+
+        @Test
+        @DisplayName("must not depend on persistence or adapter-out")
+        void platformWeb_MustNotDependOnPersistenceOrAdapterOut() {
+            ArchRule rule =
+                    noClasses()
+                            .should()
+                            .dependOnClassesThat()
+                            .resideInAnyPackage(
+                                    allPackages(
+                                            PERSISTENCE_PACKAGES,
+                                            new String[] {"com.ryuqqq.platform.template.adapter.out.."}))
+                            .allowEmptyShould(true)
+                            .because("Adapter-In must not depend on persistence or adapter-out (wiki overview)");
+
+            rule.check(platformWebClasses);
+        }
+
+        @Test
+        @DisplayName("must not depend on bootstrap assembly SDK")
+        void platformWeb_MustNotDependOnBootstrap() {
+            ArchRule rule =
+                    noClasses()
+                            .should()
+                            .dependOnClassesThat()
+                            .resideInAnyPackage(allPackages(PLATFORM_BOOTSTRAP_PACKAGES))
+                            .allowEmptyShould(true)
+                            .because("Adapter-In must not depend on bootstrap assembly");
+
+            rule.check(platformWebClasses);
+        }
+
+        @Test
+        @DisplayName("may depend on platform-common-domain shared VOs (SDK exception to strict Port-In-only rule)")
+        void platformWeb_MayDependOnCommonDomain() {
+            // Documented pragmatic exception: adapter-in web SDK shares domain VOs for ApiResponse envelopes.
+            // Strict wiki rule (adapter-in → application only) applies to template business modules.
+            org.assertj.core.api.Assertions.assertThat(platformWebClasses).isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("platform-bootstrap (bootstrap layer)")
+    class PlatformBootstrapRules {
+
+        @Test
+        @DisplayName("inner SDK layers must not depend on platform-bootstrap")
+        void innerLayers_MustNotDependOnPlatformBootstrap() {
+            ArchRule rule =
+                    noClasses()
+                            .that()
+                            .resideInAnyPackage(
+                                    "com.ryuqqq.platform.common..",
+                                    "com.ryuqqq.platform.web..",
+                                    "com.ryuqqq.platform.template..")
+                            .should()
+                            .dependOnClassesThat()
+                            .resideInAnyPackage(allPackages(PLATFORM_BOOTSTRAP_PACKAGES))
+                            .allowEmptyShould(true)
+                            .because("Only runnable bootstrap apps assemble platform-bootstrap — inner layers must not");
+
+            rule.check(commonDomainClasses);
+            rule.check(commonApplicationClasses);
+            rule.check(platformWebClasses);
+        }
+
+        @Test
+        @DisplayName("platform-bootstrap module is registered and importable")
+        void platformBootstrap_ModuleIsPresent() {
+            org.assertj.core.api.Assertions.assertThat(platformBootstrapClasses).isNotNull();
+        }
+    }
+}

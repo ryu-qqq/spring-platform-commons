@@ -1,0 +1,30 @@
+// Hexagonal layer dependency smoke tests — wiki-aligned ArchUnit rules for template + platform SDK
+
+dependencies {
+    testImplementation project(':domain')
+    testImplementation project(':application')
+    testImplementation project(':adapter-in:rest-api')
+    testImplementation project(':bootstrap:bootstrap-web-api')
+    testImplementation project(':platform-common-domain')
+    testImplementation project(':platform-common-application')
+    testImplementation project(':platform-web')
+    testImplementation project(':platform-bootstrap')
+
+    testImplementation platform(libs.junit.bom)
+    testImplementation libs.bundles.testing
+    testImplementation libs.archunit.junit5
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.test {
+    dependsOn(
+        ':domain:classes',
+        ':application:classes',
+        ':adapter-in:rest-api:classes',
+        ':bootstrap:bootstrap-web-api:classes',
+        ':platform-common-domain:classes',
+        ':platform-common-application:classes',
+        ':platform-web:classes',
+        ':platform-bootstrap:classes'
+    )
+}

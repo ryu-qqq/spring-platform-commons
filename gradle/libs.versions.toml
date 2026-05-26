@@ -20,6 +20,7 @@ micrometer = "1.14.3"
 junit = "5.11.4"
 assertj = "3.27.3"
 mockito = "5.15.2"
+archunit = "1.2.1"
 
 [libraries]
 # Resilience
@@ -51,6 +52,7 @@ junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+archunit-junit5 = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "archunit" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "springBoot" }
