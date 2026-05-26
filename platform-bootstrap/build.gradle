@@ -1,0 +1,24 @@
+publishing {
+    publications {
+        maven(MavenPublication) {
+            pom {
+                name = 'Platform Bootstrap'
+                description = 'Bootstrap-layer SDK — logging, actuator defaults, graceful shutdown for runnable Spring Boot apps'
+            }
+        }
+    }
+}
+
+dependencies {
+    api platform(libs.spring.boot.dependencies)
+
+    implementation libs.spring.boot.starter
+    implementation libs.spring.boot.starter.actuator
+    implementation libs.spring.boot.autoconfigure
+    implementation libs.logstash.logback.encoder
+
+    testImplementation platform(libs.junit.bom)
+    testImplementation libs.bundles.testing
+    testImplementation libs.spring.boot.starter.test
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Logback Configuration — Platform Bootstrap SDK
+
+    Features:
+    - Development: Human-readable console output with MDC
+    - Production: JSON structured logging for CloudWatch/ELK/Datadog
+    - Observability: traceId/userId/tenantId/requestType/errorCode via MDC
+
+    MDC Keys (set by adapter-in filters / GlobalExceptionHandler):
+    - traceId: distributed tracing id
+    - userId: authenticated user id (when present)
+    - tenantId: multi-tenant id (when present)
+    - requestType: request classification
+    - errorCode: domain error code (GlobalExceptionHandler)
+-->
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="platform-app"/>
+    <springProperty scope="context" name="APP_ENV" source="spring.profiles.active" defaultValue="local"/>
+
+    <property name="CONSOLE_PATTERN"
+              value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - [traceId=%X{traceId:-N/A}] [userId=%X{userId:-}] [type=%X{requestType:-}] %msg%n"/>
+
+    <springProfile name="local,test,default">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>${CONSOLE_PATTERN}</pattern>
+                <charset>UTF-8</charset>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+
+        <logger name="com.ryuqq" level="DEBUG"/>
+
+        <logger name="org.springframework.web" level="INFO"/>
+        <logger name="org.springframework.security" level="INFO"/>
+
+        <logger name="org.hibernate.SQL" level="DEBUG"/>
+        <logger name="org.hibernate.orm.jdbc.bind" level="TRACE"/>
+    </springProfile>
+
+    <springProfile name="prod,stage,staging">
+        <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeMdcKeyName>traceId</includeMdcKeyName>
+                <includeMdcKeyName>userId</includeMdcKeyName>
+                <includeMdcKeyName>tenantId</includeMdcKeyName>
+                <includeMdcKeyName>requestType</includeMdcKeyName>
+                <includeMdcKeyName>errorCode</includeMdcKeyName>
+
+                <customFields>{"service":"${APP_NAME}","environment":"${APP_ENV}"}</customFields>
+
+                <timestampPattern>yyyy-MM-dd'T'HH:mm:ss.SSSXXX</timestampPattern>
+
+                <fieldNames>
+                    <timestamp>@timestamp</timestamp>
+                    <message>message</message>
+                    <logger>logger</logger>
+                    <level>level</level>
+                    <thread>thread</thread>
+                    <stackTrace>stack_trace</stackTrace>
+                </fieldNames>
+
+                <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                    <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                    <maxLength>4096</maxLength>
+                    <shortenedClassNameLength>20</shortenedClassNameLength>
+                    <exclude>sun\.reflect\..*</exclude>
+                    <exclude>java\.lang\.reflect\..*</exclude>
+                    <exclude>jdk\.internal\..*</exclude>
+                    <rootCauseFirst>true</rootCauseFirst>
+                </throwableConverter>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="JSON_CONSOLE"/>
+        </root>
+
+        <logger name="com.ryuqq" level="INFO"/>
+
+        <logger name="org.springframework" level="WARN"/>
+        <logger name="org.hibernate" level="WARN"/>
+
+        <logger name="software.amazon.awssdk" level="WARN"/>
+        <logger name="io.awspring.cloud" level="WARN"/>
+
+        <logger name="io.netty" level="WARN"/>
+        <logger name="reactor.netty" level="WARN"/>
+    </springProfile>
+
+</configuration>

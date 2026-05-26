@@ -11,6 +11,7 @@ jackson = "2.18.2"
 # Logging
 slf4j = "2.0.16"
 logback = "1.5.15"
+logstashLogbackEncoder = "8.0"
 
 # Monitoring
 micrometer = "1.14.3"
@@ -31,6 +32,7 @@ jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", ver
 # Logging
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstashLogbackEncoder" }
 
 # Monitoring
 micrometer-core = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
@@ -38,6 +40,8 @@ micrometer-core = { module = "io.micrometer:micrometer-core", version.ref = "mic
 # Spring Boot
 spring-boot-autoconfigure = { module = "org.springframework.boot:spring-boot-autoconfigure", version.ref = "springBoot" }
 spring-boot-dependencies = { group = "org.springframework.boot", name = "spring-boot-dependencies", version.ref = "springBoot" }
+spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter", version.ref = "springBoot" }
+spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "springBoot" }
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "springBoot" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "springBoot" }
 spring-context = { module = "org.springframework:spring-context" }

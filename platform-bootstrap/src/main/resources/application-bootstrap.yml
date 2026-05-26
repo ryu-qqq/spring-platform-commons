@@ -1,0 +1,71 @@
+# ===============================================
+# Platform Bootstrap — shared runnable infra defaults
+# ===============================================
+# Imported automatically when platform-bootstrap is on the classpath.
+# Override any property in the consumer bootstrap application.yml.
+# ===============================================
+
+server:
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,loggers
+      base-path: /actuator
+
+  endpoint:
+    health:
+      show-details: when-authorized
+    loggers:
+      enabled: true
+
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+    tags:
+      application: ${spring.application.name:platform-app}
+      environment: ${spring.profiles.active:local}
+
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
+      slo:
+        http.server.requests: 100ms,500ms,1s,5s
+
+  health:
+    diskspace:
+      enabled: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: stage,staging
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+server:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
