@@ -50,6 +50,15 @@ Engineering OS(Notion Tasks)와 wiki·git을 **같은 작업 단위**로 묶는 
    - `Commit` url 속성
    - 코멘트 1–2줄 (vault raw 링크)
 3. (선택) 사용자가 요청 시 `work-evaluator`에 작업 품질 채점 위임 — 백그라운드 Claude Code 세션용
+4. **OpsPilot fixture ingest** (best-effort, Task 완료를 막지 않음):
+   - 레포 루트에서 `git rev-parse HEAD` → `gitRef`
+   - `retro`: Task 산출물 요약 또는 사용자 입력
+   - `notionTaskUrl`: Task 페이지 URL (있으면)
+   - `curl -s -X POST http://localhost:3001/api/feedback/ingest` — `projectId` `9f83dd39-85e2-4fb2-807c-b565c27d82b3`, `evalSource` `fixture`
+   - 응답 `id`·초기 `status` 보고; `done`까지 짧게 폴링 (최대 ~30초)
+   - ingest id를 `notion-manager`에 위임해 Task 코멘트에 메모
+   - OpsPilot 서버(`:3001`) 미기동·curl 실패 시 보고만 하고 eo-done 계속
+   - 의미 있는 작업이면 사용자에게 `/opspilot-ingest-session`(local-claude eval) 실행을 **제안**
 
 ### C. 조회
 
