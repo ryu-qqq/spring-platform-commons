@@ -216,6 +216,79 @@ class ResilientClientTest {
     }
 
     @Nested
+    @DisplayName("Retry 필터 회귀 방지")
+    class RetryFilterRegression {
+
+        private Logger sdkLogger;
+        private ListAppender<ILoggingEvent> appender;
+
+        @BeforeEach
+        void attachAppender() {
+            sdkLogger = (Logger) LoggerFactory.getLogger(DefaultResilientClient.class);
+            appender = new ListAppender<>();
+            appender.start();
+            sdkLogger.addAppender(appender);
+        }
+
+        @AfterEach
+        void detachAppender() {
+            sdkLogger.detachAppender(appender);
+            appender.stop();
+        }
+
+        @Test
+        @DisplayName("CB OPEN 상태에서 CallNotPermittedException은 Retry 필터에 걸려 재시도되지 않는다")
+        void callNotPermittedDoesNotTriggerRetry() {
+            AtomicInteger senderCallCount = new AtomicInteger();
+
+            ResilientClient client = ResilientClient.builder()
+                .name("retry-filter")
+                .sender(req -> {
+                    senderCallCount.incrementAndGet();
+                    return new RawResponse(500, Map.of(), "error".getBytes());
+                })
+                .circuitBreaker(cb -> cb
+                    .failureRateThreshold(50)
+                    .slidingWindowSize(2)
+                    .minimumNumberOfCalls(2)
+                    .waitDurationInOpenState(Duration.ofSeconds(60)))
+                .retry(r -> r
+                    .maxAttempts(3)
+                    .initialBackoff(Duration.ofMillis(10)))
+                .build();
+
+            // setup: maxAttempts=3 이므로 한 번 호출만으로 supplier 2~3번 시도 → CB OPEN 전이
+            try {
+                client.executeVoid(ExternalRequest.get("http://example.com"));
+            } catch (ExternalCallException ignored) {
+                // setup 단계는 ServerException(retry 소진) 또는 CircuitOpenException(OPEN 전이 후 차단) 둘 다 정상
+            }
+
+            int senderCallsBeforeOpenAttempt = senderCallCount.get();
+            long retryLogsBeforeOpenAttempt = appender.list.stream()
+                .filter(e -> e.getFormattedMessage().contains("Retry attempt"))
+                .count();
+
+            // 검증: CB OPEN 상태에서 추가 호출 시도
+            try {
+                client.executeVoid(ExternalRequest.get("http://example.com"));
+            } catch (CircuitOpenException ignored) {
+            }
+
+            assertThat(senderCallCount.get())
+                .as("CB OPEN 상태에서는 sender가 호출되지 않아야 한다")
+                .isEqualTo(senderCallsBeforeOpenAttempt);
+
+            long retryLogsAfterOpenAttempt = appender.list.stream()
+                .filter(e -> e.getFormattedMessage().contains("Retry attempt"))
+                .count();
+            assertThat(retryLogsAfterOpenAttempt)
+                .as("CallNotPermittedException은 retryOnException 필터에서 걸러져야 한다")
+                .isEqualTo(retryLogsBeforeOpenAttempt);
+        }
+    }
+
+    @Nested
     @DisplayName("빌더 검증")
     class BuilderValidation {
 
