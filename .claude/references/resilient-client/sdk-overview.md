@@ -2,6 +2,7 @@
 
 > spring-platform-commons 전용. `resilient-client-dev` skill·`resilience-reviewer`가 Read한다.
 > 스택 공통 Resilience4j 원칙은 `.claude/references/java-spring/resilience-patterns.md`와 함께 본다.
+> **Wiki SSOT:** `/Users/ryu-qqq/Documents/ryu-qqq-wiki/wiki/projects/spring-platform-commons/resilient-client.md`
 
 ## 모듈
 
@@ -9,7 +10,17 @@
 |------|------|
 | `resilient-client-core` | ResilientClient 인터페이스·빌더·CB/Retry·예외 분류. Spring 의존성 없음. |
 | `resilient-client-metrics` | Micrometer Binder — duration, errors, CB state, retry |
-| `resilient-client-spring-boot-starter` | AutoConfiguration, Factory, Properties |
+| `resilient-client-spring-boot-starter` | AutoConfiguration, Factory, Properties, **YAML auto-register beans** (v0.2) |
+
+## v0.2 추가 (YAML declarative)
+
+- `ResilientClientBeansConfiguration` — `resilient.client.clients.*` → `{key}ResilientClient` 빈
+- `ResilientClientRegistry` — 런타임 lookup
+- `ResilientClientRestSupport` / `createRestClientBacked()` — RestClient + timeout wiring
+- CB `sliding-window-type`: COUNT_BASED / TIME_BASED
+- 조건: `enabled: true` + `base-url` (수동 `@Bean` 있으면 수동 우선)
+
+**템플릿 예시:** `adapter-out/client/example-client` — `@DependsOn("resilientClientRegistry")`
 
 ## 패키지
 
@@ -29,14 +40,19 @@
 
 `DefaultResponseClassifier` — HTTP status → `ServerException` / `BadRequestException` / `ClientException` / `NetworkException`
 
+## Rate limit
+
+**SDK 범위 밖.** 클러스터 quota/429 → Phase 4 `platform-persistence-redis`. Pod CB와 역할 분리.
+
 ## 배포
 
-JitPack: `com.github.ryu-qqq.spring-platform-commons:<module>:vX.Y.Z`
+JitPack: `com.github.ryu-qqq.spring-platform-commons:<module>:v0.2.0` (태그 후)
 
 ## 변경 시 검증
 
 ```bash
-./gradlew test
+./gradlew :resilient-client:test
+./gradlew :adapter-out:client:example-client:test
 ```
 
-모듈별 테스트 필수. starter 변경 시 `ResilientClientAutoConfigurationTest` 포함.
+starter 변경 시 `ResilientClientAutoConfigurationTest` 포함.
