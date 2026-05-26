@@ -46,7 +46,9 @@ class ResilientClientAutoConfigurationTest {
     void propertiesBinding() {
         runner.withPropertyValues(
                 "resilient.client.clients.callback.circuit-breaker.failure-rate-threshold=30",
-                "resilient.client.clients.callback.retry.max-attempts=5"
+                "resilient.client.clients.callback.retry.max-attempts=5",
+                "resilient.client.clients.callback.timeout.connect=2s",
+                "resilient.client.clients.callback.timeout.read=8s"
             )
             .run(context -> {
                 ResilientClientFactory factory = context.getBean(ResilientClientFactory.class);
@@ -62,6 +64,10 @@ class ResilientClientAutoConfigurationTest {
                     .getCircuitBreaker().getFailureRateThreshold()).isEqualTo(30f);
                 assertThat(props.getClients().get("callback")
                     .getRetry().getMaxAttempts()).isEqualTo(5);
+                assertThat(props.getClients().get("callback")
+                    .getTimeout().getConnect()).isEqualTo(java.time.Duration.ofSeconds(2));
+                assertThat(props.getClients().get("callback")
+                    .getTimeout().getRead()).isEqualTo(java.time.Duration.ofSeconds(8));
             });
     }
 

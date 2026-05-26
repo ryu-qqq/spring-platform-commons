@@ -8,6 +8,8 @@ import com.ryuqqq.platform.resilient.spring.ResilientClientProperties.CircuitBre
 import com.ryuqqq.platform.resilient.spring.ResilientClientProperties.ClientProperties;
 import com.ryuqqq.platform.resilient.spring.ResilientClientProperties.RetryProperties;
 
+import org.springframework.web.client.RestClient;
+
 /**
  * Properties 기반 {@link ResilientClient} 팩토리.
  *
@@ -59,6 +61,35 @@ public class ResilientClientFactory {
         return builder.build();
     }
 
+    /**
+     * {@link ResilientClientRestSupport}로 RestClient를 만들고 properties의 timeout/CB/retry를 적용한다.
+     *
+     * @param clientName properties의 clients 키
+     * @param baseUrl    RestClient base URL
+     */
+    public ResilientClient createRestClientBacked(String clientName, String baseUrl) {
+        ClientProperties clientProps = properties.getClients().get(clientName);
+        if (clientProps == null) {
+            clientProps = new ClientProperties();
+            clientProps.setBaseUrl(baseUrl);
+        }
+        return createRestClientBacked(clientName, clientProps);
+    }
+
+    /**
+     * {@link ClientProperties}의 base-url, timeout, default-headers로 RestClient-backed client 생성.
+     */
+    public ResilientClient createRestClientBacked(String clientName, ClientProperties clientProps) {
+        String baseUrl = clientProps.getBaseUrl();
+        if (baseUrl == null || baseUrl.isBlank()) {
+            throw new IllegalArgumentException("base-url is required for client: " + clientName);
+        }
+        RestClient restClient =
+                ResilientClientRestSupport.buildRestClient(
+                        baseUrl, clientProps.getTimeout(), clientProps.getDefaultHeaders());
+        return create(clientName, ResilientClientRestSupport.requestSender(restClient));
+    }
+
     private void applyCircuitBreaker(ResilientClientBuilder builder,
                                      CircuitBreakerProperties cbProps) {
         builder.circuitBreaker(cb -> cb
@@ -66,6 +97,7 @@ public class ResilientClientFactory {
             .slowCallDurationThreshold(cbProps.getSlowCallDurationThreshold())
             .slowCallRateThreshold(cbProps.getSlowCallRateThreshold())
             .slidingWindowSize(cbProps.getSlidingWindowSize())
+            .slidingWindowType(cbProps.getSlidingWindowType())
             .waitDurationInOpenState(cbProps.getWaitDurationInOpenState())
             .permittedCallsInHalfOpenState(cbProps.getPermittedCallsInHalfOpenState())
             .minimumNumberOfCalls(cbProps.getMinimumNumberOfCalls()));

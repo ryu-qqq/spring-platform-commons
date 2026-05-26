@@ -12,6 +12,7 @@ public class CircuitBreakerConfig {
     private Duration slowCallDurationThreshold = Duration.ofSeconds(3);
     private float slowCallRateThreshold = 80;
     private int slidingWindowSize = 20;
+    private SlidingWindowType slidingWindowType = SlidingWindowType.COUNT_BASED;
     private Duration waitDurationInOpenState = Duration.ofSeconds(60);
     private int permittedCallsInHalfOpenState = 5;
     private int minimumNumberOfCalls = 10;
@@ -36,6 +37,11 @@ public class CircuitBreakerConfig {
         return this;
     }
 
+    public CircuitBreakerConfig slidingWindowType(SlidingWindowType type) {
+        this.slidingWindowType = type;
+        return this;
+    }
+
     public CircuitBreakerConfig waitDurationInOpenState(Duration duration) {
         this.waitDurationInOpenState = duration;
         return this;
@@ -57,6 +63,7 @@ public class CircuitBreakerConfig {
             .slowCallDurationThreshold(slowCallDurationThreshold)
             .slowCallRateThreshold(slowCallRateThreshold)
             .slidingWindowSize(slidingWindowSize)
+            .slidingWindowType(slidingWindowType.toResilience4j())
             .waitDurationInOpenState(waitDurationInOpenState)
             .permittedNumberOfCallsInHalfOpenState(permittedCallsInHalfOpenState)
             .minimumNumberOfCalls(minimumNumberOfCalls)

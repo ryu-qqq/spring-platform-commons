@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 
 /**
  * Resilient Client SDK Spring Boot 자동 설정.
@@ -17,9 +18,11 @@ import org.springframework.context.annotation.Bean;
  *   <li>{@link ResilientClientProperties} 바인딩</li>
  *   <li>{@link MeterRegistry} 빈이 있으면 Micrometer 메트릭 자동 연동</li>
  *   <li>{@link ResilientClientFactory} 빈 등록</li>
+ *   <li>{@link ResilientClientBeansConfiguration} — YAML declarative client 빈</li>
  * </ul>
  */
 @AutoConfiguration
+@Import(ResilientClientBeansConfiguration.class)
 @EnableConfigurationProperties(ResilientClientProperties.class)
 public class ResilientClientAutoConfiguration {
 
