@@ -36,6 +36,7 @@ engineering-os eo-start — Notion Task URL (또는 TASK-n)
 | **백로그·우선순위·Task 발행** | **`platform-backlog` skill** |
 | 테스트 계획만 | `test-plan` skill |
 | ADR·의사결정 | `adr` skill |
+| **헥사고날 컨벤션 조회** | Obsidian wiki `wiki/conventions/java-springboot-hexagonal/_overview.md` · `wiki-lookup` · `.cursor/rules/java-spring-hexagonal-conventions.mdc` |
 | Notion Task 갱신 | `engineering-os` / `notion-manager` |
 
 ### 3. Task 완료

@@ -213,14 +213,25 @@ docs/opspilot-feedback-loop.md 를 읽고 순서대로 실행해줘.
 
 ---
 
+## Platform 로드맵과 ingest (점진 고도화)
+
+Phase Task마다 **commit 1회 = ingest 1회**로 묶으면 `work-evaluator` 4축 채점·proposal(HITL)로 Harness(skill·rule·agent)를 단계적으로 올릴 수 있다.
+
+- **로드맵 SSOT:** [`platform-backlog.md`](./platform-backlog.md) — Phase 0~5, 동시성·보상 전략, Task별 ingest retro 예시
+- **메타:** ingest JSON에 `notionTaskUrl` + commit message에 Task ID (`HT2`, `platform-persistence-v1`)
+- **블로커:** `workflow_patch` parser 완료 전(SPC-H4)에는 eval·수동 retro 중심, auto-apply proposal은 제한적
+
+---
+
 ## 관련 파일 (이 레포)
 
 | 경로 | 설명 |
 |------|------|
+| `docs/platform-backlog.md` | Platform Phase 로드맵 + ingest 연동 |
 | `.claude/agents/work-evaluator.md` | 피드백 eval 에이전트 (agent-crew) |
 | `.claude/project.yaml` | Engineering OS / vault 설정 |
 | `docs/opspilot-feedback-loop.md` | 이 문서 |
 
 ---
 
-*최종 갱신: 2026-05-25 — OpsPilot TASK-5 MVP 피드백 루프 세팅 기준*
+*최종 갱신: 2026-05-25 — Platform roadmap ingest 연동 섹션 추가*
