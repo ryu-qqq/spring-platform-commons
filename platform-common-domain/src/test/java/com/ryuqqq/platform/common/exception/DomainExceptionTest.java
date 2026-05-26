@@ -48,6 +48,8 @@ class DomainExceptionTest {
         assertThat(ex.getMessage()).isEqualTo("id=42 없음");
         assertThat(ex.args()).containsEntry("id", 42L);
         assertThat(ex.errorCode().getHttpStatus()).isEqualTo(404);
+        assertThat(ex.code()).isEqualTo("TST-001");
+        assertThat(ex.httpStatus()).isEqualTo(404);
     }
 
     @Test

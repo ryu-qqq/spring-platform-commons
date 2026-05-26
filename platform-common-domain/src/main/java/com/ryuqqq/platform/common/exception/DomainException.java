@@ -34,6 +34,16 @@ public class DomainException extends RuntimeException {
         return errorCode;
     }
 
+    /** {@link ErrorCode#getCode()} 위임. */
+    public String code() {
+        return errorCode.getCode();
+    }
+
+    /** {@link ErrorCode#getHttpStatus()} 위임. */
+    public int httpStatus() {
+        return errorCode.getHttpStatus();
+    }
+
     public Map<String, Object> args() {
         return args;
     }

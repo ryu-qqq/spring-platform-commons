@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     api project(':application')
+    api project(':platform-web')
 
     implementation platform(libs.spring.boot.dependencies)
     implementation libs.spring.boot.starter.web

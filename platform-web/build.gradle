@@ -1,0 +1,26 @@
+publishing {
+    publications {
+        maven(MavenPublication) {
+            pom {
+                name = 'Platform Web'
+                description = 'Hexagonal adapter-in web core — ApiResponse envelope, GlobalExceptionHandler, ErrorMapper'
+            }
+        }
+    }
+}
+
+dependencies {
+    api project(':platform-common-domain')
+
+    implementation platform(libs.spring.boot.dependencies)
+    implementation libs.spring.boot.starter.web
+    implementation libs.spring.boot.autoconfigure
+    implementation libs.slf4j.api
+    implementation 'org.springframework.security:spring-security-core'
+
+    testImplementation platform(libs.junit.bom)
+    testImplementation libs.bundles.testing
+    testImplementation libs.spring.boot.starter.test
+    testImplementation 'org.springframework.boot:spring-boot-starter-validation'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
