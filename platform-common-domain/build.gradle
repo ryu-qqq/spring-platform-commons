@@ -3,7 +3,7 @@ publishing {
         maven(MavenPublication) {
             pom {
                 name = 'Platform Common Domain'
-                description = 'Hexagonal common domain VOs — paging, query context, date range, versioned contract'
+                description = 'Hexagonal common domain — query/paging VOs, soft delete, exception base, Versioned'
             }
         }
     }

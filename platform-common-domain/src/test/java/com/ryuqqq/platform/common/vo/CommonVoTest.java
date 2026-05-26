@@ -71,7 +71,7 @@ class CommonVoTest {
     class QueryContextTest {
 
         @Test
-        @DisplayName("defaultOf는 DESC + firstPage")
+        @DisplayName("defaultOf는 DESC + firstPage + includeDeleted false")
         void defaultOf() {
             QueryContext<TestSortKey> context = QueryContext.defaultOf(TestSortKey.defaultKey());
 
@@ -80,6 +80,16 @@ class CommonVoTest {
             assertThat(context.page()).isZero();
             assertThat(context.size()).isEqualTo(20);
             assertThat(context.offset()).isZero();
+            assertThat(context.includeDeleted()).isFalse();
+        }
+
+        @Test
+        @DisplayName("includeDeleted 전달 가능")
+        void includeDeleted() {
+            QueryContext<TestSortKey> context = QueryContext.of(
+                    TestSortKey.CREATED_AT, SortDirection.ASC, PageRequest.firstPage(), true);
+
+            assertThat(context.includeDeleted()).isTrue();
         }
 
         @Test
@@ -140,6 +150,76 @@ class CommonVoTest {
             holder.refreshVersion(3L);
 
             assertThat(holder.version()).isEqualTo(3L);
+        }
+    }
+
+    @Nested
+    @DisplayName("CursorPageRequest / CursorQueryContext")
+    class CursorPagingTest {
+
+        @Test
+        @DisplayName("firstPage cursor는 null")
+        void firstPageCursorNull() {
+            CursorPageRequest<Long> request = CursorPageRequest.firstPage();
+
+            assertThat(request.isFirstPage()).isTrue();
+            assertThat(request.size()).isEqualTo(20);
+        }
+
+        @Test
+        @DisplayName("CursorQueryContext defaultOf는 DESC + firstPage")
+        void cursorQueryContextDefault() {
+            CursorQueryContext<TestSortKey, Long> context =
+                    CursorQueryContext.defaultOf(TestSortKey.defaultKey());
+
+            assertThat(context.sortDirection()).isEqualTo(SortDirection.DESC);
+            assertThat(context.isFirstPage()).isTrue();
+            assertThat(context.includeDeleted()).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("PageMeta / SliceMeta")
+    class ResponseMetaTest {
+
+        @Test
+        @DisplayName("PageMeta totalPages·hasNext")
+        void pageMeta() {
+            PageMeta meta = PageMeta.of(0, 10, 25);
+
+            assertThat(meta.totalPages()).isEqualTo(3);
+            assertThat(meta.hasNext()).isTrue();
+            assertThat(meta.hasPrevious()).isFalse();
+        }
+
+        @Test
+        @DisplayName("SliceMeta nextCursor")
+        void sliceMeta() {
+            SliceMeta<Long> meta = SliceMeta.of(20, true, 99L);
+
+            assertThat(meta.hasNext()).isTrue();
+            assertThat(meta.nextCursor()).isEqualTo(99L);
+        }
+    }
+
+    @Nested
+    @DisplayName("DeletionStatus")
+    class DeletionStatusTest {
+
+        @Test
+        @DisplayName("active → markDeleted → restore")
+        void lifecycle() {
+            Instant now = Instant.parse("2026-05-25T12:00:00Z");
+            DeletionStatus active = DeletionStatus.active();
+
+            assertThat(active.isActive()).isTrue();
+
+            DeletionStatus deleted = active.markDeleted(now);
+
+            assertThat(deleted.deleted()).isTrue();
+            assertThat(deleted.deletedAt()).isEqualTo(now);
+
+            assertThat(deleted.restore().isActive()).isTrue();
         }
     }
 
