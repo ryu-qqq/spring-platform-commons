@@ -24,6 +24,7 @@ include 'platform-bootstrap'
 include 'domain'
 include 'application'
 include 'adapter-in:rest-api'
+include 'adapter-out:client:example-client'
 include 'bootstrap:bootstrap-web-api'
 include 'architecture-tests'
 
@@ -34,5 +35,6 @@ project(':platform-bootstrap').projectDir = file('platform-bootstrap')
 project(':domain').projectDir = file('domain')
 project(':application').projectDir = file('application')
 project(':adapter-in:rest-api').projectDir = file('adapter-in/rest-api')
+project(':adapter-out:client:example-client').projectDir = file('adapter-out/client/example-client')
 project(':bootstrap:bootstrap-web-api').projectDir = file('bootstrap/bootstrap-web-api')
 project(':architecture-tests').projectDir = file('architecture-tests')

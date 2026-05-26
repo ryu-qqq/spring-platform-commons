@@ -10,7 +10,6 @@ build/
 .settings/
 .project
 .classpath
-out/
 
 # OS
 .DS_Store

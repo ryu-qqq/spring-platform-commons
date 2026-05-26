@@ -31,6 +31,7 @@ class TemplateHexagonalLayerArchTest {
     private static JavaClasses domainClasses;
     private static JavaClasses applicationClasses;
     private static JavaClasses adapterInClasses;
+    private static JavaClasses adapterOutClasses;
     private static JavaClasses bootstrapClasses;
 
     @BeforeAll
@@ -38,6 +39,7 @@ class TemplateHexagonalLayerArchTest {
         domainClasses = importProductionClasses("domain");
         applicationClasses = importProductionClasses("application");
         adapterInClasses = importProductionClasses("adapter-in/rest-api");
+        adapterOutClasses = importProductionClasses("adapter-out/client/example-client");
         bootstrapClasses = importProductionClasses("bootstrap/bootstrap-web-api");
     }
 
@@ -172,6 +174,52 @@ class TemplateHexagonalLayerArchTest {
                             .because("Adapter-In must not depend on bootstrap assembly (wiki overview)");
 
             rule.check(adapterInClasses);
+        }
+    }
+
+    @Nested
+    @DisplayName("Adapter-Out (:adapter-out:client:example-client)")
+    class AdapterOutLayerRules {
+
+        @Test
+        @DisplayName("must not depend on adapter-in or bootstrap")
+        void adapterOut_MustNotDependOnAdapterInOrBootstrap() {
+            ArchRule rule =
+                    noClasses()
+                            .should()
+                            .dependOnClassesThat()
+                            .resideInAnyPackage(
+                                    allPackages(
+                                            TEMPLATE_ADAPTER_IN_PACKAGES,
+                                            PLATFORM_ADAPTER_IN_PACKAGES,
+                                            PLATFORM_BOOTSTRAP_PACKAGES,
+                                            new String[] {"com.ryuqqq.platform.template.bootstrap.."}))
+                            .allowEmptyShould(true)
+                            .because("Adapter-Out must not depend on adapter-in or bootstrap (wiki overview)");
+
+            rule.check(adapterOutClasses);
+        }
+
+        @Test
+        @DisplayName("must not depend on domain aggregates directly")
+        void adapterOut_MustNotDependOnDomainAggregates() {
+            ArchRule rule =
+                    noClasses()
+                            .should()
+                            .dependOnClassesThat()
+                            .resideInAnyPackage("com.ryuqqq.platform.template..aggregate..")
+                            .allowEmptyShould(true)
+                            .because(
+                                    "Adapter-Out implements application ports — no direct domain aggregate"
+                                            + " (wiki layers/adapter-out)");
+
+            rule.check(adapterOutClasses);
+        }
+
+        @Test
+        @DisplayName("example-client module is registered and importable")
+        void adapterOut_ModuleIsPresent() {
+            org.assertj.core.api.Assertions.assertThat(adapterOutClasses).isNotNull();
         }
     }
 

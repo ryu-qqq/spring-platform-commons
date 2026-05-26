@@ -8,6 +8,7 @@ dependencies {
     implementation project(':domain')
     implementation project(':application')
     implementation project(':adapter-in:rest-api')
+    implementation project(':adapter-out:client:example-client')
     implementation project(':platform-bootstrap')
 
     implementation libs.spring.boot.starter.web

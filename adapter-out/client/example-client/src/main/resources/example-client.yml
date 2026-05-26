@@ -1,0 +1,15 @@
+# Example client — resilient.client.clients.example YAML로 HTTP client 빈 자동 등록
+example-client:
+  health-path: /health
+
+resilient:
+  client:
+    clients:
+      example:
+        enabled: true
+        base-url: http://localhost:8089
+        timeout:
+          connect: 3s
+          read: 10s
+        retry:
+          max-attempts: 2
