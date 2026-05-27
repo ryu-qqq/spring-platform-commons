@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -47,6 +48,7 @@ public class GlobalExceptionHandler {
     private static final String RESOURCE_NOT_FOUND = "RESOURCE_NOT_FOUND";
     private static final String METHOD_NOT_ALLOWED = "METHOD_NOT_ALLOWED";
     private static final String STATE_CONFLICT = "STATE_CONFLICT";
+    private static final String OPTIMISTIC_LOCK_CONFLICT = "OPTIMISTIC_LOCK_CONFLICT";
     private static final String ACCESS_DENIED = "ACCESS_DENIED";
     private static final String INTERNAL_ERROR = "INTERNAL_ERROR";
 
@@ -194,6 +196,18 @@ public class GlobalExceptionHandler {
         String detail = Optional.ofNullable(ex.getMessage()).orElse("State conflict");
         log.warn("IllegalState: code={}, message={}", STATE_CONFLICT, detail);
         return build(HttpStatus.CONFLICT, "Conflict", detail, STATE_CONFLICT, req);
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<ProblemDetail> handleOptimisticLock(
+            OptimisticLockingFailureException ex, HttpServletRequest req) {
+        log.warn("OptimisticLockingFailure: code={}, message={}", OPTIMISTIC_LOCK_CONFLICT, ex.getMessage());
+        return build(
+                HttpStatus.CONFLICT,
+                "Conflict",
+                "다른 트랜잭션에서 리소스가 수정되었습니다. 다시 조회 후 시도해주세요.",
+                OPTIMISTIC_LOCK_CONFLICT,
+                req);
     }
 
     @ExceptionHandler(AccessDeniedException.class)

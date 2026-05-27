@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
@@ -142,6 +143,15 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    @DisplayName("409 OptimisticLockingFailureException")
+    void optimisticLockConflict() throws Exception {
+        mockMvc.perform(get("/test/optimistic-lock").accept(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(status().isConflict())
+                .andExpect(header().string("x-error-code", "OPTIMISTIC_LOCK_CONFLICT"))
+                .andExpect(jsonPath("$.code").value("OPTIMISTIC_LOCK_CONFLICT"));
+    }
+
+    @Test
     @DisplayName("500 catch-all Exception")
     void internalError() throws Exception {
         mockMvc.perform(get("/test/boom").accept(MediaType.APPLICATION_PROBLEM_JSON))
@@ -218,6 +228,11 @@ class GlobalExceptionHandlerTest {
         @GetMapping("/test/conflict")
         ApiResponse<Void> conflict() {
             throw new IllegalStateException("already exists");
+        }
+
+        @GetMapping("/test/optimistic-lock")
+        ApiResponse<Void> optimisticLock() {
+            throw new OptimisticLockingFailureException("version conflict");
         }
 
         @GetMapping("/test/boom")
