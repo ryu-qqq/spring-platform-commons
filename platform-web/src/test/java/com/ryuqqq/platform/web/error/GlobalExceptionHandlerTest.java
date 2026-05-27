@@ -148,7 +148,8 @@ class GlobalExceptionHandlerTest {
         mockMvc.perform(get("/test/optimistic-lock").accept(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(status().isConflict())
                 .andExpect(header().string("x-error-code", "OPTIMISTIC_LOCK_CONFLICT"))
-                .andExpect(jsonPath("$.code").value("OPTIMISTIC_LOCK_CONFLICT"));
+                .andExpect(jsonPath("$.code").value("OPTIMISTIC_LOCK_CONFLICT"))
+                .andExpect(jsonPath("$.detail").value("정보가 변경되었습니다. 화면을 새로고침한 뒤 다시 시도해 주세요."));
     }
 
     @Test

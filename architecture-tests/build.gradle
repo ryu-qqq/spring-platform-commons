@@ -5,7 +5,6 @@ dependencies {
     testImplementation project(':application')
     testImplementation project(':adapter-in:rest-api')
     testImplementation project(':adapter-out:client:example-client')
-    testImplementation project(':adapter-out:persistence-mysql:example-persistence')
     testImplementation project(':bootstrap:bootstrap-web-api')
     testImplementation project(':platform-common-domain')
     testImplementation project(':platform-common-application')
@@ -25,7 +24,6 @@ tasks.test {
         ':application:classes',
         ':adapter-in:rest-api:classes',
         ':adapter-out:client:example-client:classes',
-        ':adapter-out:persistence-mysql:example-persistence:classes',
         ':bootstrap:bootstrap-web-api:classes',
         ':platform-common-domain:classes',
         ':platform-common-application:classes',

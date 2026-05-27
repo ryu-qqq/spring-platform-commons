@@ -49,6 +49,8 @@ public class GlobalExceptionHandler {
     private static final String METHOD_NOT_ALLOWED = "METHOD_NOT_ALLOWED";
     private static final String STATE_CONFLICT = "STATE_CONFLICT";
     private static final String OPTIMISTIC_LOCK_CONFLICT = "OPTIMISTIC_LOCK_CONFLICT";
+    private static final String OPTIMISTIC_LOCK_USER_MESSAGE =
+            "정보가 변경되었습니다. 화면을 새로고침한 뒤 다시 시도해 주세요.";
     private static final String ACCESS_DENIED = "ACCESS_DENIED";
     private static final String INTERNAL_ERROR = "INTERNAL_ERROR";
 
@@ -205,7 +207,7 @@ public class GlobalExceptionHandler {
         return build(
                 HttpStatus.CONFLICT,
                 "Conflict",
-                "다른 트랜잭션에서 리소스가 수정되었습니다. 다시 조회 후 시도해주세요.",
+                OPTIMISTIC_LOCK_USER_MESSAGE,
                 OPTIMISTIC_LOCK_CONFLICT,
                 req);
     }

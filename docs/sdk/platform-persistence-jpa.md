@@ -34,29 +34,18 @@ implementation 'com.github.ryu-qqq.spring-platform-commons:platform-persistence-
 ## QueryDSL
 
 - SDK가 base entity용 Q-type 생성 (`PersistenceQueryMetaEntity` anchor)
-- per-domain `ConditionBuilder`는 서비스 adapter-out에 둔다 (Phase 2 비목표)
-
-## 템플릿 예시
-
-`adapter-out/persistence-mysql/example-persistence` — HT6 패턴:
-
-```yaml
-platform:
-  example:
-    persistence:
-      enabled: true
-```
-
-→ `ExampleRecordPort` + QueryDSL `ExampleRecordQueryDslRepository`.
+- per-domain `ConditionBuilder`·Query adapter는 **서비스 adapter-out**에 둔다 (wiki `persistence-mysql` 참고)
 
 ## 낙관적 락 → HTTP 409
 
 `@Version` 충돌 시 Spring이 `OptimisticLockingFailureException`을 던진다.  
-`platform-web` `GlobalExceptionHandler`가 **409** + `OPTIMISTIC_LOCK_CONFLICT` ProblemDetail로 매핑.
+`platform-web` `GlobalExceptionHandler`가 **409** + `OPTIMISTIC_LOCK_CONFLICT` ProblemDetail로 매핑한다.
+
+사용자-facing `detail`: *정보가 변경되었습니다. 화면을 새로고침한 뒤 다시 시도해 주세요.*  
+기술 원인(`ex.getMessage()`)은 서버 로그에만 남긴다.
 
 ## 테스트
 
 ```bash
 ./gradlew :platform-persistence-jpa:test
-./gradlew :adapter-out:persistence-mysql:example-persistence:test
 ```

@@ -24,7 +24,6 @@ spring-platform-commons/
 ├── application/
 ├── adapter-in/rest-api/
 ├── adapter-out/client/example-client/   # HT6 — resilient-client YAML wiring 예시
-├── adapter-out/persistence-mysql/example-persistence/  # P2-3 — platform-persistence-jpa wiring 예시
 └── bootstrap/bootstrap-web-api/
 ```
 
@@ -43,7 +42,6 @@ spring-platform-commons/
 |--------------|------|
 | P2-1 platform-persistence-jpa v0.1 | ✅ |
 | P2-2 OptimisticLock → 409 (platform-web) | ✅ |
-| P2-3 example-persistence template wiring | ✅ |
 | P2-4 SDK docs · backlog | ✅ |
 
 ## 빠른 시작
@@ -101,7 +99,7 @@ JPA adapter-out 공통 기반 — audit, soft delete, `@Version`, `JPAQueryFacto
 implementation project(':platform-persistence-jpa')
 ```
 
-**adapter-out 패턴:** `adapter-out/persistence-mysql/example-persistence` 참고 (`platform.example.persistence.enabled=true`).
+**adapter-out:** wiki `persistence-mysql` 패턴 + `BaseVersionedSoftDeleteEntity` 상속 entity를 서비스 adapter-out에 구현.
 
 | 문서 | 경로 |
 |------|------|
