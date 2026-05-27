@@ -53,6 +53,7 @@ spring-context = { module = "org.springframework:spring-context" }
 
 # QueryDSL (Jakarta)
 querydsl-jpa = { group = "com.querydsl", name = "querydsl-jpa", version.ref = "querydsl" }
+querydsl-apt = { group = "com.querydsl", name = "querydsl-apt", version.ref = "querydsl" }
 
 # Database (test)
 h2 = { module = "com.h2database:h2" }

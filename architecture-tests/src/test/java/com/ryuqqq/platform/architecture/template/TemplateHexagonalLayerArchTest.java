@@ -39,7 +39,10 @@ class TemplateHexagonalLayerArchTest {
         domainClasses = importProductionClasses("domain");
         applicationClasses = importProductionClasses("application");
         adapterInClasses = importProductionClasses("adapter-in/rest-api");
-        adapterOutClasses = importProductionClasses("adapter-out/client/example-client");
+        adapterOutClasses =
+                importProductionClasses(
+                        "adapter-out/client/example-client",
+                        "adapter-out/persistence-mysql/example-persistence");
         bootstrapClasses = importProductionClasses("bootstrap/bootstrap-web-api");
     }
 
@@ -178,7 +181,7 @@ class TemplateHexagonalLayerArchTest {
     }
 
     @Nested
-    @DisplayName("Adapter-Out (:adapter-out:client:example-client)")
+    @DisplayName("Adapter-Out (example-client + example-persistence)")
     class AdapterOutLayerRules {
 
         @Test
@@ -217,7 +220,7 @@ class TemplateHexagonalLayerArchTest {
         }
 
         @Test
-        @DisplayName("example-client module is registered and importable")
+        @DisplayName("adapter-out example modules are registered and importable")
         void adapterOut_ModuleIsPresent() {
             org.assertj.core.api.Assertions.assertThat(adapterOutClasses).isNotNull();
         }

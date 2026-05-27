@@ -9,6 +9,7 @@ dependencies {
     implementation project(':application')
     implementation project(':adapter-in:rest-api')
     implementation project(':adapter-out:client:example-client')
+    implementation project(':adapter-out:persistence-mysql:example-persistence')
     implementation project(':platform-bootstrap')
 
     implementation libs.spring.boot.starter.web

@@ -1,0 +1,5 @@
+# Example persistence adapter — enable when wiring this module in bootstrap
+platform:
+  example:
+    persistence:
+      enabled: false
