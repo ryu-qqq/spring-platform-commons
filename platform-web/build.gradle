@@ -15,6 +15,7 @@ dependencies {
     implementation platform(libs.spring.boot.dependencies)
     implementation libs.spring.boot.starter.web
     implementation libs.spring.boot.autoconfigure
+    implementation 'org.springframework:spring-tx'
     implementation libs.slf4j.api
     implementation 'org.springframework.security:spring-security-core'
 

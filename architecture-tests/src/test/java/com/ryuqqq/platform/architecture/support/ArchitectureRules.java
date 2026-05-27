@@ -75,4 +75,8 @@ public final class ArchitectureRules {
     public static final String[] PLATFORM_BOOTSTRAP_PACKAGES = {
         "com.ryuqqq.platform.bootstrap..",
     };
+
+    public static final String[] PLATFORM_ADAPTER_OUT_PACKAGES = {
+        "com.ryuqqq.platform.persistence.jpa..",
+    };
 }

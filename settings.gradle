@@ -17,6 +17,7 @@ include 'platform-common-domain'
 include 'platform-common-application'
 include 'platform-web'
 include 'platform-bootstrap'
+include 'platform-persistence-jpa'
 
 // ========================================
 // Hexagonal template (reference skeleton)
@@ -32,6 +33,7 @@ project(':platform-common-domain').projectDir = file('platform-common-domain')
 project(':platform-common-application').projectDir = file('platform-common-application')
 project(':platform-web').projectDir = file('platform-web')
 project(':platform-bootstrap').projectDir = file('platform-bootstrap')
+project(':platform-persistence-jpa').projectDir = file('platform-persistence-jpa')
 project(':domain').projectDir = file('domain')
 project(':application').projectDir = file('application')
 project(':adapter-in:rest-api').projectDir = file('adapter-in/rest-api')

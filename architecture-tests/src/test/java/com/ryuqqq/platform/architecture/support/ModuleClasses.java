@@ -14,15 +14,22 @@ public final class ModuleClasses {
     private ModuleClasses() {}
 
     public static JavaClasses importProductionClasses(String modulePath) {
-        Path classesDir = repoRoot().resolve(modulePath).resolve("build/classes/java/main");
-        if (!Files.isDirectory(classesDir)) {
-            return new ClassFileImporter()
-                    .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-                    .importPaths(Collections.emptyList());
+        return importProductionClasses(new String[] {modulePath});
+    }
+
+    public static JavaClasses importProductionClasses(String... modulePaths) {
+        ClassFileImporter importer =
+                new ClassFileImporter()
+                        .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS);
+        var paths =
+                java.util.Arrays.stream(modulePaths)
+                        .map(path -> repoRoot().resolve(path).resolve("build/classes/java/main"))
+                        .filter(Files::isDirectory)
+                        .toList();
+        if (paths.isEmpty()) {
+            return importer.importPaths(Collections.emptyList());
         }
-        return new ClassFileImporter()
-                .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-                .importPath(classesDir);
+        return importer.importPaths(paths);
     }
 
     private static Path repoRoot() {

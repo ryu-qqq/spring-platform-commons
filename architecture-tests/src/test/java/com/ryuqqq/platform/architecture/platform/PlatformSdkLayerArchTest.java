@@ -28,6 +28,7 @@ class PlatformSdkLayerArchTest {
     private static JavaClasses commonApplicationClasses;
     private static JavaClasses platformWebClasses;
     private static JavaClasses platformBootstrapClasses;
+    private static JavaClasses platformPersistenceJpaClasses;
 
     @BeforeAll
     static void setUp() {
@@ -35,6 +36,7 @@ class PlatformSdkLayerArchTest {
         commonApplicationClasses = importProductionClasses("platform-common-application");
         platformWebClasses = importProductionClasses("platform-web");
         platformBootstrapClasses = importProductionClasses("platform-bootstrap");
+        platformPersistenceJpaClasses = importProductionClasses("platform-persistence-jpa");
     }
 
     @Nested
@@ -189,6 +191,52 @@ class PlatformSdkLayerArchTest {
         @DisplayName("platform-bootstrap module is registered and importable")
         void platformBootstrap_ModuleIsPresent() {
             org.assertj.core.api.Assertions.assertThat(platformBootstrapClasses).isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("platform-persistence-jpa (adapter-out layer)")
+    class PlatformPersistenceJpaRules {
+
+        @Test
+        @DisplayName("must not depend on adapter-in or bootstrap SDK layers")
+        void persistenceJpa_MustNotDependOnAdapterInOrBootstrap() {
+            ArchRule rule =
+                    noClasses()
+                            .should()
+                            .dependOnClassesThat()
+                            .resideInAnyPackage(
+                                    allPackages(PLATFORM_ADAPTER_IN_PACKAGES, PLATFORM_BOOTSTRAP_PACKAGES))
+                            .allowEmptyShould(true)
+                            .because("Adapter-out JPA SDK must not depend on adapter-in or bootstrap");
+
+            rule.check(platformPersistenceJpaClasses);
+        }
+
+        @Test
+        @DisplayName("must not depend on application layer SDK")
+        void persistenceJpa_MustNotDependOnApplicationLayer() {
+            ArchRule rule =
+                    noClasses()
+                            .should()
+                            .dependOnClassesThat()
+                            .resideInAnyPackage(
+                                    allPackages(
+                                            new String[] {
+                                                "com.ryuqqq.platform.common.factory..",
+                                                "com.ryuqqq.platform.common.component..",
+                                                "com.ryuqqq.platform.common.port.."
+                                            }))
+                            .allowEmptyShould(true)
+                            .because("Adapter-out must not depend on application layer (wiki overview)");
+
+            rule.check(platformPersistenceJpaClasses);
+        }
+
+        @Test
+        @DisplayName("platform-persistence-jpa module is registered and importable")
+        void platformPersistenceJpa_ModuleIsPresent() {
+            org.assertj.core.api.Assertions.assertThat(platformPersistenceJpaClasses).isNotEmpty();
         }
     }
 }

@@ -13,6 +13,7 @@ spring-platform-commons/
 ├── platform-common-application/     # HT7 — CommonVoFactory
 ├── platform-web/                    # HT3 — ApiResponse, GEH, RequestContextFilter
 ├── platform-bootstrap/              # HT4 — logback JSON, actuator, bootstrap yml
+├── platform-persistence-jpa/          # P2-1 — BaseAuditEntity, soft delete, @Version, QueryDSL
 ├── resilient-client/                # v0.2 — CB + Retry + Timeout + metrics + YAML beans
 │   ├── resilient-client-core/
 │   ├── resilient-client-metrics/
@@ -36,6 +37,12 @@ spring-platform-commons/
 | HT6 example-client | ✅ |
 | HT7 platform-common-application | ✅ |
 | HT8 docs (이 README · backlog · SDK 가이드) | ✅ |
+
+| Phase 2 Task | 상태 |
+|--------------|------|
+| P2-1 platform-persistence-jpa v0.1 | ✅ |
+| P2-2 OptimisticLock → 409 (platform-web) | ✅ |
+| P2-4 SDK docs · backlog | ✅ |
 
 ## 빠른 시작
 
@@ -77,12 +84,33 @@ resilient:
 |------|------|
 | 레포 가이드 | [`docs/sdk/resilient-client.md`](docs/sdk/resilient-client.md) |
 | Wiki SSOT | `wiki/projects/spring-platform-commons/resilient-client.md` |
-| 백로그·로드맵 | [`docs/platform-backlog.md`](docs/platform-backlog.md) |
 
 **JitPack** (태그 후):
 
 ```groovy
 implementation 'com.github.ryu-qqq.spring-platform-commons:resilient-client-spring-boot-starter:v0.2.0'
+```
+
+### platform-persistence-jpa (v0.1)
+
+JPA adapter-out 공통 기반 — audit, soft delete, `@Version`, `JPAQueryFactory`.
+
+```groovy
+implementation project(':platform-persistence-jpa')
+```
+
+**adapter-out:** wiki `persistence-mysql` 패턴 + `BaseVersionedSoftDeleteEntity` 상속 entity를 서비스 adapter-out에 구현.
+
+| 문서 | 경로 |
+|------|------|
+| 레포 가이드 | [`docs/sdk/platform-persistence-jpa.md`](docs/sdk/platform-persistence-jpa.md) |
+| Wiki SSOT | `wiki/projects/spring-platform-commons/platform-persistence-jpa.md` |
+| 백로그·로드맵 | [`docs/platform-backlog.md`](docs/platform-backlog.md) |
+
+**JitPack** (태그 후, P0-2 잔여):
+
+```groovy
+implementation 'com.github.ryu-qqq.spring-platform-commons:platform-persistence-jpa:v0.1.0'
 ```
 
 ### Resilience 2레이어
