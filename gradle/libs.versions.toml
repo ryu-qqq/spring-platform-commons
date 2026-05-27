@@ -22,6 +22,9 @@ assertj = "3.27.3"
 mockito = "5.15.2"
 archunit = "1.2.1"
 
+# QueryDSL
+querydsl = "5.1.0"
+
 [libraries]
 # Resilience
 resilience4j-circuitbreaker = { module = "io.github.resilience4j:resilience4j-circuitbreaker", version.ref = "resilience4j" }
@@ -44,8 +47,15 @@ spring-boot-dependencies = { group = "org.springframework.boot", name = "spring-
 spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter", version.ref = "springBoot" }
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "springBoot" }
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "springBoot" }
+spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "springBoot" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "springBoot" }
 spring-context = { module = "org.springframework:spring-context" }
+
+# QueryDSL (Jakarta)
+querydsl-jpa = { group = "com.querydsl", name = "querydsl-jpa", version.ref = "querydsl" }
+
+# Database (test)
+h2 = { module = "com.h2database:h2" }
 
 # Testing
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }

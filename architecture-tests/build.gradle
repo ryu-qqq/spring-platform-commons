@@ -10,6 +10,7 @@ dependencies {
     testImplementation project(':platform-common-application')
     testImplementation project(':platform-web')
     testImplementation project(':platform-bootstrap')
+    testImplementation project(':platform-persistence-jpa')
 
     testImplementation platform(libs.junit.bom)
     testImplementation libs.bundles.testing
@@ -27,6 +28,7 @@ tasks.test {
         ':platform-common-domain:classes',
         ':platform-common-application:classes',
         ':platform-web:classes',
-        ':platform-bootstrap:classes'
+        ':platform-bootstrap:classes',
+        ':platform-persistence-jpa:classes'
     )
 }
