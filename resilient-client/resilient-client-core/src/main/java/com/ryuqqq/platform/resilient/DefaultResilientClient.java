@@ -62,6 +62,15 @@ class DefaultResilientClient implements ResilientClient {
             .onRetry(event -> log.warn("[{}] Retry attempt #{}: {}",
                 name, event.getNumberOfRetryAttempts(), event.getLastThrowable().getMessage()));
 
+        this.circuitBreaker.getEventPublisher()
+            .onStateTransition(event -> log.info("[{}] CB {} -> {}",
+                name,
+                event.getStateTransition().getFromState(),
+                event.getStateTransition().getToState()))
+            .onCallNotPermitted(event -> log.warn("[{}] CB call not permitted (state=OPEN)", name))
+            .onError(event -> log.warn("[{}] CB recorded failure: {}",
+                name, event.getThrowable().toString()));
+
         metricsRecorder.bindCircuitBreaker(name, this.circuitBreaker);
     }
 
