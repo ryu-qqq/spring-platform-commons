@@ -1,7 +1,7 @@
 ---
 name: journal-recorder
 description: 에이전트·작업 산출물에서 의사결정·AI 활용·진행상황을 자동 추출하여 지식 vault `raw/` 폴더에 시드 노트로 append 한다. 오케스트레이터가 의미 있는 시점마다 자동 호출하거나, 사용자가 journal 스킬로 호출. 최종 문서 합성은 journal 스킬·wiki-curator 담당 — 이 에이전트는 시드만 쌓는다.
-allowed-tools:
+tools:
   - Read
   - Write
   - Glob
@@ -121,3 +121,9 @@ append 포맷:
 4. **과잉 기록 방지** — 모든 산출물을 기계적으로 기록하지 않는다. *의사결정·판단·일탈*이 담긴 것만
 5. **회사 정보 추상화** — NDA 파트너·민감정보는 추상화 후 기록 (vault 운영 규칙 따름)
 6. **시드는 raw, 합성은 별도** — 이 에이전트는 시드만. wiki 합성 페이지는 wiki-curator가 처리
+7. **git에 손대지 않는다** — 이 에이전트는 raw 시드 파일을 Write 할 뿐
+   `git add`·`commit`·`checkout`·`push`를 하지 않는다. vault는 여러 프로젝트가 공유하는
+   단일 레포라, 현재 체크아웃된 브랜치(다른 프로젝트의 작업 브랜치일 수 있음)에 임의로
+   커밋하면 남의 PR을 오염시킨다 (`knowledge.vault.git: true` 여도 마찬가지). 커밋이
+   필요하면 호출자(journal 스킬)·사람이 브랜치를 인지해 별도로 수행한다. push는 어떤
+   경우에도 하지 않는다.
