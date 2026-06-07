@@ -1,0 +1,22 @@
+// 공유 헥사고날 ArchUnit 규칙 라이브러리 (발행). 소비측이 @AnalyzeClasses + @ArchTest로 적용한다.
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            pom {
+                name = 'Platform ArchRules'
+                description = '공유 헥사고날 ArchUnit 규칙 — 레이어 경계·프레임워크 비의존·의존 방향. 상대 패키지 매처(..domain.. 등)로 root 패키지 무관.'
+            }
+        }
+    }
+}
+
+dependencies {
+    api libs.archunit.junit5
+
+    testImplementation platform(libs.spring.boot.dependencies)
+    testImplementation 'org.springframework:spring-context'
+    testImplementation platform(libs.junit.bom)
+    testImplementation libs.bundles.testing
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
