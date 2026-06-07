@@ -1,0 +1,30 @@
+// Adapter-in 보안 SDK — servlet ServiceToken 인증 필터·properties·ProblemDetail 핸들러 + 자동설정.
+// SecurityFilterChain 은 소비측이 소유 (ServiceTokenSecurity.applyDefaults 로 공통부 적용).
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            pom {
+                name = 'Platform Security'
+                description = 'Adapter-in 보안 SDK — servlet ServiceTokenAuthenticationFilter superset + ProblemDetail 핸들러 + 자동설정.'
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation platform(libs.spring.boot.dependencies)
+    implementation libs.spring.boot.autoconfigure
+    implementation 'org.springframework.security:spring-security-web'
+    implementation 'org.springframework.security:spring-security-config'
+    implementation 'org.springframework:spring-web'
+    implementation libs.jackson.databind
+    implementation libs.slf4j.api
+
+    testImplementation platform(libs.junit.bom)
+    testImplementation libs.bundles.testing
+    testImplementation libs.spring.boot.starter.test
+    testImplementation libs.spring.boot.starter.web
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
