@@ -5,16 +5,14 @@ import jakarta.persistence.MappedSuperclass;
 import java.time.Instant;
 
 /**
- * Soft-delete columns ({@code deleted}, {@code deletedAt}) for JPA entities.
+ * Soft-delete column ({@code deletedAt}) for JPA entities. 삭제 여부는 {@code deletedAt != null}로 파생한다 —
+ * 별도 {@code deleted} boolean 컬럼은 두지 않는다 (ADR-0003 드리프트 표준 수렴).
  *
  * <p>Maps to domain {@code DeletionStatus}. Per-domain status-enum soft delete remains valid (wiki
  * persistence-mysql § ConditionBuilder).
  */
 @MappedSuperclass
 public abstract class BaseSoftDeleteEntity extends BaseAuditEntity {
-
-    @Column(name = "deleted", nullable = false)
-    private boolean deleted;
 
     @Column(name = "deleted_at")
     private Instant deletedAt;
@@ -23,14 +21,13 @@ public abstract class BaseSoftDeleteEntity extends BaseAuditEntity {
         super();
     }
 
-    protected BaseSoftDeleteEntity(Instant createdAt, Instant updatedAt, boolean deleted, Instant deletedAt) {
+    protected BaseSoftDeleteEntity(Instant createdAt, Instant updatedAt, Instant deletedAt) {
         super(createdAt, updatedAt);
-        this.deleted = deleted;
         this.deletedAt = deletedAt;
     }
 
     public boolean isDeleted() {
-        return deleted;
+        return deletedAt != null;
     }
 
     public Instant getDeletedAt() {
@@ -38,12 +35,10 @@ public abstract class BaseSoftDeleteEntity extends BaseAuditEntity {
     }
 
     protected void markDeleted(Instant deletedAt) {
-        this.deleted = true;
         this.deletedAt = deletedAt;
     }
 
     protected void restoreFromSoftDelete() {
-        this.deleted = false;
         this.deletedAt = null;
     }
 }

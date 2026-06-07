@@ -20,8 +20,8 @@ public abstract class BaseVersionedSoftDeleteEntity extends BaseSoftDeleteEntity
     }
 
     protected BaseVersionedSoftDeleteEntity(
-            Instant createdAt, Instant updatedAt, boolean deleted, Instant deletedAt, Long version) {
-        super(createdAt, updatedAt, deleted, deletedAt);
+            Instant createdAt, Instant updatedAt, Instant deletedAt, Long version) {
+        super(createdAt, updatedAt, deletedAt);
         this.version = version;
     }
 

@@ -26,14 +26,14 @@ public class TestSoftDeleteJpaEntity extends BaseSoftDeleteEntity {
     }
 
     private TestSoftDeleteJpaEntity(
-            Long id, String name, Instant createdAt, Instant updatedAt, boolean deleted, Instant deletedAt) {
-        super(createdAt, updatedAt, deleted, deletedAt);
+            Long id, String name, Instant createdAt, Instant updatedAt, Instant deletedAt) {
+        super(createdAt, updatedAt, deletedAt);
         this.id = id;
         this.name = name;
     }
 
     public static TestSoftDeleteJpaEntity create(String name) {
-        return new TestSoftDeleteJpaEntity(null, name, null, null, false, null);
+        return new TestSoftDeleteJpaEntity(null, name, null, null, null);
     }
 
     public Long getId() {
