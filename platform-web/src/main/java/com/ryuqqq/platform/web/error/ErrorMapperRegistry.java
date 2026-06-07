@@ -6,14 +6,14 @@ import java.util.Locale;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 
 import com.ryuqqq.platform.common.exception.DomainException;
 
 /**
  * {@link ErrorMapper} 구현체 레지스트리. 첫 매칭 mapper 사용, 없으면 {@link #defaultMapping}.
+ *
+ * <p>{@link com.ryuqqq.platform.web.config.PlatformWebAutoConfiguration}가 {@code @Bean}으로 등록한다.
  */
-@Component
 public class ErrorMapperRegistry {
 
     private final List<ErrorMapper> mappers;

@@ -10,13 +10,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
  * Gateway {@code X-Trace-Id}를 MDC에 등록하고 응답 헤더로 echo한다.
+ *
+ * <p>{@link com.ryuqqq.platform.web.config.PlatformWebAutoConfiguration}가 {@code @Bean}으로 등록한다.
+ * Filter 빈은 Spring Boot가 서블릿 필터로 자동 등록하며 {@code @Order}로 순서를 지킨다.
  */
-@Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class RequestContextFilter extends OncePerRequestFilter {
 
