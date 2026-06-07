@@ -21,6 +21,9 @@ dependencies {
     implementation libs.jackson.databind
     implementation libs.slf4j.api
 
+    // servlet API 는 런타임에 컨테이너(소비측 starter-web)가 제공 — 컴파일에만 필요.
+    compileOnly 'jakarta.servlet:jakarta.servlet-api'
+
     testImplementation platform(libs.junit.bom)
     testImplementation libs.bundles.testing
     testImplementation libs.spring.boot.starter.test
