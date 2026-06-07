@@ -25,6 +25,9 @@ archunit = "1.2.1"
 # QueryDSL
 querydsl = "5.1.0"
 
+# Redis
+redisson = "3.35.0"
+
 [libraries]
 # Resilience
 resilience4j-circuitbreaker = { module = "io.github.resilience4j:resilience4j-circuitbreaker", version.ref = "resilience4j" }
@@ -54,6 +57,9 @@ spring-context = { module = "org.springframework:spring-context" }
 # QueryDSL (Jakarta)
 querydsl-jpa = { group = "com.querydsl", name = "querydsl-jpa", version.ref = "querydsl" }
 querydsl-apt = { group = "com.querydsl", name = "querydsl-apt", version.ref = "querydsl" }
+
+# Redis
+redisson = { module = "org.redisson:redisson", version.ref = "redisson" }
 
 # Database (test)
 h2 = { module = "com.h2database:h2" }

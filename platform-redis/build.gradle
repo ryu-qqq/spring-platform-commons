@@ -1,0 +1,24 @@
+// Adapter-out Redis SDK — Redisson 기반 분산락·캐시 구현 + 자동설정. RedissonClient는 소비측이 제공.
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            pom {
+                name = 'Platform Redis'
+                description = 'Adapter-out Redis SDK — Redisson 기반 DistributedLockPort·CachePort 구현 + 자동설정.'
+            }
+        }
+    }
+}
+
+dependencies {
+    api project(':platform-common-application')
+
+    implementation platform(libs.spring.boot.dependencies)
+    implementation libs.spring.boot.autoconfigure
+    implementation libs.redisson
+
+    testImplementation platform(libs.junit.bom)
+    testImplementation libs.bundles.testing
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

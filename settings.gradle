@@ -19,6 +19,7 @@ include 'platform-web'
 include 'platform-bootstrap'
 include 'platform-persistence-jpa'
 include 'platform-archrules'
+include 'platform-redis'
 
 // ========================================
 // Hexagonal template (reference skeleton)
@@ -36,6 +37,7 @@ project(':platform-web').projectDir = file('platform-web')
 project(':platform-bootstrap').projectDir = file('platform-bootstrap')
 project(':platform-persistence-jpa').projectDir = file('platform-persistence-jpa')
 project(':platform-archrules').projectDir = file('platform-archrules')
+project(':platform-redis').projectDir = file('platform-redis')
 project(':domain').projectDir = file('domain')
 project(':application').projectDir = file('application')
 project(':adapter-in:rest-api').projectDir = file('adapter-in/rest-api')
