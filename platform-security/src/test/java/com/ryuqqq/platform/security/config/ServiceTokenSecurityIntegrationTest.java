@@ -55,6 +55,16 @@ class ServiceTokenSecurityIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    @DisplayName("인증됐으나 권한 부족 → 403 ProblemDetail (ACCESS_DENIED)")
+    void authenticatedButForbiddenReturns403() throws Exception {
+        mockMvc.perform(get("/admin").header("X-Service-Token", "s3cr3t"))
+                .andExpect(status().isForbidden())
+                .andExpect(header().string("x-error-code", "ACCESS_DENIED"))
+                .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
+                .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+    }
+
     @SpringBootApplication
     static class TestApp {
 
@@ -66,7 +76,12 @@ class ServiceTokenSecurityIntegrationTest {
                 ServiceTokenAccessDeniedHandler accessDeniedHandler)
                 throws Exception {
             ServiceTokenSecurity.applyDefaults(http, filter, entryPoint, accessDeniedHandler);
-            http.authorizeHttpRequests(auth -> auth.anyRequest().authenticated());
+            http.authorizeHttpRequests(
+                    auth ->
+                            auth.requestMatchers("/admin")
+                                    .hasRole("ADMIN")
+                                    .anyRequest()
+                                    .authenticated());
             return http.build();
         }
 
@@ -75,6 +90,11 @@ class ServiceTokenSecurityIntegrationTest {
             @GetMapping("/ping")
             String ping() {
                 return "pong";
+            }
+
+            @GetMapping("/admin")
+            String admin() {
+                return "admin";
             }
         }
     }

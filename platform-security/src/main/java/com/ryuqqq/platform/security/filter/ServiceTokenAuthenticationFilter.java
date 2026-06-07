@@ -54,7 +54,12 @@ public class ServiceTokenAuthenticationFilter extends OncePerRequestFilter {
             return false;
         }
         String uri = request.getRequestURI();
-        return paths.stream().noneMatch(uri::startsWith);
+        String contextPath = request.getContextPath();
+        if (contextPath != null && !contextPath.isEmpty() && uri.startsWith(contextPath)) {
+            uri = uri.substring(contextPath.length());
+        }
+        String pathWithinApp = uri;
+        return paths.stream().noneMatch(pathWithinApp::startsWith);
     }
 
     @Override

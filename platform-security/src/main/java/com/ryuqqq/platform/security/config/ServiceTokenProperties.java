@@ -106,6 +106,6 @@ public class ServiceTokenProperties {
     }
 
     public void setPaths(List<String> paths) {
-        this.paths = paths;
+        this.paths = (paths == null) ? new ArrayList<>() : new ArrayList<>(paths);
     }
 }

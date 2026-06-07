@@ -35,6 +35,11 @@ final class ServiceTokenProblemDetailWriter {
             HttpServletRequest request)
             throws IOException {
 
+        // 이미 커밋된 응답에 쓰면 IllegalStateException — 조기 리턴.
+        if (response.isCommitted()) {
+            return;
+        }
+
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(status, detail);
         pd.setTitle(title);
         pd.setType(URI.create("about:blank"));
@@ -43,7 +48,12 @@ final class ServiceTokenProblemDetailWriter {
         if (request.getQueryString() != null && !request.getQueryString().isBlank()) {
             uri = uri + "?" + request.getQueryString();
         }
-        pd.setInstance(URI.create(uri));
+        // uri/queryString 은 raw 클라이언트 입력 — 불정 URI 로 인한 500 방지.
+        try {
+            pd.setInstance(URI.create(uri));
+        } catch (IllegalArgumentException ex) {
+            pd.setInstance(URI.create("/"));
+        }
 
         pd.setProperty("timestamp", Instant.now().toString());
         pd.setProperty("code", code);
