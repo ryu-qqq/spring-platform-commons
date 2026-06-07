@@ -1,0 +1,26 @@
+// Adapter-in 스케줄러 공통 인프라 — @SchedulerJob + AOP(TraceId/MDC·로깅·Micrometer 메트릭) + 자동설정.
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            pom {
+                name = 'Platform Scheduler'
+                description = '@SchedulerJob 어노테이션 + SchedulerLoggingAspect (TraceId·로깅·메트릭·BatchResult 요약) + 자동설정.'
+            }
+        }
+    }
+}
+
+dependencies {
+    api project(':platform-common-application')
+
+    implementation platform(libs.spring.boot.dependencies)
+    implementation libs.spring.boot.autoconfigure
+    implementation libs.micrometer.core
+    implementation libs.slf4j.api
+    implementation 'org.aspectj:aspectjweaver'
+
+    testImplementation platform(libs.junit.bom)
+    testImplementation libs.bundles.testing
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
