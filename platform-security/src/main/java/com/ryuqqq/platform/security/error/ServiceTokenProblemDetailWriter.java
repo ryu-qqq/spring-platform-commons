@@ -1,6 +1,7 @@
 package com.ryuqqq.platform.security.error;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ryuqqq.platform.common.observability.MdcKeys;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -58,13 +59,13 @@ final class ServiceTokenProblemDetailWriter {
         pd.setProperty("timestamp", Instant.now().toString());
         pd.setProperty("code", code);
 
-        String traceId = MDC.get("traceId");
-        String spanId = MDC.get("spanId");
+        String traceId = MDC.get(MdcKeys.TRACE_ID);
+        String spanId = MDC.get(MdcKeys.SPAN_ID);
         if (traceId != null) {
-            pd.setProperty("traceId", traceId);
+            pd.setProperty(MdcKeys.TRACE_ID, traceId);
         }
         if (spanId != null) {
-            pd.setProperty("spanId", spanId);
+            pd.setProperty(MdcKeys.SPAN_ID, spanId);
         }
 
         response.setStatus(status.value());
