@@ -18,8 +18,11 @@ import org.slf4j.MDC;
  * {@link SchedulerBatchProcessingResult} 요약을 적용하는 AOP. platform-scheduler 자동설정이
  * {@code @Bean}으로 등록한다 (라이브러리 모범 — {@code @Component} 스캔에 의존하지 않음).
  *
- * <p>메트릭: {@code scheduler.job.duration}(Timer)·{@code scheduler.job.executions}(성공/실패 카운터)·
- * {@code scheduler.job.items}(배치 내 개별 아이템 성공/실패).
+ * <p><b>로깅·TraceId(불변 핵심)는 메트릭과 분리된다</b>: {@link MeterRegistry}가 null이면(소비측에
+ * Micrometer 미존재) 메트릭만 no-op하고 로깅·TraceId·결과 요약은 그대로 동작한다.
+ *
+ * <p>메트릭(레지스트리 있을 때): {@code scheduler.job.duration}(Timer)·{@code scheduler.job.executions}
+ * (성공/실패 카운터)·{@code scheduler.job.items}(배치 내 개별 아이템 성공/실패).
  */
 @Aspect
 public class SchedulerLoggingAspect {
@@ -27,6 +30,7 @@ public class SchedulerLoggingAspect {
     private static final Logger log = LoggerFactory.getLogger(SchedulerLoggingAspect.class);
     private static final String TRACE_ID_KEY = "traceId";
 
+    /** nullable — null이면 메트릭 no-op, 로깅·TraceId는 정상 동작. */
     private final MeterRegistry meterRegistry;
 
     public SchedulerLoggingAspect(MeterRegistry meterRegistry) {
@@ -37,7 +41,7 @@ public class SchedulerLoggingAspect {
     public Object around(ProceedingJoinPoint joinPoint, SchedulerJob schedulerJob) throws Throwable {
         String jobName = schedulerJob.value();
         String traceId = generateTraceId();
-        Timer.Sample sample = Timer.start(meterRegistry);
+        Timer.Sample sample = (meterRegistry != null) ? Timer.start(meterRegistry) : null;
 
         MDC.put(TRACE_ID_KEY, traceId);
         try {
@@ -45,20 +49,27 @@ public class SchedulerLoggingAspect {
 
             Object result = joinPoint.proceed();
 
-            sample.stop(timer(jobName));
+            stopTimer(sample, jobName);
             recordExecution(jobName, "success");
             logResult(jobName, result);
             recordBatchMetrics(jobName, result);
 
             return result;
         } catch (Exception e) {
-            sample.stop(timer(jobName));
+            stopTimer(sample, jobName);
             recordExecution(jobName, "error");
             log.error("[{}] 스케줄러 작업 실패 - error: {}", jobName, e.getMessage(), e);
             throw e;
         } finally {
             MDC.remove(TRACE_ID_KEY);
         }
+    }
+
+    private void stopTimer(Timer.Sample sample, String jobName) {
+        if (meterRegistry == null || sample == null) {
+            return;
+        }
+        sample.stop(timer(jobName));
     }
 
     private Timer timer(String jobName) {
@@ -69,6 +80,9 @@ public class SchedulerLoggingAspect {
     }
 
     private void recordExecution(String jobName, String outcome) {
+        if (meterRegistry == null) {
+            return;
+        }
         Counter.builder("scheduler.job.executions")
                 .tag("job_name", jobName)
                 .tag("outcome", outcome)
@@ -77,6 +91,9 @@ public class SchedulerLoggingAspect {
     }
 
     private void recordBatchMetrics(String jobName, Object result) {
+        if (meterRegistry == null) {
+            return;
+        }
         if (result instanceof SchedulerBatchProcessingResult batchResult && batchResult.total() > 0) {
             Counter.builder("scheduler.job.items")
                     .tag("job_name", jobName)
