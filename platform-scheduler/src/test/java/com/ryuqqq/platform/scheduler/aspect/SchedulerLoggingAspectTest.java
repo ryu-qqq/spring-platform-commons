@@ -68,4 +68,44 @@ class SchedulerLoggingAspectTest {
                                 .count())
                 .isEqualTo(1.0);
     }
+
+    @Test
+    @DisplayName("Error(Throwable) 발생 시에도 error 메트릭 기록 후 그대로 전파한다")
+    void recordsAndPropagatesError() throws Throwable {
+        ProceedingJoinPoint pjp = mock(ProceedingJoinPoint.class);
+        when(pjp.proceed()).thenThrow(new AssertionError("fatal"));
+
+        assertThatThrownBy(() -> aspect.around(pjp, job("error-job")))
+                .isInstanceOf(AssertionError.class);
+        assertThat(
+                        registry.find("scheduler.job.executions")
+                                .tag("outcome", "error")
+                                .counter()
+                                .count())
+                .isEqualTo(1.0);
+    }
+
+    @Test
+    @DisplayName("MeterRegistry 가 null 이어도(메트릭 미존재) NPE 없이 로깅·결과 반환은 정상 동작한다")
+    void worksWithoutMeterRegistry() throws Throwable {
+        SchedulerLoggingAspect noMetricAspect = new SchedulerLoggingAspect(null);
+        ProceedingJoinPoint pjp = mock(ProceedingJoinPoint.class);
+        SchedulerBatchProcessingResult result = SchedulerBatchProcessingResult.of(2, 2, 0);
+        when(pjp.proceed()).thenReturn(result);
+
+        Object returned = noMetricAspect.around(pjp, job("no-metric-job"));
+
+        assertThat(returned).isSameAs(result);
+    }
+
+    @Test
+    @DisplayName("MeterRegistry null 일 때 예외도 정상 전파한다(메트릭 no-op)")
+    void propagatesExceptionWithoutMeterRegistry() throws Throwable {
+        SchedulerLoggingAspect noMetricAspect = new SchedulerLoggingAspect(null);
+        ProceedingJoinPoint pjp = mock(ProceedingJoinPoint.class);
+        when(pjp.proceed()).thenThrow(new IllegalStateException("boom"));
+
+        assertThatThrownBy(() -> noMetricAspect.around(pjp, job("no-metric-err")))
+                .isInstanceOf(IllegalStateException.class);
+    }
 }
