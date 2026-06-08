@@ -34,7 +34,13 @@ public interface QueueOutboxAdapter<O> {
     /** PENDING → PROCESSING 원자 claim 후 도메인 객체 목록 반환. */
     List<O> claimPendingMessages(int batchSize);
 
-    /** business id·멱등키 배치를 발행하고 성공·실패 분리 결과를 반환. */
+    /**
+     * business id·멱등키 배치를 발행하고 성공·실패 분리 결과를 반환.
+     *
+     * <p><b>계약:</b> 입력 command 의 모든 business id 는 결과의 {@code successIds} 또는
+     * {@code failedEntries} 중 정확히 한 곳에 포함되어야 한다. 어느 쪽에도 없는 항목은 PROCESSING 상태로
+     * 남아 stuck 될 수 있다(템플릿이 SENT/FAILED 어디로도 전이시키지 않음).
+     */
     OutboxBatchSendResult enqueueBatch(List<OutboxEnqueueCommand> commands);
 
     /** 성공한 outbox 들을 PROCESSING → SENT 로 일괄 마킹. */
