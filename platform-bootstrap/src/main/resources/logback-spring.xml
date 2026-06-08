@@ -18,8 +18,9 @@
 
     <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="platform-app"/>
     <springProperty scope="context" name="APP_ENV" source="spring.profiles.active" defaultValue="local"/>
-    <!-- 소비 앱이 logging.platform.base-package 로 자기 베이스 패키지를 지정한다. 기본값은 조직 루트. -->
-    <springProperty scope="context" name="APP_BASE_PACKAGE" source="logging.platform.base-package" defaultValue="com.ryuqq"/>
+    <!-- 앱 레벨 로그 verbosity 대상 패키지. 신규 소비 앱은 platform 네임스페이스(com.ryuqqq)로 정렬되므로
+         기본값을 com.ryuqqq 로 둔다. 다른 베이스 패키지를 쓰는 앱은 logging.platform.base-package 로 override. -->
+    <springProperty scope="context" name="APP_BASE_PACKAGE" source="logging.platform.base-package" defaultValue="com.ryuqqq"/>
 
     <property name="CONSOLE_PATTERN"
               value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - [traceId=%X{traceId:-N/A}] [userId=%X{userId:-}] [type=%X{requestType:-}] %msg%n"/>
