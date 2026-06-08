@@ -1,7 +1,7 @@
 package com.ryuqqq.platform.outbox.config;
 
 import com.ryuqqq.platform.common.scheduler.SchedulerBatchProcessingResult;
-import com.ryuqqq.platform.outbox.QueueOutboxRelayTemplate;
+import com.ryuqqq.platform.outbox.BatchOutboxRelayTemplate;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -10,10 +10,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 
 /**
- * Platform Outbox 자동 설정 — {@link QueueOutboxRelayTemplate} 빈을 등록한다.
+ * Platform Outbox 자동 설정 — 배치 트랜스포트 {@link BatchOutboxRelayTemplate} 빈을 등록한다.
  *
- * <p>{@link MeterRegistry} 는 optional — 소비측(actuator/micrometer)이 제공하면 주입되고, 없으면 null
- * 로 메트릭 no-op 한다. 소비측이 동일 타입 빈을 정의하면 {@link ConditionalOnMissingBean} 으로 양보한다.
+ * <p>{@link MeterRegistry} 는 optional. 건별 트랜스포트({@code PerItemOutboxRelayTemplate})는 executor·
+ * defer 윈도가 소비자별이라 소비측이 직접 인스턴스화한다 — 여기서 등록하지 않는다.
  */
 @AutoConfiguration
 @ConditionalOnClass(SchedulerBatchProcessingResult.class)
@@ -21,8 +21,8 @@ public class PlatformOutboxAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public QueueOutboxRelayTemplate queueOutboxRelayTemplate(
+    public BatchOutboxRelayTemplate batchOutboxRelayTemplate(
             ObjectProvider<MeterRegistry> meterRegistryProvider) {
-        return new QueueOutboxRelayTemplate(meterRegistryProvider.getIfAvailable());
+        return new BatchOutboxRelayTemplate(meterRegistryProvider.getIfAvailable());
     }
 }

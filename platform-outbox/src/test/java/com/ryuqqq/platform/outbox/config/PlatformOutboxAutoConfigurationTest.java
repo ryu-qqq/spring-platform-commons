@@ -2,7 +2,7 @@ package com.ryuqqq.platform.outbox.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.ryuqqq.platform.outbox.QueueOutboxRelayTemplate;
+import com.ryuqqq.platform.outbox.BatchOutboxRelayTemplate;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +21,7 @@ class PlatformOutboxAutoConfigurationTest {
     @DisplayName("MeterRegistry 없이도 relay 템플릿 빈이 등록된다")
     void registersWithoutMeterRegistry() {
         runner.run(context ->
-                assertThat(context).hasSingleBean(QueueOutboxRelayTemplate.class));
+                assertThat(context).hasSingleBean(BatchOutboxRelayTemplate.class));
     }
 
     @Test
@@ -29,7 +29,7 @@ class PlatformOutboxAutoConfigurationTest {
     void registersWithMeterRegistry() {
         runner.withBean(MeterRegistry.class, SimpleMeterRegistry::new)
                 .run(context ->
-                        assertThat(context).hasSingleBean(QueueOutboxRelayTemplate.class));
+                        assertThat(context).hasSingleBean(BatchOutboxRelayTemplate.class));
     }
 
     @Test
@@ -37,11 +37,11 @@ class PlatformOutboxAutoConfigurationTest {
     void backsOffWhenUserDefinesOwnTemplate() {
         runner.withBean(
                         "customTemplate",
-                        QueueOutboxRelayTemplate.class,
-                        () -> new QueueOutboxRelayTemplate(null))
+                        BatchOutboxRelayTemplate.class,
+                        () -> new BatchOutboxRelayTemplate(null))
                 .run(context -> {
-                    assertThat(context).hasSingleBean(QueueOutboxRelayTemplate.class);
-                    assertThat(context.getBeanNamesForType(QueueOutboxRelayTemplate.class))
+                    assertThat(context).hasSingleBean(BatchOutboxRelayTemplate.class);
+                    assertThat(context.getBeanNamesForType(BatchOutboxRelayTemplate.class))
                             .containsExactly("customTemplate");
                 });
     }
