@@ -1,12 +1,12 @@
-// Application 레이어 Outbox SDK — generic Queue relay 템플릿 + QueueOutboxAdapter SPI + DTO.
-// persistence·SQS 구현은 소비측이 SPI 로 제공. Callback relay 는 2단계로 deferred.
+// Application 레이어 Outbox SDK — 트랜스포트 중립 relay (Batch·PerItem) + OutboxStore SPI + DTO.
+// 발행/저장 구현(SQS·HTTP·persistence)은 소비측이 SPI 로 제공.
 
 publishing {
     publications {
         maven(MavenPublication) {
             pom {
                 name = 'Platform Outbox'
-                description = 'Application 레이어 Outbox SDK — generic Queue relay 템플릿 + QueueOutboxAdapter SPI + 자동설정.'
+                description = 'Application 레이어 Outbox SDK — 트랜스포트 중립 relay 템플릿(Batch·PerItem) + OutboxStore SPI + 자동설정.'
             }
         }
     }
