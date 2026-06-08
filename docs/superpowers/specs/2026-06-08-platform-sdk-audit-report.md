@@ -21,6 +21,7 @@ source: 병렬 워크플로 platform-sdk-audit (17 agents)
 | platform-redis | CONCERN | 3 | CachePort glob 계약을 opt-in 인터페이스로 분리, get() 미사용 type 파라미터 결정, Redisson Javadoc 제거 (CachePort.java:26, RedissonCacheAdapter.java:30-33) |
 | platform-archrules | CONCERN | 2 | ArchitectureRules.java의 'com.ryuqqq.platform.template..' 17개 절대경로 제거, platform-archrules 실제 의존·참조 전환 (ArchitectureRules.java:33-68) |
 | platform-security | CONCERN | 1 | 공개 타입명의 'ServiceToken'(구현 메커니즘) 역할 중심 이름·인터페이스 파라미터로 완화 (ServiceTokenSecurity.java:29-33) |
+| platform-scheduler | CONCERN | 1 | 로깅+TraceId(불변)와 메트릭(가변)을 한 aspect에 묶어 MeterRegistry 없으면 로깅도 안 됨 — seam 분리 (PlatformSchedulerAutoConfiguration.java:21-25) |
 | platform-persistence-jpa | CONCERN | 1 | PersistenceQueryMetaEntity의 @Entity 제거 (entity scan DDL 위험) (PersistenceQueryMetaEntity.java:15-16) |
 | platform-common-application | CONCERN | 0 | CommonVoFactory @Component → AutoConfiguration + @ConditionalOnMissingBean (CommonVoFactory.java:18) |
 | platform-common-domain | CONCERN | 0 | ErrorCode.getHttpStatus() 제거(HTTP를 adapter-in으로), Versioned.refreshVersion 분리/삭제 검토 (ErrorCode.java:12, Versioned.java:10-12) |
@@ -143,7 +144,7 @@ source: 병렬 워크플로 platform-sdk-audit (17 agents)
 이번 감사에서 반복 검출된 패턴을 6축에 운영가능한 자동 체크로 추가한다.
 
 **neutrality 축 추가 체크:**
-- (N1) 공개 타입명·메서드명·빈명·DTO명에 구현 기술 토큰이 있는가 — 금지어 사전 검사: `Queue|enqueue|Redisson|Resilience4j|JPA|MySQL|ServiceToken|Kafka|SQS` 가 port/spi/계약 패키지 식별자에 등장하면 flag (patternA 다수 적중).
+- (N1) 공개 타입명·메서드명·빈명·DTO명에 *특정 구현 기술* 토큰이 있는가 — 금지어 사전 검사: `Redisson|Resilience4j|JPA|MySQL|ServiceToken|Kafka|SQS|<벤더명>` 가 port/spi/계약 패키지 식별자에 등장하면 flag (patternA 다수 적중). 단 `Queue|enqueue|Cache|Lock|Store` 등 범용 자료구조/패턴어는 추상화 본질이면 중립 — 트랜스포트 선택이 비(非)해당 추상화에 샐 때만 flag(예: outbox relay에 큐 고정).
 - (N2) 포트 인터페이스가 toXxx() 형태로 구현 라이브러리 타입을 반환하거나 파라미터/반환에 구현 타입을 노출하는가 (toResilience4j 사례). public 메서드 시그니처에 구현 패키지 타입 직접 노출 = major.
 - (N3) Javadoc이 특정 구현/위키/도메인을 '유일 구현' 또는 예시로 박았는가 (Redis/Product/다운로드).
 
@@ -169,5 +170,16 @@ source: 병렬 워크플로 platform-sdk-audit (17 agents)
 - (V1) SDK 라이브러리 빈이 @Component 단독 등록(스캔 의존)인가 vs @AutoConfiguration + @ConditionalOnMissingBean (CommonVoFactory).
 - (V2) @Entity 등 스캔 부수효과를 가진 타입이 SDK 패키지에 있는가 — package-private 가시성은 JPA 바이트코드 스캔을 막지 못함(PersistenceQueryMetaEntity).
 - (V3) 발행한 공유 규칙(archrules)을 소비측이 재구현/미참조하는가 — '공유 자산이 실제로 공유되는지' 역검증.
+
+---
+
+## 변경 이력
+
+| 날짜 | 변경 내용 | 작성자 |
+|------|----------|--------|
+| 2026-06-08 | 초안: platform SDK 11개 모듈 6축 감사 + P2-1~P2-5 공통성 조사 리포트 (병렬 워크플로 17 agents) | ryu-qqq |
+| 2026-06-08 | 코드리뷰 반영 — platform-scheduler 행 추가, §5 N1 범용어(Queue 등) 예외 명시 | ryu-qqq |
+
+*최종 갱신: 2026-06-08*
 
 (파일 산출물 없음. 본 리포트가 호출 스크립트로 반환되는 최종 결과물이다.)
