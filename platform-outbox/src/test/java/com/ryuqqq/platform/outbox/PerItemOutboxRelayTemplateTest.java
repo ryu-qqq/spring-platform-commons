@@ -53,6 +53,7 @@ class PerItemOutboxRelayTemplateTest {
         final List<String> permanent = new ArrayList<>();
         Duration deferDurationSeen;
         boolean preloadThrows = false;
+        boolean preloadReturnsNull = false;
 
         @Override public String label() { return "테스트콜백"; }
         @Override public String pipeline() { return "callback"; }
@@ -70,6 +71,7 @@ class PerItemOutboxRelayTemplateTest {
 
         @Override
         public Map<String, String> preloadTasks(List<String> taskIds) {
+            if (preloadReturnsNull) return null;
             if (preloadThrows) throw new RuntimeException("DB down");
             Map<String, String> m = new HashMap<>();
             for (String id : taskIds) if (tasks.containsKey(id)) m.put(id, tasks.get(id));
@@ -187,6 +189,40 @@ class PerItemOutboxRelayTemplateTest {
         assertThat(a.released).containsExactlyInAnyOrder("o1", "o2");
         assertThat(a.markedSent).isEmpty();
         assertThat(r).isEqualTo(SchedulerBatchProcessingResult.of(2, 0, 0));
+    }
+
+    @Test
+    @DisplayName("preloadTasks 가 null 반환 → 건별 오전이 대신 전체 bulkReleaseToPending, 결과 (n,0,0)")
+    void preloadReturnsNull() {
+        FakeAdapter a = new FakeAdapter();
+        claim(a, "o1", "t1", "success");
+        claim(a, "o2", "t2", "success");
+        a.preloadReturnsNull = true;
+
+        SchedulerBatchProcessingResult r = template.relay(10, a);
+
+        assertThat(a.released).containsExactlyInAnyOrder("o1", "o2");
+        assertThat(a.markedSent).isEmpty();
+        assertThat(a.markedFailed).isEmpty();
+        assertThat(r).isEqualTo(SchedulerBatchProcessingResult.of(2, 0, 0));
+    }
+
+    @Test
+    @DisplayName("생성자: maxDeferDuration·executor null 이면 즉시 예외(fail-fast)")
+    void constructorRejectsNullDeps() {
+        ExecutorService ex = Executors.newSingleThreadExecutor();
+        try {
+            org.assertj.core.api.Assertions.assertThatThrownBy(
+                            () -> new PerItemOutboxRelayTemplate(null, ex, registry))
+                    .isInstanceOf(NullPointerException.class);
+            org.assertj.core.api.Assertions.assertThatThrownBy(
+                            () ->
+                                    new PerItemOutboxRelayTemplate(
+                                            Duration.ofHours(6), null, registry))
+                    .isInstanceOf(NullPointerException.class);
+        } finally {
+            ex.shutdownNow();
+        }
     }
 
     @Test

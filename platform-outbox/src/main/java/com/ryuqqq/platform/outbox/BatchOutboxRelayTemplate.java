@@ -52,6 +52,9 @@ public class BatchOutboxRelayTemplate {
                                                     adapter.businessId(o), adapter.idempotencyKey(o)))
                             .toList();
             dispatchResult = adapter.dispatchBatch(commands);
+            if (dispatchResult == null) {
+                throw new IllegalStateException("dispatchBatch must not return null");
+            }
         } catch (Exception e) {
             log.error(
                     "{} 배치 발행 중 인프라 예외, PROCESSING → PENDING 무차감 복귀: count={}",

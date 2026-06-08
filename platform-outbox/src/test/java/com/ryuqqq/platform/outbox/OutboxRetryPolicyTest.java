@@ -1,6 +1,7 @@
 package com.ryuqqq.platform.outbox;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Duration;
 import org.junit.jupiter.api.DisplayName;
@@ -24,5 +25,19 @@ class OutboxRetryPolicyTest {
 
         assertThat(policy.maxRetries()).isEqualTo(3);
         assertThat(policy.maxDeferDuration()).isEqualTo(Duration.ofMinutes(30));
+    }
+
+    @Test
+    @DisplayName("maxRetries 음수면 예외")
+    void rejectsNegativeRetries() {
+        assertThatThrownBy(() -> OutboxRetryPolicy.of(-1, Duration.ofHours(1)))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("maxDeferDuration null 이면 예외")
+    void rejectsNullDuration() {
+        assertThatThrownBy(() -> OutboxRetryPolicy.of(5, null))
+                .isInstanceOf(NullPointerException.class);
     }
 }

@@ -123,6 +123,22 @@ class BatchOutboxRelayTemplateTest {
     }
 
     @Test
+    @DisplayName("dispatchBatch 가 null 반환 → stuck 대신 bulkReleaseToPending, 결과 (n,0,0)")
+    void dispatchReturnsNull() {
+        FakeBatchOutboxAdapter adapter = new FakeBatchOutboxAdapter();
+        adapter.toClaim = List.of(
+                new TestOutbox("o1", "b1", "k1"), new TestOutbox("o2", "b2", "k2"));
+        adapter.dispatchResult = null; // 계약 위반(null 반환)
+
+        SchedulerBatchProcessingResult result = template.relay(10, adapter);
+
+        assertThat(adapter.released).containsExactly("o1", "o2");
+        assertThat(adapter.markedSent).isEmpty();
+        assertThat(adapter.markedFailed).isEmpty();
+        assertThat(result).isEqualTo(SchedulerBatchProcessingResult.of(2, 0, 0));
+    }
+
+    @Test
     @DisplayName("errorSummary 는 중복 제거 후 최대 3건을 \"; \" 로 합친다")
     void errorSummaryDedupAndLimit() {
         FakeBatchOutboxAdapter adapter = new FakeBatchOutboxAdapter();

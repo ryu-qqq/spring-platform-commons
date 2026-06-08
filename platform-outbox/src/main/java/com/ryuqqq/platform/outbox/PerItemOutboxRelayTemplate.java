@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -41,8 +42,9 @@ public class PerItemOutboxRelayTemplate {
 
     public PerItemOutboxRelayTemplate(
             Duration maxDeferDuration, ExecutorService executor, MeterRegistry meterRegistry) {
-        this.maxDeferDuration = maxDeferDuration;
-        this.executor = executor;
+        this.maxDeferDuration =
+                Objects.requireNonNull(maxDeferDuration, "maxDeferDuration must not be null");
+        this.executor = Objects.requireNonNull(executor, "executor must not be null");
         this.meterRegistry = meterRegistry;
     }
 
@@ -57,6 +59,9 @@ public class PerItemOutboxRelayTemplate {
         try {
             List<String> taskIds = claimed.stream().map(adapter::taskId).distinct().toList();
             Map<String, T> taskById = adapter.preloadTasks(taskIds);
+            if (taskById == null) {
+                throw new IllegalStateException("preloadTasks must not return null");
+            }
             results = dispatchAll(claimed, taskById, adapter);
         } catch (Exception e) {
             log.error(
