@@ -4,7 +4,7 @@ import com.ryuqqq.platform.common.vo.LockKey;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 분산락 아웃바운드 포트 (Redisson 기반 추상화). 구현은 platform-redis adapter-out.
+ * 분산락 아웃바운드 포트. 구현은 platform-redis(Redisson) 등 adapter-out.
  *
  * <p>사용 패턴: {@code tryLock} 성공 시 {@code try ... finally}로 반드시 {@code unlock} 한다.
  */

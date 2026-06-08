@@ -7,7 +7,7 @@ import java.time.Instant;
 /**
  * Audit + soft delete + {@code @Version} — typical domain aggregate JPA base.
  *
- * <p>Combines {@link BaseSoftDeleteEntity} and {@link BaseVersionedEntity} for Product-like roots.
+ * <p>Combines {@link BaseSoftDeleteEntity} and {@link BaseVersionedEntity} for versioned aggregate roots.
  */
 @MappedSuperclass
 public abstract class BaseVersionedSoftDeleteEntity extends BaseSoftDeleteEntity {

@@ -18,6 +18,8 @@
 
     <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="platform-app"/>
     <springProperty scope="context" name="APP_ENV" source="spring.profiles.active" defaultValue="local"/>
+    <!-- 소비 앱이 logging.platform.base-package 로 자기 베이스 패키지를 지정한다. 기본값은 조직 루트. -->
+    <springProperty scope="context" name="APP_BASE_PACKAGE" source="logging.platform.base-package" defaultValue="com.ryuqq"/>
 
     <property name="CONSOLE_PATTERN"
               value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - [traceId=%X{traceId:-N/A}] [userId=%X{userId:-}] [type=%X{requestType:-}] %msg%n"/>
@@ -34,7 +36,7 @@
             <appender-ref ref="CONSOLE"/>
         </root>
 
-        <logger name="com.ryuqq" level="DEBUG"/>
+        <logger name="${APP_BASE_PACKAGE}" level="DEBUG"/>
 
         <logger name="org.springframework.web" level="INFO"/>
         <logger name="org.springframework.security" level="INFO"/>
@@ -81,7 +83,7 @@
             <appender-ref ref="JSON_CONSOLE"/>
         </root>
 
-        <logger name="com.ryuqq" level="INFO"/>
+        <logger name="${APP_BASE_PACKAGE}" level="INFO"/>
 
         <logger name="org.springframework" level="WARN"/>
         <logger name="org.hibernate" level="WARN"/>
