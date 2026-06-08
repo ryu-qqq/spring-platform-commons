@@ -18,6 +18,9 @@
 
     <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="platform-app"/>
     <springProperty scope="context" name="APP_ENV" source="spring.profiles.active" defaultValue="local"/>
+    <!-- 앱 레벨 로그 verbosity 대상 패키지. 신규 소비 앱은 platform 네임스페이스(com.ryuqqq)로 정렬되므로
+         기본값을 com.ryuqqq 로 둔다. 다른 베이스 패키지를 쓰는 앱은 logging.platform.base-package 로 override. -->
+    <springProperty scope="context" name="APP_BASE_PACKAGE" source="logging.platform.base-package" defaultValue="com.ryuqqq"/>
 
     <property name="CONSOLE_PATTERN"
               value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - [traceId=%X{traceId:-N/A}] [userId=%X{userId:-}] [type=%X{requestType:-}] %msg%n"/>
@@ -34,7 +37,7 @@
             <appender-ref ref="CONSOLE"/>
         </root>
 
-        <logger name="com.ryuqq" level="DEBUG"/>
+        <logger name="${APP_BASE_PACKAGE}" level="DEBUG"/>
 
         <logger name="org.springframework.web" level="INFO"/>
         <logger name="org.springframework.security" level="INFO"/>
@@ -81,7 +84,7 @@
             <appender-ref ref="JSON_CONSOLE"/>
         </root>
 
-        <logger name="com.ryuqq" level="INFO"/>
+        <logger name="${APP_BASE_PACKAGE}" level="INFO"/>
 
         <logger name="org.springframework" level="WARN"/>
         <logger name="org.hibernate" level="WARN"/>

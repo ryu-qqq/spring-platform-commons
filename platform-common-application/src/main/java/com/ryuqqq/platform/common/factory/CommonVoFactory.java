@@ -1,7 +1,5 @@
 package com.ryuqqq.platform.common.factory;
 
-import org.springframework.stereotype.Component;
-
 import com.ryuqqq.platform.common.vo.CursorPageRequest;
 import com.ryuqqq.platform.common.vo.CursorQueryContext;
 import com.ryuqqq.platform.common.vo.PageRequest;
@@ -14,8 +12,10 @@ import com.ryuqqq.platform.common.vo.SortKey;
  *
  * <p><b>입력 전제 (APP-IN-001):</b> adapter-in mapper가 paging·sort·date 등을 이미 검증·기본값 적용한
  * 도메인 VO / enum만 넘긴다. null 처리·HTTP 문자열 parse·default page/size는 Factory 책임이 아니다.
+ *
+ * <p>무상태(stateless)다. 빈 등록은 컴포넌트 스캔이 아니라 {@code PlatformCommonApplicationAutoConfiguration}
+ * 이 zero-config 로 담당한다 — 소비측 스캔 범위와 무관하게 주입된다.
  */
-@Component
 public class CommonVoFactory {
 
     /**
