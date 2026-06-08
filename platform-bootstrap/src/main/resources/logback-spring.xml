@@ -13,6 +13,8 @@
     - tenantId: multi-tenant id (when present)
     - requestType: request classification
     - errorCode: domain error code (GlobalExceptionHandler)
+
+    NOTE: 위 키 문자열의 SSOT는 com.ryuqqq.platform.common.observability.MdcKeys (XML은 import 불가라 문자열 mirror).
 -->
 <configuration scan="true" scanPeriod="30 seconds">
 

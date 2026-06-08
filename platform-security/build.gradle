@@ -13,6 +13,7 @@ publishing {
 }
 
 dependencies {
+    implementation project(':platform-common-domain')
     implementation platform(libs.spring.boot.dependencies)
     implementation libs.spring.boot.autoconfigure
     implementation 'org.springframework.security:spring-security-web'

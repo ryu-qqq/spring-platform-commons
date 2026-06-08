@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.ryuqqq.platform.common.exception.DomainException;
+import com.ryuqqq.platform.common.observability.MdcKeys;
 
 /**
  * 글로벌 REST 예외 처리 — 성공 {@link com.ryuqqq.platform.web.dto.ApiResponse}, 실패 RFC 7807
@@ -247,13 +248,13 @@ public class GlobalExceptionHandler {
             problemDetail.setInstance(URI.create(uri));
         }
 
-        String traceId = MDC.get("traceId");
-        String spanId = MDC.get("spanId");
+        String traceId = MDC.get(MdcKeys.TRACE_ID);
+        String spanId = MDC.get(MdcKeys.SPAN_ID);
         if (traceId != null) {
-            problemDetail.setProperty("traceId", traceId);
+            problemDetail.setProperty(MdcKeys.TRACE_ID, traceId);
         }
         if (spanId != null) {
-            problemDetail.setProperty("spanId", spanId);
+            problemDetail.setProperty(MdcKeys.SPAN_ID, spanId);
         }
 
         return ResponseEntity.status(status)
