@@ -22,6 +22,7 @@ include 'platform-archrules'
 include 'platform-redis'
 include 'platform-scheduler'
 include 'platform-security'
+include 'platform-outbox'
 
 // ========================================
 // Hexagonal template (reference skeleton)
@@ -42,6 +43,7 @@ project(':platform-archrules').projectDir = file('platform-archrules')
 project(':platform-redis').projectDir = file('platform-redis')
 project(':platform-scheduler').projectDir = file('platform-scheduler')
 project(':platform-security').projectDir = file('platform-security')
+project(':platform-outbox').projectDir = file('platform-outbox')
 project(':domain').projectDir = file('domain')
 project(':application').projectDir = file('application')
 project(':adapter-in:rest-api').projectDir = file('adapter-in/rest-api')

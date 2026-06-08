@@ -1,0 +1,26 @@
+// Application 레이어 Outbox SDK — generic Queue relay 템플릿 + QueueOutboxAdapter SPI + DTO.
+// persistence·SQS 구현은 소비측이 SPI 로 제공. Callback relay 는 2단계로 deferred.
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            pom {
+                name = 'Platform Outbox'
+                description = 'Application 레이어 Outbox SDK — generic Queue relay 템플릿 + QueueOutboxAdapter SPI + 자동설정.'
+            }
+        }
+    }
+}
+
+dependencies {
+    api project(':platform-common-application')
+
+    implementation platform(libs.spring.boot.dependencies)
+    implementation libs.spring.boot.autoconfigure
+    implementation libs.micrometer.core
+    implementation libs.slf4j.api
+
+    testImplementation platform(libs.junit.bom)
+    testImplementation libs.bundles.testing
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
