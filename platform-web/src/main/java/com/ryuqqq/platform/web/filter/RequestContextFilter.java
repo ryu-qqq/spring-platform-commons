@@ -32,7 +32,8 @@ public class RequestContextFilter extends OncePerRequestFilter {
         try {
             String traceId = headerOrNull(request, MdcKeys.TRACE_ID_HEADER);
             if (traceId == null) {
-                traceId = UUID.randomUUID().toString();
+                // W3C Trace Context/OTel 호환: 32자리 소문자 hex (UUID 16바이트, 하이픈 제거).
+                traceId = UUID.randomUUID().toString().replace("-", "");
             }
             MDC.put(MdcKeys.TRACE_ID, traceId);
             response.setHeader(MdcKeys.TRACE_ID_HEADER, traceId);

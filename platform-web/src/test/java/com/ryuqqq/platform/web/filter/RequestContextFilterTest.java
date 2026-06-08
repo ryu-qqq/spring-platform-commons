@@ -59,6 +59,8 @@ class RequestContextFilterTest {
         Map<String, String> mdc = runAndCaptureMdc(request, response);
 
         assertThat(mdc.get(MdcKeys.TRACE_ID)).isNotBlank();
+        // W3C Trace Context/OTel 호환 — 32자리 소문자 hex.
+        assertThat(mdc.get(MdcKeys.TRACE_ID)).matches("[0-9a-f]{32}");
         assertThat(response.getHeader(MdcKeys.TRACE_ID_HEADER)).isEqualTo(mdc.get(MdcKeys.TRACE_ID));
     }
 
