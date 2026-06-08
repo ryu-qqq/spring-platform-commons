@@ -1,5 +1,6 @@
 package com.ryuqqq.platform.scheduler.aspect;
 
+import com.ryuqqq.platform.common.observability.MdcKeys;
 import com.ryuqqq.platform.common.scheduler.SchedulerBatchProcessingResult;
 import com.ryuqqq.platform.scheduler.annotation.SchedulerJob;
 import io.micrometer.core.instrument.Counter;
@@ -28,7 +29,6 @@ import org.slf4j.MDC;
 public class SchedulerLoggingAspect {
 
     private static final Logger log = LoggerFactory.getLogger(SchedulerLoggingAspect.class);
-    private static final String TRACE_ID_KEY = "traceId";
 
     /** nullable — null이면 메트릭 no-op, 로깅·TraceId는 정상 동작. */
     private final MeterRegistry meterRegistry;
@@ -43,7 +43,7 @@ public class SchedulerLoggingAspect {
         String traceId = generateTraceId();
         Timer.Sample sample = (meterRegistry != null) ? Timer.start(meterRegistry) : null;
 
-        MDC.put(TRACE_ID_KEY, traceId);
+        MDC.put(MdcKeys.TRACE_ID, traceId);
         try {
             log.info("[{}] 스케줄러 작업 시작", jobName);
 
@@ -62,7 +62,7 @@ public class SchedulerLoggingAspect {
             log.error("[{}] 스케줄러 작업 실패 - error: {}", jobName, t.getMessage(), t);
             throw t;
         } finally {
-            MDC.remove(TRACE_ID_KEY);
+            MDC.remove(MdcKeys.TRACE_ID);
         }
     }
 

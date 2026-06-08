@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import org.slf4j.MDC;
 
+import com.ryuqqq.platform.common.observability.MdcKeys;
+
 /**
  * 표준 API 성공 응답 (API-CTR-004). 실패 응답은 {@link org.springframework.http.ProblemDetail}.
  *
@@ -23,7 +25,7 @@ public record ApiResponse<T>(T data, String timestamp, String requestId) {
     }
 
     private static String resolveRequestId() {
-        String traceId = MDC.get("traceId");
+        String traceId = MDC.get(MdcKeys.TRACE_ID);
         if (traceId != null && !traceId.isBlank()) {
             return traceId;
         }
