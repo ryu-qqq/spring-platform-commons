@@ -1,11 +1,11 @@
 /**
- * Platform Outbox — generic Queue Outbox relay 공통 모듈 (application 레이어).
+ * Platform Outbox — 트랜스포트 중립 Outbox relay 공통 모듈 (application 레이어).
  *
- * <p>{@link com.ryuqqq.platform.outbox.BatchOutboxRelayTemplate} 이 claim → enqueue → bulkMark
- * 흐름을 캡슐화하고, 도메인 의존부(타입·ID 추출·발행·마킹)는 {@link
- * com.ryuqqq.platform.outbox.spi.BatchOutboxAdapter} SPI 로 위임한다. 소비측이 SPI 를 구현하면 여러
- * 도메인의 릴레이 흐름이 한 곳으로 수렴한다.
- *
- * <p>Callback Outbox relay 와 {@code OutboxStatus}·{@code OutboxRetryPolicy} 는 2단계로 분리되어 있다.
+ * <p>수명주기(claim → mark → release)는 트랜스포트 무관 base SPI {@link
+ * com.ryuqqq.platform.outbox.spi.OutboxStore} 로 공유하고, 발행 채널별로 두 릴레이 템플릿을 둔다:
+ * 배치 발행 {@link com.ryuqqq.platform.outbox.BatchOutboxRelayTemplate}(+{@link
+ * com.ryuqqq.platform.outbox.spi.BatchOutboxAdapter})와 건별 발송 {@link
+ * com.ryuqqq.platform.outbox.PerItemOutboxRelayTemplate}(+{@code PerItemOutboxAdapter}). 소비측이
+ * 어댑터를 구현하면 여러 도메인의 릴레이 흐름이 한 곳으로 수렴한다.
  */
 package com.ryuqqq.platform.outbox;
