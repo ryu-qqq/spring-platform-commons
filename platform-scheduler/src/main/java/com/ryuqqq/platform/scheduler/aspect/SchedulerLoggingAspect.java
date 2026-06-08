@@ -55,11 +55,12 @@ public class SchedulerLoggingAspect {
             recordBatchMetrics(jobName, result);
 
             return result;
-        } catch (Exception e) {
+        } catch (Throwable t) {
+            // proceed()는 Throwable을 던진다 — Error(OOM·NoClassDefFoundError 등)도 계측·로깅 후 재던진다(삼키지 않음).
             stopTimer(sample, jobName);
             recordExecution(jobName, "error");
-            log.error("[{}] 스케줄러 작업 실패 - error: {}", jobName, e.getMessage(), e);
-            throw e;
+            log.error("[{}] 스케줄러 작업 실패 - error: {}", jobName, t.getMessage(), t);
+            throw t;
         } finally {
             MDC.remove(TRACE_ID_KEY);
         }
