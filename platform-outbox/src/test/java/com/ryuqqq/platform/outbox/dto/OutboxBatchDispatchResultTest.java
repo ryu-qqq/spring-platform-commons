@@ -6,12 +6,12 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class OutboxBatchSendResultTest {
+class OutboxBatchDispatchResultTest {
 
     @Test
     @DisplayName("allSuccess: 실패 없음, hasFailures=false")
     void allSuccess() {
-        OutboxBatchSendResult result = OutboxBatchSendResult.allSuccess(List.of("a", "b"));
+        OutboxBatchDispatchResult result = OutboxBatchDispatchResult.allSuccess(List.of("a", "b"));
 
         assertThat(result.successIds()).containsExactly("a", "b");
         assertThat(result.failedEntries()).isEmpty();
@@ -21,10 +21,10 @@ class OutboxBatchSendResultTest {
     @Test
     @DisplayName("of: 성공/실패 혼재, hasFailures=true")
     void ofWithFailures() {
-        OutboxBatchSendResult result =
-                OutboxBatchSendResult.of(
+        OutboxBatchDispatchResult result =
+                OutboxBatchDispatchResult.of(
                         List.of("a"),
-                        List.of(new OutboxBatchSendResult.FailedEntry("b", "timeout")));
+                        List.of(new OutboxBatchDispatchResult.FailedEntry("b", "timeout")));
 
         assertThat(result.successIds()).containsExactly("a");
         assertThat(result.failedEntries()).hasSize(1);
@@ -36,7 +36,7 @@ class OutboxBatchSendResultTest {
     @Test
     @DisplayName("null 입력은 빈 리스트로 정규화된다")
     void nullInputsNormalizedToEmpty() {
-        OutboxBatchSendResult result = OutboxBatchSendResult.of(null, null);
+        OutboxBatchDispatchResult result = OutboxBatchDispatchResult.of(null, null);
 
         assertThat(result.successIds()).isEmpty();
         assertThat(result.failedEntries()).isEmpty();

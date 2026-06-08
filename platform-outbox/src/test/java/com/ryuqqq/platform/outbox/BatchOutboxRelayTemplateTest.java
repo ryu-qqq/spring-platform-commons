@@ -3,9 +3,9 @@ package com.ryuqqq.platform.outbox;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.ryuqqq.platform.common.scheduler.SchedulerBatchProcessingResult;
-import com.ryuqqq.platform.outbox.dto.OutboxBatchSendResult;
-import com.ryuqqq.platform.outbox.dto.OutboxEnqueueCommand;
-import com.ryuqqq.platform.outbox.spi.QueueOutboxAdapter;
+import com.ryuqqq.platform.outbox.dto.OutboxBatchDispatchResult;
+import com.ryuqqq.platform.outbox.dto.OutboxDispatchCommand;
+import com.ryuqqq.platform.outbox.spi.BatchOutboxAdapter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Instant;
@@ -14,18 +14,18 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class QueueOutboxRelayTemplateTest {
+class BatchOutboxRelayTemplateTest {
 
     /** 테스트용 도메인 outbox. */
     record TestOutbox(String outboxId, String businessId, String idempotencyKey) {}
 
     /** 호출을 기록하는 fake SPI 구현체. */
-    static class FakeQueueOutboxAdapter implements QueueOutboxAdapter<TestOutbox> {
+    static class FakeBatchOutboxAdapter implements BatchOutboxAdapter<TestOutbox> {
         List<TestOutbox> toClaim = new ArrayList<>();
-        OutboxBatchSendResult enqueueResult;
-        RuntimeException enqueueException;
+        OutboxBatchDispatchResult dispatchResult;
+        RuntimeException dispatchException;
 
-        List<OutboxEnqueueCommand> enqueued;
+        List<OutboxDispatchCommand> dispatched;
         final List<String> markedSent = new ArrayList<>();
         final List<String> markedFailed = new ArrayList<>();
         String failedErrorMessage;
@@ -39,10 +39,10 @@ class QueueOutboxRelayTemplateTest {
         @Override public List<TestOutbox> claimPendingMessages(int batchSize) { return toClaim; }
 
         @Override
-        public OutboxBatchSendResult enqueueBatch(List<OutboxEnqueueCommand> commands) {
-            this.enqueued = commands;
-            if (enqueueException != null) throw enqueueException;
-            return enqueueResult;
+        public OutboxBatchDispatchResult dispatchBatch(List<OutboxDispatchCommand> commands) {
+            this.dispatched = commands;
+            if (dispatchException != null) throw dispatchException;
+            return dispatchResult;
         }
 
         @Override public void bulkMarkSent(List<String> ids, Instant now) { markedSent.addAll(ids); }
@@ -54,49 +54,49 @@ class QueueOutboxRelayTemplateTest {
     }
 
     private final MeterRegistry registry = new SimpleMeterRegistry();
-    private final QueueOutboxRelayTemplate template = new QueueOutboxRelayTemplate(registry);
+    private final BatchOutboxRelayTemplate template = new BatchOutboxRelayTemplate(registry);
 
     @Test
-    @DisplayName("claim 이 비면 empty() 반환, enqueue 미호출")
+    @DisplayName("claim 이 비면 empty() 반환, dispatch 미호출")
     void emptyClaim() {
-        FakeQueueOutboxAdapter adapter = new FakeQueueOutboxAdapter();
+        FakeBatchOutboxAdapter adapter = new FakeBatchOutboxAdapter();
 
         SchedulerBatchProcessingResult result = template.relay(10, adapter);
 
         assertThat(result).isEqualTo(SchedulerBatchProcessingResult.empty());
-        assertThat(adapter.enqueued).isNull();
+        assertThat(adapter.dispatched).isNull();
         assertThat(adapter.markedSent).isEmpty();
     }
 
     @Test
     @DisplayName("전건 성공 → bulkMarkSent 전체, markFailed 미호출, 결과 (n,n,0)")
     void allSuccess() {
-        FakeQueueOutboxAdapter adapter = new FakeQueueOutboxAdapter();
+        FakeBatchOutboxAdapter adapter = new FakeBatchOutboxAdapter();
         adapter.toClaim = List.of(
                 new TestOutbox("o1", "b1", "k1"), new TestOutbox("o2", "b2", "k2"));
-        adapter.enqueueResult = OutboxBatchSendResult.allSuccess(List.of("b1", "b2"));
+        adapter.dispatchResult = OutboxBatchDispatchResult.allSuccess(List.of("b1", "b2"));
 
         SchedulerBatchProcessingResult result = template.relay(10, adapter);
 
         assertThat(adapter.markedSent).containsExactly("o1", "o2");
         assertThat(adapter.markedFailed).isEmpty();
         assertThat(result).isEqualTo(SchedulerBatchProcessingResult.of(2, 2, 0));
-        assertThat(adapter.enqueued)
+        assertThat(adapter.dispatched)
                 .containsExactly(
-                        new OutboxEnqueueCommand("b1", "k1"),
-                        new OutboxEnqueueCommand("b2", "k2"));
+                        new OutboxDispatchCommand("b1", "k1"),
+                        new OutboxDispatchCommand("b2", "k2"));
     }
 
     @Test
     @DisplayName("부분 실패 → success markSent, failed markFailed(errorSummary), 결과 (n,s,f)")
     void partialFailure() {
-        FakeQueueOutboxAdapter adapter = new FakeQueueOutboxAdapter();
+        FakeBatchOutboxAdapter adapter = new FakeBatchOutboxAdapter();
         adapter.toClaim = List.of(
                 new TestOutbox("o1", "b1", "k1"), new TestOutbox("o2", "b2", "k2"));
-        adapter.enqueueResult =
-                OutboxBatchSendResult.of(
+        adapter.dispatchResult =
+                OutboxBatchDispatchResult.of(
                         List.of("b1"),
-                        List.of(new OutboxBatchSendResult.FailedEntry("b2", "timeout")));
+                        List.of(new OutboxBatchDispatchResult.FailedEntry("b2", "timeout")));
 
         SchedulerBatchProcessingResult result = template.relay(10, adapter);
 
@@ -107,12 +107,12 @@ class QueueOutboxRelayTemplateTest {
     }
 
     @Test
-    @DisplayName("enqueueBatch 예외 → bulkReleaseToPending 전체, markSent/Failed 미호출, 결과 (n,0,0)")
-    void enqueueInfraException() {
-        FakeQueueOutboxAdapter adapter = new FakeQueueOutboxAdapter();
+    @DisplayName("dispatchBatch 예외 → bulkReleaseToPending 전체, markSent/Failed 미호출, 결과 (n,0,0)")
+    void dispatchInfraException() {
+        FakeBatchOutboxAdapter adapter = new FakeBatchOutboxAdapter();
         adapter.toClaim = List.of(
                 new TestOutbox("o1", "b1", "k1"), new TestOutbox("o2", "b2", "k2"));
-        adapter.enqueueException = new RuntimeException("SQS down");
+        adapter.dispatchException = new RuntimeException("SQS down");
 
         SchedulerBatchProcessingResult result = template.relay(10, adapter);
 
@@ -125,22 +125,22 @@ class QueueOutboxRelayTemplateTest {
     @Test
     @DisplayName("errorSummary 는 중복 제거 후 최대 3건을 \"; \" 로 합친다")
     void errorSummaryDedupAndLimit() {
-        FakeQueueOutboxAdapter adapter = new FakeQueueOutboxAdapter();
+        FakeBatchOutboxAdapter adapter = new FakeBatchOutboxAdapter();
         adapter.toClaim = List.of(
                 new TestOutbox("o1", "b1", "k1"),
                 new TestOutbox("o2", "b2", "k2"),
                 new TestOutbox("o3", "b3", "k3"),
                 new TestOutbox("o4", "b4", "k4"),
                 new TestOutbox("o5", "b5", "k5"));
-        adapter.enqueueResult =
-                OutboxBatchSendResult.of(
+        adapter.dispatchResult =
+                OutboxBatchDispatchResult.of(
                         List.of(),
                         List.of(
-                                new OutboxBatchSendResult.FailedEntry("b1", "dup"),
-                                new OutboxBatchSendResult.FailedEntry("b2", "dup"),
-                                new OutboxBatchSendResult.FailedEntry("b3", "e3"),
-                                new OutboxBatchSendResult.FailedEntry("b4", "e4"),
-                                new OutboxBatchSendResult.FailedEntry("b5", "e5")));
+                                new OutboxBatchDispatchResult.FailedEntry("b1", "dup"),
+                                new OutboxBatchDispatchResult.FailedEntry("b2", "dup"),
+                                new OutboxBatchDispatchResult.FailedEntry("b3", "e3"),
+                                new OutboxBatchDispatchResult.FailedEntry("b4", "e4"),
+                                new OutboxBatchDispatchResult.FailedEntry("b5", "e5")));
 
         template.relay(10, adapter);
 
@@ -151,13 +151,13 @@ class QueueOutboxRelayTemplateTest {
     @Test
     @DisplayName("outbox.relay 카운터에 success/failure 가 기록된다")
     void recordsMetrics() {
-        FakeQueueOutboxAdapter adapter = new FakeQueueOutboxAdapter();
+        FakeBatchOutboxAdapter adapter = new FakeBatchOutboxAdapter();
         adapter.toClaim = List.of(
                 new TestOutbox("o1", "b1", "k1"), new TestOutbox("o2", "b2", "k2"));
-        adapter.enqueueResult =
-                OutboxBatchSendResult.of(
+        adapter.dispatchResult =
+                OutboxBatchDispatchResult.of(
                         List.of("b1"),
-                        List.of(new OutboxBatchSendResult.FailedEntry("b2", "timeout")));
+                        List.of(new OutboxBatchDispatchResult.FailedEntry("b2", "timeout")));
 
         template.relay(10, adapter);
 
@@ -180,10 +180,10 @@ class QueueOutboxRelayTemplateTest {
     @Test
     @DisplayName("MeterRegistry 가 null 이어도 NPE 없이 동작한다")
     void nullMeterRegistry() {
-        QueueOutboxRelayTemplate noMetricTemplate = new QueueOutboxRelayTemplate(null);
-        FakeQueueOutboxAdapter adapter = new FakeQueueOutboxAdapter();
+        BatchOutboxRelayTemplate noMetricTemplate = new BatchOutboxRelayTemplate(null);
+        FakeBatchOutboxAdapter adapter = new FakeBatchOutboxAdapter();
         adapter.toClaim = List.of(new TestOutbox("o1", "b1", "k1"));
-        adapter.enqueueResult = OutboxBatchSendResult.allSuccess(List.of("b1"));
+        adapter.dispatchResult = OutboxBatchDispatchResult.allSuccess(List.of("b1"));
 
         SchedulerBatchProcessingResult result = noMetricTemplate.relay(10, adapter);
 
