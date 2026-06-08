@@ -32,4 +32,14 @@ class OutboxBatchSendResultTest {
         assertThat(result.failedEntries().get(0).errorMessage()).isEqualTo("timeout");
         assertThat(result.hasFailures()).isTrue();
     }
+
+    @Test
+    @DisplayName("null 입력은 빈 리스트로 정규화된다")
+    void nullInputsNormalizedToEmpty() {
+        OutboxBatchSendResult result = OutboxBatchSendResult.of(null, null);
+
+        assertThat(result.successIds()).isEmpty();
+        assertThat(result.failedEntries()).isEmpty();
+        assertThat(result.hasFailures()).isFalse();
+    }
 }

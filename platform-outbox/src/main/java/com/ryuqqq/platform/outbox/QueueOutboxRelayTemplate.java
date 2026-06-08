@@ -7,7 +7,9 @@ import com.ryuqqq.platform.outbox.spi.QueueOutboxAdapter;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +46,7 @@ public class QueueOutboxRelayTemplate {
 
     public <O> SchedulerBatchProcessingResult relay(int batchSize, QueueOutboxAdapter<O> adapter) {
         List<O> claimed = adapter.claimPendingMessages(batchSize);
-        if (claimed.isEmpty()) {
+        if (claimed == null || claimed.isEmpty()) {
             return SchedulerBatchProcessingResult.empty();
         }
 
@@ -77,19 +79,21 @@ public class QueueOutboxRelayTemplate {
             List<O> claimed, OutboxBatchSendResult sendResult, QueueOutboxAdapter<O> adapter) {
         Instant now = Instant.now();
 
+        Set<String> successBusinessIds = new HashSet<>(sendResult.successIds());
         List<String> successOutboxIds =
                 claimed.stream()
-                        .filter(o -> sendResult.successIds().contains(adapter.businessId(o)))
+                        .filter(o -> successBusinessIds.contains(adapter.businessId(o)))
                         .map(adapter::outboxId)
                         .toList();
         adapter.bulkMarkSent(successOutboxIds, now);
 
+        Set<String> failedBusinessIds =
+                sendResult.failedEntries().stream()
+                        .map(OutboxBatchSendResult.FailedEntry::id)
+                        .collect(Collectors.toSet());
         List<String> failedOutboxIds =
                 claimed.stream()
-                        .filter(
-                                o ->
-                                        sendResult.failedEntries().stream()
-                                                .anyMatch(f -> f.id().equals(adapter.businessId(o))))
+                        .filter(o -> failedBusinessIds.contains(adapter.businessId(o)))
                         .map(adapter::outboxId)
                         .toList();
 

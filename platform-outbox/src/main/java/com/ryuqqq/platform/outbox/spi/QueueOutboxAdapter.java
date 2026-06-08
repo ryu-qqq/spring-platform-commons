@@ -40,6 +40,10 @@ public interface QueueOutboxAdapter<O> {
      * <p><b>계약:</b> 입력 command 의 모든 business id 는 결과의 {@code successIds} 또는
      * {@code failedEntries} 중 정확히 한 곳에 포함되어야 한다. 어느 쪽에도 없는 항목은 PROCESSING 상태로
      * 남아 stuck 될 수 있다(템플릿이 SENT/FAILED 어디로도 전이시키지 않음).
+     *
+     * <p>또한 {@code businessId} 는 <b>한 배치 내에서 유일</b>해야 한다 — 템플릿이 success/failed 매칭
+     * 상관키로 사용하므로, 같은 배치에 동일 businessId 가 둘 이상이면 함께 (오)마킹된다. 배치 내 유일성이
+     * 보장되지 않는 도메인은 businessId 에 outbox 별 유일 값(예: idempotencyKey)을 싣는다.
      */
     OutboxBatchSendResult enqueueBatch(List<OutboxEnqueueCommand> commands);
 
