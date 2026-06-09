@@ -39,6 +39,8 @@ class PlatformJpaAutoConfigurationTest {
     @Test
     @DisplayName("소비측이 직접 JPAQueryFactory 빈을 정의하면 ConditionalOnMissingBean 으로 양보한다")
     void backsOffWhenUserDefinesOwnJpaQueryFactory() {
+        // 공유 runner(실제 EMF) 사용 — JPA auditing(JpaMetamodelMappingContext)이 진짜 Metamodel을
+        // 요구하므로 mock EMF로 경량화 불가(리뷰 제안 검증 시 'Metamodel must not be null' 폭발).
         runner.withBean(
                         "customJpaQueryFactory",
                         JPAQueryFactory.class,
@@ -55,7 +57,10 @@ class PlatformJpaAutoConfigurationTest {
     @Test
     @DisplayName("클래스패스에 JPAQueryFactory(QueryDSL) 가 없으면 @ConditionalOnClass 로 자동설정이 비활성화된다")
     void backsOffWhenJpaQueryFactoryNotOnClasspath() {
-        runner.withClassLoader(new FilteredClassLoader(JPAQueryFactory.class))
+        // config 가 backs-off 하므로 DataSource/Hibernate 불필요(경량)
+        new ApplicationContextRunner()
+                .withConfiguration(AutoConfigurations.of(PlatformJpaAutoConfiguration.class))
+                .withClassLoader(new FilteredClassLoader(JPAQueryFactory.class))
                 .run(
                         context -> {
                             assertThat(context)
