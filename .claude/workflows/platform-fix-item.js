@@ -9,7 +9,8 @@ export const meta = {
 }
 
 // args = finding: {module, check, severity, evidence, direction, branch, auditorCriteria}
-const f = args
+// args 는 객체 또는 JSON 문자열로 들어올 수 있어 강제 정규화한다.
+const f = typeof args === 'string' ? JSON.parse(args) : args
 if (!f || !f.module || !f.check || !f.direction) {
   throw new Error('args에 finding {module, check, direction, branch, auditorCriteria} 필요')
 }
