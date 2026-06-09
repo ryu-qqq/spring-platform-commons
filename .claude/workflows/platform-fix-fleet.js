@@ -7,12 +7,13 @@ export const meta = {
   ],
 }
 
-// args = {findings:[{module,check,severity,evidence,direction}...], gatekeeperCriteria, auditorCriteria}
+// args = {findings:[{module,check,severity,evidence,direction}...], gatekeeperCriteria, auditorCriteria, repo?}
 const a = typeof args === 'string' ? JSON.parse(args) : args
 if (!a || !Array.isArray(a.findings) || !a.gatekeeperCriteria || !a.auditorCriteria) {
   throw new Error('args에 {findings:[], gatekeeperCriteria, auditorCriteria} 필요')
 }
-const REPO = '/Users/ryu-qqq/Documents/ryu-qqq/spring-platform-commons'
+// repo 경로는 args.repo 로 주입(이식성). 워크플로우 샌드박스엔 process.cwd() 미보장이라 args 우선.
+const REPO = a.repo || '/Users/ryu-qqq/Documents/ryu-qqq/spring-platform-commons'
 
 const GATE_SCHEMA = { type:'object', required:['class'], properties:{
   module:{type:'string'}, check:{type:'string'},
