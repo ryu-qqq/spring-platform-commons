@@ -57,5 +57,5 @@ git:
     requireTicket: true
     ticketSource: literal
     ticketPrefix: SPC
-    requireOnIngest: true
+    requireOnIngest: false
     scopesHint: [platform, docs, sdk, harness]
