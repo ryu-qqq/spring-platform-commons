@@ -120,11 +120,18 @@ if (a.autoMerge) {
       autoMerge.push({ ...prRef(r), action:'escalate', reason:`merge-gate=${review.verdict} scopeOk=${review.scopeOk}: ${(review.reasons || []).join('; ')}` }); continue
     }
     if (a.dryRun) { autoMerge.push({ ...prRef(r), action:'would-merge', reason:'dry-run(머지 안 함)' }); merged++; continue }
+    // ⑤ CI 게이트: 진짜 게이트인 'build' 체크만 본다(atlantis 등 무관·non-required 실패는 무시).
+    // build pass면 --auto 시도, 레포에 auto-merge 미허용이면 직접 머지로 폴백.
     const m = await agent(
-      `작업 디렉토리 ${REPO}. \`gh pr merge ${r.pr.prUrl} --auto --squash --delete-branch\` 실행(CI green 후 GitHub가 머지). JSON: {"enabled":bool,"detail":""}`,
-      { label:`merge:${r.module}`, phase:'Auto-merge', schema:{ type:'object', required:['enabled'], properties:{ enabled:{type:'boolean'}, detail:{type:'string'} } } }).catch(() => ({ enabled:false, detail:'agent error' }))
-    autoMerge.push({ ...prRef(r), action: m.enabled ? 'auto-merge-enabled' : 'escalate', reason: m.enabled ? 'gh --auto 설정' : `머지 실패: ${m.detail}` })
-    if (m.enabled) merged++
+      `작업 디렉토리 ${REPO}. PR ${r.pr.prUrl} 자동머지 절차:\n` +
+      `1. \`gh pr checks ${r.pr.prUrl}\` 실행 → 'build' 체크가 pass인지 확인. build가 pass가 아니면(fail/pending) 머지하지 말고 {"merged":false,"method":"skipped","reason":"build 체크 미통과"} 반환.\n` +
+      `   (atlantis 등 build 외 체크 실패는 무시 — 이 레포의 required 게이트는 build 뿐.)\n` +
+      `2. build pass면 \`gh pr merge ${r.pr.prUrl} --auto --squash --delete-branch\` 시도. ` +
+      `'auto merge is not allowed' 류 에러면 \`gh pr merge ${r.pr.prUrl} --squash --delete-branch\` 로 직접 머지(폴백).\n` +
+      `JSON: {"merged":bool,"method":"auto|direct|skipped","reason":""}`,
+      { label:`merge:${r.module}`, phase:'Auto-merge', schema:{ type:'object', required:['merged'], properties:{ merged:{type:'boolean'}, method:{enum:['auto','direct','skipped']}, reason:{type:'string'} } } }).catch(() => ({ merged:false, method:'skipped', reason:'agent error' }))
+    autoMerge.push({ ...prRef(r), action: m.merged ? `merged(${m.method})` : 'escalate', reason: m.merged ? `${m.method} 머지` : `머지 안 함: ${m.reason}` })
+    if (m.merged) merged++
   }
 }
 
