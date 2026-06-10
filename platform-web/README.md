@@ -121,10 +121,12 @@ class OrderNotFoundMapper implements ErrorMapper {
 
 ## 사용
 
-```kotlin
-// build.gradle(.kts)
+```groovy
 dependencies {
-    implementation("com.ryuqqq:platform-web:<version>")
+    // 외부 소비(JitPack) — 정식 좌표
+    implementation 'com.github.ryu-qqq.spring-platform-commons:platform-web:v0.1.0'
+    // 모노레포 내부
+    // implementation project(':platform-web')
 }
 ```
 
