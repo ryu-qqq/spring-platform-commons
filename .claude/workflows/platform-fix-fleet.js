@@ -52,7 +52,7 @@ async function fixItem(fd) {
   try {
     const impl = await agent(
       `너는 자율 수정 구현자다. 격리 worktree에서 TDD로 감사 finding을 수정하라.\n` +
-      `## 셋업\n1. 메인 레포 ${REPO} 에서: \`git worktree add ${wt} -b ${branch} main\` (이미 있으면 제거 후 재생성).\n2. 이후 모든 작업은 ${wt} 에서 수행(cd ${wt}).\n` +
+      `## 셋업\n1. 메인 레포 ${REPO} 에서 worktree 생성 — **.git 락 경합 대비 재시도 루프로**: 기존 있으면 먼저 \`git worktree remove ${wt} --force 2>/dev/null; git worktree prune\` 후, \`for i in 1 2 3 4 5; do git worktree add ${wt} -b ${branch} main && break || { sleep 2; git worktree prune; }; done\` (병렬 실행 중 락 충돌 시 백오프 재시도).\n2. 이후 모든 작업은 ${wt} 에서 수행(cd ${wt}).\n` +
       `## finding\nmodule=${fd.module}\ncheck=${fd.check}\nevidence=${fd.evidence}\ndirection=${fd.direction}\n` +
       `## 수정 (finding 성격에 맞춰라)\n` +
       `- 테스트 추가형: 선례(platform-security/outbox 의 ApplicationContextRunner 스타일) → 실패 테스트 → \`./gradlew :${fd.module}:test\` red → green → \`./gradlew :${fd.module}:build\` 그린. buildGreen=true.\n` +
@@ -94,6 +94,12 @@ const designForks = classified.filter(c => c.class === 'design-fork')
 const skipped = classified.filter(c => c.class === 'skip')
 
 phase('Fan-out')
+// 병렬 fan-out 전 stale worktree 정리(이전 런 잔재·락 누수 방지) — 1회 순차.
+if (mechanical.length) {
+  await agent(
+    `메인 레포 ${REPO} 에서 \`git worktree prune\` 실행 후, \`${REPO}/.worktrees/\` 하위에서 \`git worktree list\`에 등록되지 않은 고아 디렉토리를 \`rm -rf\` 로 정리하라(현재 등록된 worktree는 건드리지 마라). JSON: {"pruned":true}`,
+    { label: 'worktree-prune', phase: 'Fan-out', schema: { type:'object', properties:{ pruned:{type:'boolean'} } } }).catch(() => {})
+}
 const fixed = mechanical.length
   ? (await parallel(mechanical.map(fd => () => fixItem(fd)))).filter(Boolean)
   : []
