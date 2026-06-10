@@ -11,9 +11,12 @@ import com.ryuqqq.platform.resilient.RequestSender;
 import com.ryuqqq.platform.resilient.spring.ResilientClientProperties.TimeoutProperties;
 import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
@@ -29,6 +32,30 @@ class ResilientClientRestSupportTest {
         RestClient client = ResilientClientRestSupport.buildRestClient("http://example.test", timeout);
 
         assertThat(client).isNotNull();
+    }
+
+    @Test
+    @DisplayName("buildRestClient(base)는 전달받은 base 빌더의 인터셉터(트레이싱 등)를 보존한다")
+    void buildRestClientPreservesBaseBuilderInterceptors() {
+        // 트레이싱 인터셉터를 흉내내는 인터셉터 — 호출되면 마크하고 즉시 200 응답(네트워크 X)
+        AtomicBoolean baseInterceptorRan = new AtomicBoolean(false);
+        RestClient.Builder base =
+                RestClient.builder()
+                        .requestInterceptor(
+                                (request, body, execution) -> {
+                                    baseInterceptorRan.set(true);
+                                    return new MockClientHttpResponse(new byte[0], HttpStatus.OK);
+                                });
+        TimeoutProperties timeout = new TimeoutProperties();
+
+        RestClient client =
+                ResilientClientRestSupport.buildRestClient(
+                        base, "http://example.test", timeout, Map.of());
+        client.get().uri("/probe").retrieve().toBodilessEntity();
+
+        assertThat(baseInterceptorRan)
+                .as("base 빌더 인터셉터가 보존되어 호출됨(트레이스 전파 가능)")
+                .isTrue();
     }
 
     @Test
