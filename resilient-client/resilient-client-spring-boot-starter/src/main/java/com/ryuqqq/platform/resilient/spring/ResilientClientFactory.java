@@ -31,11 +31,30 @@ public class ResilientClientFactory {
 
     private final ResilientClientProperties properties;
     private final MetricsRecorder metricsRecorder;
+    private final RestClient.Builder restClientBuilder;
 
+    /**
+     * @param restClientBuilder auto-configured {@link RestClient.Builder} (트레이싱 인터셉터 주입됨).
+     *     RestClient-backed 클라이언트가 이 base 빌더에서 파생되어 W3C traceparent 전파가 동작한다.
+     */
     public ResilientClientFactory(ResilientClientProperties properties,
-                                  MetricsRecorder metricsRecorder) {
+                                  MetricsRecorder metricsRecorder,
+                                  RestClient.Builder restClientBuilder) {
         this.properties = properties;
         this.metricsRecorder = metricsRecorder;
+        this.restClientBuilder = restClientBuilder;
+    }
+
+    /**
+     * @deprecated traceparent 자동 전파를 위해 auto-configured {@link RestClient.Builder}를 받는
+     *     {@link #ResilientClientFactory(ResilientClientProperties, MetricsRecorder, RestClient.Builder)}를
+     *     사용하라. 이 생성자는 plain {@code RestClient.builder()}로 폴백하여 RestClient-backed 클라이언트의
+     *     트레이스 전파가 동작하지 않는다.
+     */
+    @Deprecated
+    public ResilientClientFactory(ResilientClientProperties properties,
+                                  MetricsRecorder metricsRecorder) {
+        this(properties, metricsRecorder, RestClient.builder());
     }
 
     /**
@@ -86,7 +105,8 @@ public class ResilientClientFactory {
         }
         RestClient restClient =
                 ResilientClientRestSupport.buildRestClient(
-                        baseUrl, clientProps.getTimeout(), clientProps.getDefaultHeaders());
+                        restClientBuilder, baseUrl, clientProps.getTimeout(),
+                        clientProps.getDefaultHeaders());
         return create(clientName, ResilientClientRestSupport.requestSender(restClient));
     }
 
