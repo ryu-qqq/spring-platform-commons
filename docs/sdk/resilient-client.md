@@ -11,7 +11,7 @@
 // adapter-out client module
 implementation project(':resilient-client:resilient-client-spring-boot-starter')
 // JitPack (외부 서비스)
-implementation 'com.github.ryu-qqq.spring-platform-commons:resilient-client-spring-boot-starter:v0.2.0'
+implementation 'com.github.ryu-qqq.spring-platform-commons:resilient-client-spring-boot-starter:v0.1.0'
 ```
 
 ## YAML → 빈 자동 등록
