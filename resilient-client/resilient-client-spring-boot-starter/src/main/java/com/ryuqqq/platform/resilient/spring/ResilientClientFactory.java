@@ -46,12 +46,13 @@ public class ResilientClientFactory {
     }
 
     /**
-     * @deprecated traceparent 자동 전파를 위해 auto-configured {@link RestClient.Builder}를 받는
+     * @deprecated since 0.2.0, for removal — traceparent 자동 전파를 위해 auto-configured
+     *     {@link RestClient.Builder}를 받는
      *     {@link #ResilientClientFactory(ResilientClientProperties, MetricsRecorder, RestClient.Builder)}를
      *     사용하라. 이 생성자는 plain {@code RestClient.builder()}로 폴백하여 RestClient-backed 클라이언트의
-     *     트레이스 전파가 동작하지 않는다.
+     *     트레이스 전파가 동작하지 않는다. (ADR-0004 버저닝 정책)
      */
-    @Deprecated
+    @Deprecated(since = "0.2.0", forRemoval = true)
     public ResilientClientFactory(ResilientClientProperties properties,
                                   MetricsRecorder metricsRecorder) {
         this(properties, metricsRecorder, RestClient.builder());
