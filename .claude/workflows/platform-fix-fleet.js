@@ -120,18 +120,18 @@ if (a.autoMerge) {
       autoMerge.push({ ...prRef(r), action:'escalate', reason:`merge-gate=${review.verdict} scopeOk=${review.scopeOk}: ${(review.reasons || []).join('; ')}` }); continue
     }
     if (a.dryRun) { autoMerge.push({ ...prRef(r), action:'would-merge', reason:'dry-run(머지 안 함)' }); merged++; continue }
-    // ⑤ CI 게이트: 진짜 게이트인 'build' 체크만 본다(atlantis 등 무관·non-required 실패는 무시).
-    // build pass면 --auto 시도, 레포에 auto-merge 미허용이면 직접 머지로 폴백.
+    // ⑤ CI 게이트는 GitHub --auto 에 위임: build(required check)가 green 되면 GitHub가 머지.
+    // 에이전트는 --auto 를 enable 하고 즉시 반환한다(머지 완료를 폴링하지 않음 — 슬로우·타이밍 escalate 제거).
+    // branch protection이 build 를 required 로 강제하므로 --auto 머지는 build green 전엔 일어나지 않는다.
     const m = await agent(
-      `작업 디렉토리 ${REPO}. PR ${r.pr.prUrl} 자동머지 절차:\n` +
-      `1. \`gh pr checks ${r.pr.prUrl}\` 실행 → 'build' 체크가 pass인지 확인. build가 pass가 아니면(fail/pending) 머지하지 말고 {"merged":false,"method":"skipped","reason":"build 체크 미통과"} 반환.\n` +
-      `   (atlantis 등 build 외 체크 실패는 무시 — 이 레포의 required 게이트는 build 뿐.)\n` +
-      `2. build pass면 \`gh pr merge ${r.pr.prUrl} --auto --squash --delete-branch\` 시도. ` +
-      `'auto merge is not allowed' 류 에러면 \`gh pr merge ${r.pr.prUrl} --squash --delete-branch\` 로 직접 머지(폴백).\n` +
-      `JSON: {"merged":bool,"method":"auto|direct|skipped","reason":""}`,
-      { label:`merge:${r.module}`, phase:'Auto-merge', schema:{ type:'object', required:['merged'], properties:{ merged:{type:'boolean'}, method:{enum:['auto','direct','skipped']}, reason:{type:'string'} } } }).catch(() => ({ merged:false, method:'skipped', reason:'agent error' }))
-    autoMerge.push({ ...prRef(r), action: m.merged ? `merged(${m.method})` : 'escalate', reason: m.merged ? `${m.method} 머지` : `머지 안 함: ${m.reason}` })
-    if (m.merged) merged++
+      `작업 디렉토리 ${REPO}. PR ${r.pr.prUrl} 자동머지를 enable 하고 즉시 반환하라(머지 완료를 기다리지 마라):\n` +
+      `1. \`gh pr merge ${r.pr.prUrl} --auto --squash --delete-branch\` 실행. 성공하면 GitHub가 build green 후 머지 → enabled=true, method=auto.\n` +
+      `2. 'auto merge is not allowed' 류 에러(레포 auto-merge 비활성)면 폴백: \`gh pr checks ${r.pr.prUrl}\`로 build 가 pass 일 때만 \`gh pr merge ${r.pr.prUrl} --squash --delete-branch\` 직접 머지(enabled=true, method=direct). build 가 pending/fail 이면 머지하지 말고 enabled=false, method=skipped, reason='build 미통과 — 사람'.\n` +
+      `JSON: {"enabled":bool,"method":"auto|direct|skipped","reason":""}`,
+      { label:`merge:${r.module}`, phase:'Auto-merge', schema:{ type:'object', required:['enabled'], properties:{ enabled:{type:'boolean'}, method:{enum:['auto','direct','skipped']}, reason:{type:'string'} } } }).catch(() => ({ enabled:false, method:'skipped', reason:'agent error' }))
+    // method=auto 는 "머지 예약됨"(GitHub가 build 후 머지), direct 는 "즉시 머지됨". 둘 다 캡에 산입.
+    autoMerge.push({ ...prRef(r), action: m.enabled ? (m.method === 'auto' ? 'auto-merge-armed' : 'merged(direct)') : 'escalate', reason: m.enabled ? `${m.method}` : `머지 안 함: ${m.reason}` })
+    if (m.enabled) merged++
   }
 }
 
