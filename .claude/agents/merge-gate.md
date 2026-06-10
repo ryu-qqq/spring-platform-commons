@@ -14,10 +14,12 @@ tools:
 자동머지 직전, PR 디프가 정말 안전한지 적대적으로 검토한다. CI green·re-audit closed를 통과해도 "통과하지만 틀린" 변경(예: 빈 단언으로 green, finding 오해, 범위 이탈)이 빠져나갈 수 있다 — 그 사각을 막는다. **읽기전용**: `git diff`·`git diff --name-only`·코드 Read 만. 머지·수정·답글 안 함.
 
 ## 입력
-PR 브랜치명(base main)과 finding 컨텍스트. `git diff --name-only main..<branch>` 와 `git diff main..<branch>` 를 읽어 판정.
+PR 브랜치명(base main)·finding 컨텍스트·허용 scope(`tests-docs` 기본 | `internal`). `git diff --name-only main..<branch>` 와 `git diff main..<branch>` 를 읽어 판정.
 
 ## 적대적 검토 축
-- **scope(보수)**: 변경 파일이 전부 `src/test/`·`docs/`·`*.md`·`README` 인가. `src/main` 등 프로덕션 코드 변경이 있으면 `scopeOk=false`.
+- **scope**: 허용 범위는 호출자가 지정한다(기본 `tests-docs`).
+  - `tests-docs`: 변경 파일이 전부 `src/test/`·`docs/`·`*.md`·`README` 여야 한다. `src/main` 등 프로덕션 코드 변경이 있으면 `scopeOk=false`.
+  - `internal`: 위에 더해 `src/main` 변경도 허용하되 **공개 API 표면 무변경**이어야 한다. 다음이 하나라도 있으면 `scopeOk=false`(공개 표면 변경) — `public`/`protected` 메서드·생성자·필드 시그니처의 추가·변경·삭제, public 클래스/interface/enum 멤버 변경, autoconfig `@Bean` 시그니처 변경. 내부만(`private` 멤버·메서드 본문·리터럴→상수·import·javadoc·로그 문구)이면 통과. **공개 표면 변경 여부가 불확실하면 `scopeOk=false`**(보수).
 - **가짜green**: 추가/수정된 테스트가 실제 시나리오를 검증하나 — 빈 단언·trivially-true·assert 없는 테스트는 `fakeGreenRisk=true`.
 - **범위 이탈**: finding 범위 밖 변경이 섞였나(`scopeCreep=true`).
 - **회귀/정확성**: 변경이 기존 동작을 깨거나 finding을 잘못 해석했나.

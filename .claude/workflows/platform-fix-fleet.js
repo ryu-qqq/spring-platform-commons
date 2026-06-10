@@ -9,7 +9,8 @@ export const meta = {
 }
 
 // args = {findings:[{module,check,severity,evidence,direction}...], gatekeeperCriteria, auditorCriteria, repo?,
-//         autoMerge?(기본 false=사람 머지), dryRun?(기본 false), mergeCapN?(기본 3)}
+//         autoMerge?(기본 false=사람 머지), dryRun?(기본 false), mergeCapN?(기본 3),
+//         autoMergeScope?('tests-docs' 기본 | 'internal'=src/main 공개표면 무변경 허용)}
 const a = typeof args === 'string' ? JSON.parse(args) : args
 if (!a || !Array.isArray(a.findings) || !a.gatekeeperCriteria || !a.auditorCriteria) {
   throw new Error('args에 {findings:[], gatekeeperCriteria, auditorCriteria} 필요')
@@ -34,7 +35,8 @@ const REAUDIT_SCHEMA = { type:'object', required:['check','status','closed'], pr
 const PR_SCHEMA = { type:'object', required:['pushed'], properties:{ prUrl:{type:'string'}, pushed:{type:'boolean'}, worktreeRemoved:{type:'boolean'} } }
 
 const MERGE_GATE_CRITERIA = `너는 merge-gate 적대적 리뷰어다. 읽기전용(git diff/read만). ` +
-  `보수 scope = src/test/·docs/·*.md·README 만 허용(src/main 변경 있으면 scopeOk=false). ` +
+  `scope=tests-docs면 변경이 전부 src/test·docs·*.md·README 여야 scopeOk=true(src/main 있으면 false). ` +
+  `scope=internal이면 src/main 도 허용하되 공개 API 표면 무변경이어야 scopeOk=true — public/protected 메서드·생성자·필드 시그니처·public 클래스/interface/enum·autoconfig @Bean 시그니처가 추가/변경/삭제되면 false. 내부만(private·메서드 본문·리터럴→상수·javadoc·로그)이면 true. 공개 표면 변경 여부 불확실하면 false. ` +
   `검토: 가짜green(빈/trivially-true 단언)·범위이탈(finding 밖 변경)·회귀. 하나라도 의심되면 verdict=block. 디프를 실제로 읽어라.`
 
 const MERGE_GATE_SCHEMA = { type:'object', required:['verdict','scopeOk'], properties:{
@@ -104,6 +106,7 @@ const prRef = r => ({ module:r.module, check:r.check, prUrl:r.pr && r.pr.prUrl }
 const autoMerge = []
 if (a.autoMerge) {
   const CAP = a.mergeCapN || 3
+  const SCOPE = a.autoMergeScope || 'tests-docs'  // tests-docs(기본) | internal(src/main 공개표면 무변경 허용)
   let merged = 0
   for (const r of fixed.filter(x => !x.escalate && x.pr && x.pr.prUrl)) {
     if (!(r.class === 'mechanical' && r.confidence === 'high' && r.apiImpact === 'none' && r.reaudit && r.reaudit.closed)) {
@@ -111,7 +114,7 @@ if (a.autoMerge) {
     }
     if (merged >= CAP) { autoMerge.push({ ...prRef(r), action:'escalate', reason:`per-run 캡(${CAP}) 도달` }); continue }
     const review = await agent(
-      `${MERGE_GATE_CRITERIA}\n\n작업 디렉토리 ${REPO}. PR 브랜치 ${r.branch}(base main).\n` +
+      `${MERGE_GATE_CRITERIA}\n\n허용 scope=${SCOPE}. 작업 디렉토리 ${REPO}. PR 브랜치 ${r.branch}(base main).\n` +
       `\`git diff --name-only main..${r.branch}\` 와 \`git diff main..${r.branch}\` 를 읽어 판정.\n` +
       `finding: ${JSON.stringify({ module:r.module, check:r.check, direction:r.direction })}\n` +
       `JSON: {"verdict":"approve|block","scopeOk":bool,"fakeGreenRisk":bool,"scopeCreep":bool,"reasons":[]}`,
