@@ -1,0 +1,29 @@
+name: 💬 도입 피드백
+description: 처음 도입하며 느낀 점·막힌 점·개선 제안을 남겨주세요
+labels: ["adoption-feedback"]
+body:
+  - type: input
+    id: module
+    attributes:
+      label: 모듈
+      description: 어떤 모듈을 도입하려 했나요? (여러 개면 쉼표로)
+      placeholder: platform-web, resilient-client-spring-boot-starter
+  - type: textarea
+    id: context
+    attributes:
+      label: 무엇을 하려 했나요
+      description: 도입 목적·상황.
+    validations:
+      required: true
+  - type: textarea
+    id: friction
+    attributes:
+      label: 막힌 점·헷갈린 점
+      description: 문서가 부족했던 부분, 좌표/설정 문제, 기대와 다른 동작 등.
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: 개선 제안 (선택)
+      description: 이렇게 바뀌면 좋겠다 싶은 점.
