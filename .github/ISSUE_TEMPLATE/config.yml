@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💡 사용법 질문 (Discussions)
+    url: https://github.com/ryu-qqq/spring-platform-commons/discussions
+    about: "어떻게 쓰나요?" 류 질문은 Discussions에서 더 빠르게 답변받을 수 있습니다.
