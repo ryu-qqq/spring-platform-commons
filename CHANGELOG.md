@@ -6,7 +6,18 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-06-15
+
+> 전 플랫폼 모듈의 **최초 JitPack 배포**. `v0.1.0`은 resilient-client만 포함했고, 이번 릴리스로
+> platform-* 모듈(common-domain·application·web·bootstrap·persistence-jpa·archrules·redis·
+> scheduler·security·outbox)이 처음으로 버전 좌표로 소비 가능해진다.
+
 ### Added
+- platform-* 모듈 전체를 JitPack 좌표(`com.github.ryu-qqq.spring-platform-commons:<module>:v0.2.0`)로
+  최초 배포.
+- platform-archrules: **한 줄 Apply**(`ArchTests.in(HexagonalArchRules.class)`) strict 표면과
+  **frozen ratchet 번들**(`HexagonalArchRulesFrozen`) — 레거시 위반 동결 + 신규 위반만 차단으로
+  기존 레포의 점진 입양 지원. violation-store는 소비측 소유.
 - 자가 감사·개선 fleet — 감사 에이전트(autoconfig·observability·versioning auditor)와
   `platform-audit-sweep` 스코어카드, 자율 수정 파이프라인(`platform-fix-item`·`platform-fix-fleet`),
   자동머지 보수 게이트(merge-gate, scope: tests-docs/internal).
@@ -17,15 +28,16 @@
 ### Changed
 - resilient-client: RestClient를 auto-configured `RestClient.Builder` 기반으로 빌드 —
   W3C traceparent 자동 전파 복구(타임아웃 유지).
+- platform-archrules: 기존 규칙 상수 3종에 `@ArchTest` 부여(하위호환) — `ArchTests.in(...)` 집약 입양 지원.
 
 ### Deprecated
 - `ResilientClientFactory(ResilientClientProperties, MetricsRecorder)` 2-인자 생성자
   (`@Deprecated(since="0.2.0", forRemoval=true)`) — 트레이스 전파를 위해 `RestClient.Builder`를
   받는 3-인자 생성자를 사용하라.
 
-## [0.1.0] - 2026-06
-- 초기 공개 모듈: archrules · redis · scheduler · security · outbox · web · persistence-jpa ·
-  common-domain · common-application · bootstrap · resilient-client.
+## [0.1.0] - 2026-03-31
+- 초기 공개: resilient-client(core·metrics·spring-boot-starter)만 배포.
 
-[Unreleased]: https://github.com/ryu-qqq/spring-platform-commons/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/ryu-qqq/spring-platform-commons/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/ryu-qqq/spring-platform-commons/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/ryu-qqq/spring-platform-commons/releases/tag/v0.1.0

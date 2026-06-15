@@ -42,13 +42,13 @@ repositories {
 
 ```groovy
 // 예: 보안 필터 + 관측성 + 회복탄력 클라이언트
-implementation 'com.github.ryu-qqq.spring-platform-commons:platform-security:v0.1.0'
-implementation 'com.github.ryu-qqq.spring-platform-commons:platform-web:v0.1.0'
-implementation 'com.github.ryu-qqq.spring-platform-commons:resilient-client-spring-boot-starter:v0.1.0'
+implementation 'com.github.ryu-qqq.spring-platform-commons:platform-security:v0.2.0'
+implementation 'com.github.ryu-qqq.spring-platform-commons:platform-web:v0.2.0'
+implementation 'com.github.ryu-qqq.spring-platform-commons:resilient-client-spring-boot-starter:v0.2.0'
 ```
 
-**버전:** 현재 릴리스 태그는 **`v0.1.0`** (고정 권장). `0.2.0`은 아직 미릴리스(Unreleased) —
-CHANGELOG 참고. **pre-1.0(0.x)은 minor에서 breaking 변경을 허용**한다(ADR-0004).
+**버전:** 현재 릴리스 태그는 **`v0.2.0`** (전 모듈 최초 배포 — `v0.1.0`은 resilient-client만 포함).
+**pre-1.0(0.x)은 minor에서 breaking 변경을 허용**한다(ADR-0004). 변경 이력은 CHANGELOG 참고.
 
 > 모노레포 내부(이 레포 안에서)는 `implementation project(':platform-web')` 형태를 쓴다.
 > 외부 소비는 위 JitPack 좌표를 쓴다.
