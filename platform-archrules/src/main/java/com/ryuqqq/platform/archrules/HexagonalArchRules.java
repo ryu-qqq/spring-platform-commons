@@ -3,6 +3,7 @@ package com.ryuqqq.platform.archrules;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 
+import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 
 /**
@@ -34,6 +35,7 @@ public final class HexagonalArchRules {
     private static final String BOOTSTRAP = "..bootstrap..";
 
     /** 도메인은 프레임워크 비의존(순수 자바)이어야 한다. */
+    @ArchTest
     public static final ArchRule DOMAIN_FRAMEWORK_FREE =
             noClasses()
                     .that()
@@ -53,6 +55,7 @@ public final class HexagonalArchRules {
                     .allowEmptyShould(true);
 
     /** 애플리케이션은 웹/영속 스택에 직접 의존하지 않는다 (포트로만 통신). */
+    @ArchTest
     public static final ArchRule APPLICATION_NO_WEB_OR_PERSISTENCE =
             noClasses()
                     .that()
@@ -72,6 +75,7 @@ public final class HexagonalArchRules {
                     .allowEmptyShould(true);
 
     /** 헥사고날 레이어 의존 방향 — 의존은 안쪽으로만(adapter→application→domain, bootstrap만 조립 루트). */
+    @ArchTest
     public static final ArchRule HEXAGONAL_LAYERS =
             layeredArchitecture()
                     .consideringOnlyDependenciesInLayers()
