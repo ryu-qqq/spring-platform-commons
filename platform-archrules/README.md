@@ -42,21 +42,54 @@ Bootstrap     ← (아무도 의존 못 함 = 최외곽 조립 루트)
 `withOptionalLayers(true)` 로 두어, 소비측에 일부 레이어 패키지가 없어도 통과한다. `DOMAIN_FRAMEWORK_FREE`·
 `APPLICATION_NO_WEB_OR_PERSISTENCE` 는 `allowEmptyShould(true)` 로 대상 패키지가 비어도 실패하지 않는다.
 
-## 소비 방법
+**입양 표면 2종:** `HexagonalArchRules`(strict, 그린필드) · `HexagonalArchRulesFrozen`(frozen ratchet, 브라운필드). 둘 다 `ArchTests.in(...)` 한 줄로 적용.
 
-소비 레포의 테스트에 규칙을 `@ArchTest` 로 선언한다 (`packages` 는 소비측 root).
+## 소비 방법 (한 줄 Apply)
+
+규칙 묶음을 `ArchTests.in(...)` 한 줄로 당겨쓴다. 레거시 유무로 strict/frozen을 고른다.
+
+### 그린필드 (레거시 없음) — strict
+
+```java
+@AnalyzeClasses(packages = "com.ryuqq.newservice")
+class HexagonalArchitectureTest {
+    @ArchTest static final ArchTests platform = ArchTests.in(HexagonalArchRules.class);
+}
+```
+
+처음부터 위반 0을 강제한다. 위반이 하나라도 있으면 빌드 실패.
+
+### 브라운필드 (레거시 위반 있음) — frozen ratchet
 
 ```java
 @AnalyzeClasses(packages = "com.ryuqq.marketplace")
 class HexagonalArchitectureTest {
-    @ArchTest static final ArchRule layers      = HexagonalArchRules.HEXAGONAL_LAYERS;
-    @ArchTest static final ArchRule domainPure  = HexagonalArchRules.DOMAIN_FRAMEWORK_FREE;
-    @ArchTest static final ArchRule appIsolated = HexagonalArchRules.APPLICATION_NO_WEB_OR_PERSISTENCE;
+    @ArchTest static final ArchTests platform = ArchTests.in(HexagonalArchRulesFrozen.class);
 }
 ```
 
-위반이 있으면 해당 test 가 실패한다 = enforce. **점진 도입**은 규칙을 하나씩 추가하거나,
-잡힌 항목을 `@ArchIgnore` 로 일시 보류하는 식으로 소비측이 속도를 조절한다.
+첫 실행이 현재 위반을 baseline으로 **동결**하고, 이후엔 **신규 위반만** 실패시킨다. 위반을 고치면
+baseline에서 자동 제거되어 되돌아갈 수 없다(ratchet) → 레거시를 통째로 고치지 않고도 입양 가능.
+
+> 개별 규칙을 직접 참조하던 기존 방식(`HexagonalArchRules.HEXAGONAL_LAYERS` 등)도 그대로 동작한다.
+
+### violation-store 설정 (frozen 사용 시 필수)
+
+소비 레포 `src/test/resources/archunit.properties`:
+
+```properties
+freeze.store.default.path=archunit_store           # baseline 텍스트 파일 위치(레포에 커밋)
+freeze.store.default.allowStoreCreation=true        # 로컬 최초 1회 baseline 생성용
+freeze.refreeze=false                                # 신규 위반을 store에 자동 흡수 금지(=실패시킴)
+```
+
+운용:
+
+1. 로컬에서 최초 1회 테스트 실행 → `archunit_store/`에 baseline 생성.
+2. baseline 파일을 git에 **커밋**(소비 레포 소유 — 팀 간 baseline 공유). 본 라이브러리 self-test가
+   store를 `build/`에 버리는 것과 반대다(소비측은 커밋, self-test는 격리).
+3. CI에서는 우발적 baseline 생성을 막기 위해 `freeze.store.default.allowStoreCreation=false`로
+   두는 것을 권장(신규 위반이 store에 조용히 흡수되지 않게 함).
 
 전제: 소비측 코드가 `..domain..`·`..application..`·`..adapter.in..`·`..adapter.out..`·`..bootstrap..`
 패키지 컨벤션을 따라야 매처가 레이어를 인식한다.
@@ -79,6 +112,8 @@ class HexagonalArchitectureTest {
   (`fixture.violation.domain.LeakyDomain → application.LeakyApp`).
 
 규칙을 고치거나 추가할 때는 이 픽스처에 대응 시나리오를 함께 넣어 self-test 로 회귀를 막는다.
+
+freezing 동작은 `FreezingBehaviorTest`가 in-memory store로 검증한다(레거시 동결·신규 위반 차단·prune 후 회귀 차단). frozen/strict 한 줄 표면은 `FrozenSuiteArchTest`·`StrictSuiteArchTest`가 compliant 픽스처로 end-to-end 확인한다.
 
 ## 의존성
 
