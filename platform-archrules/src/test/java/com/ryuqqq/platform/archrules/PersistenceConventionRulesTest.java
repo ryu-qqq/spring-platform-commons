@@ -76,4 +76,24 @@ class PersistenceConventionRulesTest {
                                 .hasViolation())
                 .isTrue();
     }
+
+    @Test
+    @DisplayName("JPA_ENTITY_EXTENDS_BASE: BaseAuditEntity 상속 @Entity는 통과 (GREEN)")
+    void entityBasePassesOnCompliant() {
+        assertThat(
+                        PersistenceConventionRules.JPA_ENTITY_EXTENDS_BASE
+                                .evaluate(compliant)
+                                .hasViolation())
+                .isFalse();
+    }
+
+    @Test
+    @DisplayName("JPA_ENTITY_EXTENDS_BASE: Base 미상속 @Entity는 걸린다 (RED)")
+    void entityBaseFailsOnViolation() {
+        assertThat(
+                        PersistenceConventionRules.JPA_ENTITY_EXTENDS_BASE
+                                .evaluate(violation)
+                                .hasViolation())
+                .isTrue();
+    }
 }

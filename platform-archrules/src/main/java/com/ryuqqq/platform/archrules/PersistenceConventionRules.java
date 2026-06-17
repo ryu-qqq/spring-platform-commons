@@ -89,6 +89,17 @@ public final class PersistenceConventionRules {
                     .because("QueryDSL 동적 조건은 흩뿌리지 않고 *ConditionBuilder에 캡슐화한다")
                     .allowEmptyShould(true);
 
+    /** R: @Entity 클래스는 platform BaseAuditEntity 계열을 상속한다(감사·soft-delete 일관성). */
+    public static final ArchRule JPA_ENTITY_EXTENDS_BASE =
+            classes()
+                    .that()
+                    .areAnnotatedWith("jakarta.persistence.Entity")
+                    .should()
+                    .beAssignableTo("com.ryuqqq.platform.persistence.jpa.entity.BaseAuditEntity")
+                    .as("JPA_ENTITY_EXTENDS_BASE")
+                    .because("@Entity는 BaseAuditEntity 계열을 상속해 감사/soft-delete를 일관 적용한다")
+                    .allowEmptyShould(true);
+
     /** QueryDSL·JPA 영속 스택은 adapter-out 안에서만 사용한다(게이트). */
     @ArchTest
     public static final ArchRule NO_QUERYDSL_OUTSIDE_ADAPTER_OUT =
