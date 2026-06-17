@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.spotless) apply false
+    alias(libs.plugins.spotbugs) apply false
 }
 
 allprojects {
@@ -18,10 +19,25 @@ def sdkProjects = { project ->
 subprojects {
     apply plugin: 'java'
     apply plugin: 'com.diffplug.spotless'
+    apply plugin: 'com.github.spotbugs'
 
     java {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
+    }
+
+    // 정적 버그 분석 — report-first(빌드 안 죽임). 현재 ~27건(대부분 EI_EXPOSE_REP 가변노출,
+    // 의견 갈리는 카테고리)이라 게이트는 보류 — 팀이 정당한 것(RawResponse byte[]) 수정·프레임워크
+    // 오탐(MeterRegistry) 제외를 정한 뒤 baseline/게이트로 ratchet. 메인 코드만. HTML 리포트.
+    spotbugs {
+        ignoreFailures = true
+    }
+    tasks.named('spotbugsTest') { enabled = false }
+    tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
+        reports {
+            html { required = true }
+            xml { required = false }
+        }
     }
 
     tasks.withType(JavaCompile).configureEach {

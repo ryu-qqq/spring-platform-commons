@@ -74,6 +74,7 @@ archunit-junit5 = { module = "com.tngtech.archunit:archunit-junit5", version.ref
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "springBoot" }
 spotless = { id = "com.diffplug.spotless", version = "6.25.0" }
+spotbugs = { id = "com.github.spotbugs", version = "6.0.18" }
 
 [bundles]
 testing = [

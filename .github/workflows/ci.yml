@@ -35,7 +35,7 @@ jobs:
       - name: Build and test
         run: ./gradlew build --build-cache
 
-      - name: Upload test reports
+      - name: Upload test & SpotBugs reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -43,5 +43,6 @@ jobs:
           path: |
             **/build/reports/tests/
             **/build/test-results/
+            **/build/reports/spotbugs/
           retention-days: 7
           if-no-files-found: ignore
