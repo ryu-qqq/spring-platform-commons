@@ -1,7 +1,7 @@
 package com.ryuqqq.platform.security.error;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ryuqqq.platform.common.observability.MdcKeys;
+import com.ryuqqq.platform.observability.MdcKeys;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;

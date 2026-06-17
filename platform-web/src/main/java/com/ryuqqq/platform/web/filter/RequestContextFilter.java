@@ -1,6 +1,6 @@
 package com.ryuqqq.platform.web.filter;
 
-import com.ryuqqq.platform.common.observability.MdcKeys;
+import com.ryuqqq.platform.observability.MdcKeys;
 import java.io.IOException;
 import java.util.UUID;
 

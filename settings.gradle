@@ -15,6 +15,7 @@ include 'resilient-client:resilient-client-metrics'
 include 'resilient-client:resilient-client-spring-boot-starter'
 include 'platform-common-domain'
 include 'platform-common-application'
+include 'platform-observability'
 include 'platform-web'
 include 'platform-bootstrap'
 include 'platform-persistence-jpa'
@@ -36,6 +37,7 @@ include 'architecture-tests'
 
 project(':platform-common-domain').projectDir = file('platform-common-domain')
 project(':platform-common-application').projectDir = file('platform-common-application')
+project(':platform-observability').projectDir = file('platform-observability')
 project(':platform-web').projectDir = file('platform-web')
 project(':platform-bootstrap').projectDir = file('platform-bootstrap')
 project(':platform-persistence-jpa').projectDir = file('platform-persistence-jpa')
