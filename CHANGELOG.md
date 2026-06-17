@@ -7,6 +7,11 @@
 ## [Unreleased]
 
 ### Added
+- platform-archrules: **도메인 작성 컨벤션 룰 + 건강 리포트**(하이브리드). `DomainConventionRules`
+  11종(시간 주입·setter·DomainException 상속·aggregate 정의·일급 컬렉션·타입 형태·패키지 슬라이스,
+  상대 매처 `..domain..`)과 `DomainHealthReporter`(빌드 안 죽이고 score+findings 산출) + `Severity`·
+  `HealthReport`. CRITICAL(프레임워크·Lombok)은 게이트, 나머지는 리포트. 작성 룰은 자작(marketplace 귀납).
+- platform-archrules: `DOMAIN_FRAMEWORK_FREE`에 `lombok..` 금지 추가(도메인 Lombok 차단).
 - **(breaking)** common-domain 정렬/결과 모델 보강 — `Sort<T>`·`SortOrder<T>`(복합 정렬
   `ORDER BY a DESC, b ASC`), `Page<T>`·`Slice<T,C>`(콘텐츠+메타 결과 래퍼, `map()`). `QueryContext`·
   `CursorQueryContext`의 `(sortKey, sortDirection)` 필드가 `Sort<T>`로 교체(단일 정렬 편의 팩토리 유지).
@@ -20,16 +25,14 @@
   아니라 `platform-observability` 소유. import 경로 변경 필요(소비측 web·security·scheduler 반영 완료).
 - **(breaking)** `Versioned` 읽기전용화 — `void refreshVersion(long)` 제거, `long version()`만 남김.
   version 반영은 영속성 매퍼 책임. `platform-common-domain`이 순수 도메인 커널로 수렴(ADR-0006).
+- **(breaking)** `platform-outbox` SPI `PerItemOutboxAdapter`의 `OutboxStatus outboxStatus(O)` →
+  `boolean isTerminalFailure(O)`. 릴레이가 status에서 실제 필요로 하는 "종착 실패 여부" 하나만 노출(ISP).
+  소비측 어댑터는 자기 status를 이 불리언으로 매핑한다.
 
 ### Removed
 - **(breaking)** `platform-common-domain`의 `com.ryuqqq.platform.common.outbox.OutboxStatus` enum 제거.
   outbox 처리 상태는 인프라 수명주기이므로 도메인 커널이 아니라 소비측 도메인이 `<Domain>OutboxStatus`로
   소유한다. 근거·대안 검토: [ADR-0005](docs/adr/0005-outbox-status-shared-enum-vs-behavioral-spi.md).
-
-### Changed
-- **(breaking)** `platform-outbox` SPI `PerItemOutboxAdapter`의 `OutboxStatus outboxStatus(O)` →
-  `boolean isTerminalFailure(O)`. 릴레이가 status에서 실제 필요로 하는 "종착 실패 여부" 하나만 노출(ISP).
-  소비측 어댑터는 자기 status를 이 불리언으로 매핑한다.
 
 ## [0.2.0] - 2026-06-15
 
