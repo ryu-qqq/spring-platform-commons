@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
+import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,14 +47,20 @@ class PersistenceConventionRulesTest {
     @Test
     @DisplayName("REPOSITORY_COMMAND_ONLY: compliant Repository는 통과 (GREEN)")
     void repositoryCommandOnlyPassesOnCompliant() {
-        assertThat(PersistenceConventionRules.REPOSITORY_COMMAND_ONLY.evaluate(compliant).hasViolation())
+        assertThat(
+                        PersistenceConventionRules.REPOSITORY_COMMAND_ONLY
+                                .evaluate(compliant)
+                                .hasViolation())
                 .isFalse();
     }
 
     @Test
     @DisplayName("REPOSITORY_COMMAND_ONLY: 파생 쿼리 선언 Repository는 걸린다 (RED)")
     void repositoryCommandOnlyFailsOnViolation() {
-        assertThat(PersistenceConventionRules.REPOSITORY_COMMAND_ONLY.evaluate(violation).hasViolation())
+        assertThat(
+                        PersistenceConventionRules.REPOSITORY_COMMAND_ONLY
+                                .evaluate(violation)
+                                .hasViolation())
                 .isTrue();
     }
 
@@ -95,5 +102,45 @@ class PersistenceConventionRulesTest {
                                 .evaluate(violation)
                                 .hasViolation())
                 .isTrue();
+    }
+
+    @Test
+    @DisplayName("compliant 건강 점수는 100 (findings 0)")
+    void healthyScore() {
+        HealthReport report =
+                DomainHealthReporter.report(compliant, PersistenceConventionRules.all());
+
+        assertThat(report.score()).isEqualTo(100);
+        assertThat(report.isHealthy()).isTrue();
+        assertThat(report.findings()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("violation 점수는 결정적: 100 − (HIGH 10 + MEDIUM 5 + LOW 2) = 83")
+    void unhealthyScore() {
+        HealthReport report =
+                DomainHealthReporter.report(violation, PersistenceConventionRules.all());
+
+        assertThat(report.score()).isEqualTo(83);
+        assertThat(report.findings()).isNotEmpty();
+
+        List<String> failingIds =
+                report.findings().stream().map(Finding::ruleId).distinct().toList();
+        assertThat(failingIds)
+                .containsExactlyInAnyOrder(
+                        PersistenceConventionRules.all().stream()
+                                .map(DomainRule::id)
+                                .toArray(String[]::new));
+    }
+
+    @Test
+    @DisplayName("toJson은 score·findings를 담는다")
+    void jsonReport() {
+        HealthReport report =
+                DomainHealthReporter.report(violation, PersistenceConventionRules.all());
+
+        String json = report.toJson();
+
+        assertThat(json).contains("\"score\":83").contains("\"REPOSITORY_COMMAND_ONLY\"");
     }
 }

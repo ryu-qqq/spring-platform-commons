@@ -12,6 +12,7 @@ import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -108,8 +109,21 @@ public final class PersistenceConventionRules {
                     .resideInAnyPackage(DOMAIN, APPLICATION, ADAPTER_IN)
                     .should()
                     .dependOnClassesThat()
-                    .resideInAnyPackage("com.querydsl..", "jakarta.persistence..", "org.hibernate..")
+                    .resideInAnyPackage(
+                            "com.querydsl..", "jakarta.persistence..", "org.hibernate..")
                     .as("NO_QUERYDSL_OUTSIDE_ADAPTER_OUT")
                     .because("QueryDSL·JPA 영속 스택은 adapter-out 영속 레이어에서만 사용한다")
                     .allowEmptyShould(true);
+
+    /**
+     * 건강 리포터가 쓰는 감점 룰 + 심각도. 게이트({@link #NO_QUERYDSL_OUTSIDE_ADAPTER_OUT})는 빌드 게이트가 담당하므로 제외한다(도메인
+     * 룰과 동일 패턴).
+     */
+    public static List<DomainRule> all() {
+        return List.of(
+                new DomainRule("REPOSITORY_COMMAND_ONLY", REPOSITORY_COMMAND_ONLY, Severity.HIGH),
+                new DomainRule(
+                        "CONDITION_LOGIC_IN_BUILDER", CONDITION_LOGIC_IN_BUILDER, Severity.MEDIUM),
+                new DomainRule("JPA_ENTITY_EXTENDS_BASE", JPA_ENTITY_EXTENDS_BASE, Severity.LOW));
+    }
 }
