@@ -56,4 +56,24 @@ class PersistenceConventionRulesTest {
         assertThat(PersistenceConventionRules.REPOSITORY_COMMAND_ONLY.evaluate(violation).hasViolation())
                 .isTrue();
     }
+
+    @Test
+    @DisplayName("CONDITION_LOGIC_IN_BUILDER: ConditionBuilder의 조건 반환은 통과 (GREEN)")
+    void conditionLogicPassesOnCompliant() {
+        assertThat(
+                        PersistenceConventionRules.CONDITION_LOGIC_IN_BUILDER
+                                .evaluate(compliant)
+                                .hasViolation())
+                .isFalse();
+    }
+
+    @Test
+    @DisplayName("CONDITION_LOGIC_IN_BUILDER: ConditionBuilder 밖의 조건 반환은 걸린다 (RED)")
+    void conditionLogicFailsOnViolation() {
+        assertThat(
+                        PersistenceConventionRules.CONDITION_LOGIC_IN_BUILDER
+                                .evaluate(violation)
+                                .hasViolation())
+                .isTrue();
+    }
 }

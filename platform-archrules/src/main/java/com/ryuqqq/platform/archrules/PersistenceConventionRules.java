@@ -2,7 +2,9 @@ package com.ryuqqq.platform.archrules;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 
+import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaMethod;
 import com.tngtech.archunit.junit.ArchTest;
@@ -10,6 +12,7 @@ import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
+import java.util.Set;
 
 /**
  * 소비측 영속(adapter-out) 레이어 작성 컨벤션 ArchUnit 룰. <b>상대 패키지 매처</b>로 root 패키지 무관.
@@ -59,6 +62,31 @@ public final class PersistenceConventionRules {
                     .should(ONLY_DECLARE_COMMAND_METHODS)
                     .as("REPOSITORY_COMMAND_ONLY")
                     .because("JpaRepository는 순수 저장 기능만 — 조회/파생 쿼리는 QueryDSL로 분리한다")
+                    .allowEmptyShould(true);
+
+    /** QueryDSL 조건 타입(BooleanExpression/Predicate)을 반환하는 메서드. */
+    private static final DescribedPredicate<JavaMethod> RETURNS_QUERYDSL_CONDITION =
+            new DescribedPredicate<>("returns a QueryDSL BooleanExpression/Predicate") {
+                private final Set<String> conditionTypes =
+                        Set.of(
+                                "com.querydsl.core.types.dsl.BooleanExpression",
+                                "com.querydsl.core.types.Predicate");
+
+                @Override
+                public boolean test(JavaMethod method) {
+                    return conditionTypes.contains(method.getRawReturnType().getFullName());
+                }
+            };
+
+    /** R: QueryDSL 조건 조립은 *ConditionBuilder 타입 안에서만 한다(조건 로직 캡슐화). */
+    public static final ArchRule CONDITION_LOGIC_IN_BUILDER =
+            noMethods()
+                    .that(RETURNS_QUERYDSL_CONDITION)
+                    .should()
+                    .beDeclaredInClassesThat()
+                    .haveSimpleNameNotEndingWith("ConditionBuilder")
+                    .as("CONDITION_LOGIC_IN_BUILDER")
+                    .because("QueryDSL 동적 조건은 흩뿌리지 않고 *ConditionBuilder에 캡슐화한다")
                     .allowEmptyShould(true);
 
     /** QueryDSL·JPA 영속 스택은 adapter-out 안에서만 사용한다(게이트). */
