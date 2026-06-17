@@ -26,13 +26,8 @@ include 'platform-security'
 include 'platform-outbox'
 
 // ========================================
-// Hexagonal template (reference skeleton)
+// Architecture tests (platform SDK layer gates)
 // ========================================
-include 'domain'
-include 'application'
-include 'adapter-in:rest-api'
-include 'adapter-out:client:example-client'
-include 'bootstrap:bootstrap-web-api'
 include 'architecture-tests'
 
 project(':platform-common-domain').projectDir = file('platform-common-domain')
@@ -46,9 +41,4 @@ project(':platform-redis').projectDir = file('platform-redis')
 project(':platform-scheduler').projectDir = file('platform-scheduler')
 project(':platform-security').projectDir = file('platform-security')
 project(':platform-outbox').projectDir = file('platform-outbox')
-project(':domain').projectDir = file('domain')
-project(':application').projectDir = file('application')
-project(':adapter-in:rest-api').projectDir = file('adapter-in/rest-api')
-project(':adapter-out:client:example-client').projectDir = file('adapter-out/client/example-client')
-project(':bootstrap:bootstrap-web-api').projectDir = file('bootstrap/bootstrap-web-api')
 project(':architecture-tests').projectDir = file('architecture-tests')

@@ -78,8 +78,8 @@ resilient:
         retry: { max-attempts: 2 }
 ```
 
-→ `{clientKey}ResilientClient` 빈 + `ResilientClientRegistry` 자동 등록. adapter-out 패턴은
-`adapter-out/client/example-client`(`@DependsOn("resilientClientRegistry")`) 참고.
+→ `{clientKey}ResilientClient` 빈 + `ResilientClientRegistry` 자동 등록. adapter-out 빈은
+`@DependsOn("resilientClientRegistry")`로 등록 순서를 보장한다.
 레포 가이드: [`docs/sdk/resilient-client.md`](docs/sdk/resilient-client.md).
 
 ## Harness · Engineering OS · 자가 감사 fleet

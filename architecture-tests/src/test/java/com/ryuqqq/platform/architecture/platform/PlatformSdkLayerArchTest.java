@@ -6,6 +6,7 @@ import static com.ryuqqq.platform.architecture.support.ArchitectureRules.FRAMEWO
 import static com.ryuqqq.platform.architecture.support.ArchitectureRules.OBSERVABILITY_PACKAGES_FORBIDDEN_IN_DOMAIN;
 import static com.ryuqqq.platform.architecture.support.ArchitectureRules.PERSISTENCE_PACKAGES;
 import static com.ryuqqq.platform.architecture.support.ArchitectureRules.PLATFORM_ADAPTER_IN_PACKAGES;
+import static com.ryuqqq.platform.architecture.support.ArchitectureRules.PLATFORM_ADAPTER_OUT_PACKAGES;
 import static com.ryuqqq.platform.architecture.support.ArchitectureRules.PLATFORM_BOOTSTRAP_PACKAGES;
 import static com.ryuqqq.platform.architecture.support.ModuleClasses.importProductionClasses;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
@@ -195,9 +196,7 @@ class PlatformSdkLayerArchTest {
                             .should()
                             .dependOnClassesThat()
                             .resideInAnyPackage(
-                                    allPackages(
-                                            PERSISTENCE_PACKAGES,
-                                            new String[] {"com.ryuqqq.platform.template.adapter.out.."}))
+                                    allPackages(PERSISTENCE_PACKAGES, PLATFORM_ADAPTER_OUT_PACKAGES))
                             .allowEmptyShould(true)
                             .because("Adapter-In must not depend on persistence or adapter-out (wiki overview)");
 
@@ -239,8 +238,7 @@ class PlatformSdkLayerArchTest {
                             .that()
                             .resideInAnyPackage(
                                     "com.ryuqqq.platform.common..",
-                                    "com.ryuqqq.platform.web..",
-                                    "com.ryuqqq.platform.template..")
+                                    "com.ryuqqq.platform.web..")
                             .should()
                             .dependOnClassesThat()
                             .resideInAnyPackage(allPackages(PLATFORM_BOOTSTRAP_PACKAGES))
