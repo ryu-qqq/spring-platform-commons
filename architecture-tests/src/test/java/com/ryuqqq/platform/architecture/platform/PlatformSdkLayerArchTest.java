@@ -1,11 +1,14 @@
 package com.ryuqqq.platform.architecture.platform;
 
 import static com.ryuqqq.platform.architecture.support.ArchitectureRules.allPackages;
+import static com.ryuqqq.platform.architecture.support.ArchitectureRules.COMMON_DOMAIN_ALLOWED_PACKAGES;
 import static com.ryuqqq.platform.architecture.support.ArchitectureRules.FRAMEWORK_PACKAGES_FORBIDDEN_IN_DOMAIN;
+import static com.ryuqqq.platform.architecture.support.ArchitectureRules.OBSERVABILITY_PACKAGES_FORBIDDEN_IN_DOMAIN;
 import static com.ryuqqq.platform.architecture.support.ArchitectureRules.PERSISTENCE_PACKAGES;
 import static com.ryuqqq.platform.architecture.support.ArchitectureRules.PLATFORM_ADAPTER_IN_PACKAGES;
 import static com.ryuqqq.platform.architecture.support.ArchitectureRules.PLATFORM_BOOTSTRAP_PACKAGES;
 import static com.ryuqqq.platform.architecture.support.ModuleClasses.importProductionClasses;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 import com.tngtech.archunit.core.domain.JavaClasses;
@@ -84,15 +87,37 @@ class PlatformSdkLayerArchTest {
     class CommonDomainRules {
 
         @Test
-        @DisplayName("must not depend on Spring, JPA, or Jackson")
+        @DisplayName("must not depend on Spring, JPA, Jackson, or logging/metrics")
         void commonDomain_MustNotDependOnFrameworks() {
             ArchRule rule =
                     noClasses()
                             .should()
                             .dependOnClassesThat()
-                            .resideInAnyPackage(allPackages(FRAMEWORK_PACKAGES_FORBIDDEN_IN_DOMAIN))
+                            .resideInAnyPackage(
+                                    allPackages(
+                                            FRAMEWORK_PACKAGES_FORBIDDEN_IN_DOMAIN,
+                                            OBSERVABILITY_PACKAGES_FORBIDDEN_IN_DOMAIN))
                             .allowEmptyShould(true)
-                            .because("platform-common-domain is pure Java — no framework deps (wiki layers/domain)");
+                            .because(
+                                    "platform-common-domain is pure Java — no framework/observability deps (ADR-0006)");
+
+            rule.check(commonDomainClasses);
+        }
+
+        @Test
+        @DisplayName("입주 기준 — vo·exception·domain 패키지에만 거주(횡단 인프라 어휘 금지)")
+        void commonDomain_OnlyAllowedPackages() {
+            ArchRule rule =
+                    classes()
+                            .that()
+                            .resideInAPackage("com.ryuqqq.platform.common..")
+                            .should()
+                            .resideInAnyPackage(allPackages(COMMON_DOMAIN_ALLOWED_PACKAGES))
+                            .allowEmptyShould(true)
+                            .as("platform-common-domain 입주 기준")
+                            .because(
+                                    "도메인 커널은 vo·exception·domain 만 — 횡단 인프라 어휘(로깅·헤더·메트릭)는 금지."
+                                            + " 새 패키지 입주는 ADR로 허용목록을 갱신해야 한다 (ADR-0006)");
 
             rule.check(commonDomainClasses);
         }
