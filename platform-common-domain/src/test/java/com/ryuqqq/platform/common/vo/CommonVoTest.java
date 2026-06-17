@@ -1,15 +1,13 @@
 package com.ryuqqq.platform.common.vo;
 
-import java.time.Instant;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
+import com.ryuqqq.platform.common.domain.Versioned;
+import java.time.Instant;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import com.ryuqqq.platform.common.domain.Versioned;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 class CommonVoTest {
 
@@ -65,6 +63,20 @@ class CommonVoTest {
             assertThat(PageRequest.firstPage().size()).isEqualTo(20);
             assertThat(PageRequest.firstPage().page()).isZero();
         }
+
+        @Test
+        @DisplayName("defaultPage는 page0·size20")
+        void defaultPage() {
+            assertThat(PageRequest.defaultPage().page()).isZero();
+            assertThat(PageRequest.defaultPage().size()).isEqualTo(20);
+        }
+
+        @Test
+        @DisplayName("isFirst는 page0에서만 true")
+        void isFirst() {
+            assertThat(PageRequest.of(0, 10).isFirst()).isTrue();
+            assertThat(PageRequest.of(1, 10).isFirst()).isFalse();
+        }
     }
 
     @Nested
@@ -76,7 +88,8 @@ class CommonVoTest {
         void defaultOf() {
             QueryContext<TestSortKey> context = QueryContext.defaultOf(TestSortKey.defaultKey());
 
-            assertThat(context.sort()).isEqualTo(Sort.by(TestSortKey.CREATED_AT, SortDirection.DESC));
+            assertThat(context.sort())
+                    .isEqualTo(Sort.by(TestSortKey.CREATED_AT, SortDirection.DESC));
             assertThat(context.page()).isZero();
             assertThat(context.size()).isEqualTo(20);
             assertThat(context.offset()).isZero();
@@ -86,8 +99,12 @@ class CommonVoTest {
         @Test
         @DisplayName("includeDeleted 전달 가능")
         void includeDeleted() {
-            QueryContext<TestSortKey> context = QueryContext.of(
-                    TestSortKey.CREATED_AT, SortDirection.ASC, PageRequest.firstPage(), true);
+            QueryContext<TestSortKey> context =
+                    QueryContext.of(
+                            TestSortKey.CREATED_AT,
+                            SortDirection.ASC,
+                            PageRequest.firstPage(),
+                            true);
 
             assertThat(context.includeDeleted()).isTrue();
         }
@@ -96,7 +113,8 @@ class CommonVoTest {
         @DisplayName("페이징 편의 메서드는 PageRequest에 위임")
         void pagingDelegation() {
             QueryContext<TestSortKey> context =
-                    QueryContext.of(TestSortKey.CREATED_AT, SortDirection.ASC, PageRequest.of(3, 5));
+                    QueryContext.of(
+                            TestSortKey.CREATED_AT, SortDirection.ASC, PageRequest.of(3, 5));
 
             assertThat(context.page()).isEqualTo(3);
             assertThat(context.size()).isEqualTo(5);
@@ -144,7 +162,10 @@ class CommonVoTest {
             org.assertj.core.api.Assertions.assertThatThrownBy(
                             () ->
                                     sort.orders()
-                                            .add(new SortOrder<>(TestSortKey.CREATED_AT, SortDirection.ASC)))
+                                            .add(
+                                                    new SortOrder<>(
+                                                            TestSortKey.CREATED_AT,
+                                                            SortDirection.ASC)))
                     .isInstanceOf(UnsupportedOperationException.class);
         }
 
@@ -272,7 +293,8 @@ class CommonVoTest {
             CursorQueryContext<TestSortKey, Long> context =
                     CursorQueryContext.defaultOf(TestSortKey.defaultKey());
 
-            assertThat(context.sort()).isEqualTo(Sort.by(TestSortKey.CREATED_AT, SortDirection.DESC));
+            assertThat(context.sort())
+                    .isEqualTo(Sort.by(TestSortKey.CREATED_AT, SortDirection.DESC));
             assertThat(context.isFirstPage()).isTrue();
             assertThat(context.includeDeleted()).isFalse();
         }
@@ -364,6 +386,71 @@ class CommonVoTest {
         void deletionStatusRejectsActiveWithTimestamp() {
             Instant now = Instant.parse("2026-05-25T12:00:00Z");
             assertThatIllegalArgumentException().isThrownBy(() -> new DeletionStatus(false, now));
+        }
+    }
+
+    @Nested
+    @DisplayName("SortDirection")
+    class SortDirectionTest {
+
+        @Test
+        @DisplayName("defaultDirection은 DESC")
+        void defaultDirection() {
+            assertThat(SortDirection.defaultDirection()).isEqualTo(SortDirection.DESC);
+        }
+
+        @Test
+        @DisplayName("isAscending은 ASC에서만 true")
+        void isAscending() {
+            assertThat(SortDirection.ASC.isAscending()).isTrue();
+            assertThat(SortDirection.DESC.isAscending()).isFalse();
+        }
+
+        @Test
+        @DisplayName("reverse는 ASC↔DESC 반전")
+        void reverse() {
+            assertThat(SortDirection.ASC.reverse()).isEqualTo(SortDirection.DESC);
+            assertThat(SortDirection.DESC.reverse()).isEqualTo(SortDirection.ASC);
+        }
+
+        @Test
+        @DisplayName("fromString은 정확한 enum명만 허용(대소문자·공백 무시), 그 외 DESC 폴백")
+        void fromString() {
+            assertThat(SortDirection.fromString("asc")).isEqualTo(SortDirection.ASC);
+            assertThat(SortDirection.fromString("  DESC ")).isEqualTo(SortDirection.DESC);
+            assertThat(SortDirection.fromString(null)).isEqualTo(SortDirection.DESC);
+            assertThat(SortDirection.fromString("")).isEqualTo(SortDirection.DESC);
+            assertThat(SortDirection.fromString("   ")).isEqualTo(SortDirection.DESC);
+            assertThat(SortDirection.fromString("ASCENDING")).isEqualTo(SortDirection.DESC);
+        }
+    }
+
+    @Nested
+    @DisplayName("PageMeta")
+    class PageMetaTest {
+
+        @Test
+        @DisplayName("empty()는 page0·size20·total0")
+        void emptyDefault() {
+            PageMeta meta = PageMeta.empty();
+            assertThat(meta.page()).isZero();
+            assertThat(meta.size()).isEqualTo(20);
+            assertThat(meta.totalCount()).isZero();
+        }
+
+        @Test
+        @DisplayName("empty(size)는 주어진 size·page0·total0")
+        void emptyWithSize() {
+            PageMeta meta = PageMeta.empty(50);
+            assertThat(meta.page()).isZero();
+            assertThat(meta.size()).isEqualTo(50);
+            assertThat(meta.totalCount()).isZero();
+        }
+
+        @Test
+        @DisplayName("empty는 hasNext false")
+        void emptyHasNoNext() {
+            assertThat(PageMeta.empty().hasNext()).isFalse();
         }
     }
 

@@ -34,4 +34,13 @@ public record PageRequest(int page, int size) {
     public long offset() {
         return (long) page * size;
     }
+
+    /** 플랫폼 기본 페이지(page 0, 기본 size). fleet canonical 이름 — {@link #firstPage()}와 동일 결과의 별칭. */
+    public static PageRequest defaultPage() {
+        return firstPage();
+    }
+
+    public boolean isFirst() {
+        return page == 0;
+    }
 }

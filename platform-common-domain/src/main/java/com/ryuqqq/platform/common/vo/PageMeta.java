@@ -9,6 +9,8 @@ package com.ryuqqq.platform.common.vo;
  */
 public record PageMeta(int page, int size, long totalCount) {
 
+    private static final int DEFAULT_SIZE = 20;
+
     public PageMeta {
         if (page < 0) {
             throw new IllegalArgumentException("page must not be negative: " + page);
@@ -39,5 +41,13 @@ public record PageMeta(int page, int size, long totalCount) {
 
     public boolean hasPrevious() {
         return page > 0;
+    }
+
+    public static PageMeta empty(int size) {
+        return of(0, size, 0);
+    }
+
+    public static PageMeta empty() {
+        return empty(DEFAULT_SIZE);
     }
 }
