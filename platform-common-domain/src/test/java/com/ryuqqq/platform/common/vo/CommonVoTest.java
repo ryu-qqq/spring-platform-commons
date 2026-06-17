@@ -65,6 +65,20 @@ class CommonVoTest {
             assertThat(PageRequest.firstPage().size()).isEqualTo(20);
             assertThat(PageRequest.firstPage().page()).isZero();
         }
+
+        @Test
+        @DisplayName("defaultPage는 page0·size20")
+        void defaultPage() {
+            assertThat(PageRequest.defaultPage().page()).isZero();
+            assertThat(PageRequest.defaultPage().size()).isEqualTo(20);
+        }
+
+        @Test
+        @DisplayName("isFirst는 page0에서만 true")
+        void isFirst() {
+            assertThat(PageRequest.of(0, 10).isFirst()).isTrue();
+            assertThat(PageRequest.of(1, 10).isFirst()).isFalse();
+        }
     }
 
     @Nested

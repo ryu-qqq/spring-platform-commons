@@ -34,4 +34,12 @@ public record PageRequest(int page, int size) {
     public long offset() {
         return (long) page * size;
     }
+
+    public static PageRequest defaultPage() {
+        return of(0, DEFAULT_SIZE);
+    }
+
+    public boolean isFirst() {
+        return page == 0;
+    }
 }
