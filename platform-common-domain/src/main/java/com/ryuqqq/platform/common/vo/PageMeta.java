@@ -19,7 +19,8 @@ public record PageMeta(int page, int size, long totalElements) {
             throw new IllegalArgumentException("size must be positive: " + size);
         }
         if (totalElements < 0) {
-            throw new IllegalArgumentException("totalElements must not be negative: " + totalElements);
+            throw new IllegalArgumentException(
+                    "totalElements must not be negative: " + totalElements);
         }
     }
 

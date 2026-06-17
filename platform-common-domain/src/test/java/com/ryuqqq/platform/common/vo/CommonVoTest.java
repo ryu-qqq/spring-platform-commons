@@ -380,7 +380,6 @@ class CommonVoTest {
             assertThatIllegalArgumentException().isThrownBy(() -> PageMeta.of(0, 0, 0));
             assertThatIllegalArgumentException().isThrownBy(() -> PageMeta.of(0, 10, -1));
         }
-
     }
 
     @Nested
