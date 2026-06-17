@@ -1,9 +1,11 @@
 package com.ryuqqq.platform.archrules;
 
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.simpleNameEndingWith;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.constructors;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noFields;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
@@ -63,21 +65,22 @@ public final class DomainConventionRules {
                 }
             };
 
-    /** raw 컬렉션 타입(Collection 또는 Map). */
+    /**
+     * 표준 raw 컬렉션 타입(java.util Collection·Map)만. {@code java.util..} 한정으로, 컬렉션을
+     * 구현한 커스텀 일급 컬렉션 VO(예: {@code OrderItems implements Collection})는 오탐하지 않는다.
+     */
     private static final DescribedPredicate<JavaClass> RAW_COLLECTION_TYPE =
             assignableTo(java.util.Collection.class)
                     .or(assignableTo(java.util.Map.class))
-                    .as("raw 컬렉션 타입(Collection·Map)");
+                    .and(resideInAPackage("java.util.."))
+                    .as("표준 raw 컬렉션 타입(java.util Collection·Map)");
 
     private static ArchCondition<JavaClass> beRecord(boolean expected) {
         String desc = expected ? "be a record" : "not be a record";
         return new ArchCondition<>(desc) {
             @Override
             public void check(JavaClass item, ConditionEvents events) {
-                boolean isRecord =
-                        item.getRawSuperclass()
-                                .map(s -> s.getFullName().equals("java.lang.Record"))
-                                .orElse(false);
+                boolean isRecord = item.isRecord();
                 boolean satisfied = isRecord == expected;
                 events.add(
                         new SimpleConditionEvent(
@@ -178,18 +181,20 @@ public final class DomainConventionRules {
                     .because("컬렉션은 일급 컬렉션 Wrapper VO로 감싼다")
                     .allowEmptyShould(true);
 
-    /** R8. VO 필드는 public 금지(accessor로만 노출, 상수 제외). */
+    /** R8. VO의 public 필드는 상수(static final)만 허용 — public static 가변·public 인스턴스 필드 금지. */
     public static final ArchRule VO_FIELDS_NOT_PUBLIC =
-            noFields()
+            fields()
                     .that()
                     .areDeclaredInClassesThat()
                     .resideInAPackage(VO)
                     .and()
-                    .areNotStatic()
+                    .arePublic()
                     .should()
-                    .bePublic()
+                    .beStatic()
+                    .andShould()
+                    .beFinal()
                     .as("VO_FIELDS_NOT_PUBLIC")
-                    .because("VO는 accessor로만 노출 — public 필드 금지")
+                    .because("VO는 accessor로만 노출 — public 필드는 상수(static final)만 허용")
                     .allowEmptyShould(true);
 
     /** R9. Identifier VO는 record. */
