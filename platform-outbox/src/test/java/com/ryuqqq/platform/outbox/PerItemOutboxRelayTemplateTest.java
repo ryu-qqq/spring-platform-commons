@@ -14,9 +14,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.junit.jupiter.api.AfterEach;
+import org.slf4j.MDC;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -50,6 +52,7 @@ class PerItemOutboxRelayTemplateTest {
         final List<String> released = new ArrayList<>();
         final List<String> deferred = new ArrayList<>();
         final List<String> permanent = new ArrayList<>();
+        final ConcurrentLinkedQueue<String> notifyTraceIds = new ConcurrentLinkedQueue<>();
         Duration deferDurationSeen;
         boolean preloadThrows = false;
         boolean preloadReturnsNull = false;
@@ -81,6 +84,7 @@ class PerItemOutboxRelayTemplateTest {
 
         @Override
         public void notify(String url, String payload, String idempotencyKey) {
+            notifyTraceIds.add(String.valueOf(MDC.get("traceId")));
             TestOutbox o = toClaim.stream().filter(x -> x.url.equals(url)).findFirst().orElseThrow();
             switch (o.outcome) {
                 case "deferred" -> throw new OutboxDispatchDeferredException("CB OPEN");
@@ -261,5 +265,21 @@ class PerItemOutboxRelayTemplateTest {
         } finally {
             ex.shutdownNow();
         }
+    }
+
+    @Test
+    @DisplayName("relay는 제출 스레드의 MDC(traceId)를 워커 발송 스레드로 전파한다")
+    void propagatesMdcToWorker() {
+        FakeAdapter a = new FakeAdapter();
+        claim(a, "o1", "t1", "success");
+
+        MDC.put("traceId", "T-OUTBOX");
+        try {
+            template.relay(10, a);
+        } finally {
+            MDC.remove("traceId");
+        }
+
+        assertThat(a.notifyTraceIds).containsExactly("T-OUTBOX");
     }
 }

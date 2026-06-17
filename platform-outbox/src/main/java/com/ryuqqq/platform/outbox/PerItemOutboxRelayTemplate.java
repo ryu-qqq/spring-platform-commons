@@ -1,6 +1,7 @@
 package com.ryuqqq.platform.outbox;
 
 import com.ryuqqq.platform.common.scheduler.SchedulerBatchProcessingResult;
+import com.ryuqqq.platform.observability.MdcPropagating;
 import com.ryuqqq.platform.outbox.exception.OutboxDispatchDeferredException;
 import com.ryuqqq.platform.outbox.exception.OutboxDispatchPermanentException;
 import com.ryuqqq.platform.outbox.spi.PerItemOutboxAdapter;
@@ -88,7 +89,8 @@ public class PerItemOutboxRelayTemplate {
                         .map(
                                 outbox ->
                                         CompletableFuture.runAsync(
-                                                () -> dispatchOne(outbox, taskById, adapter, results),
+                                                MdcPropagating.wrap(
+                                                        () -> dispatchOne(outbox, taskById, adapter, results)),
                                                 executor))
                         .toList();
         CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
