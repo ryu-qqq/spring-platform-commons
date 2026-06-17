@@ -20,7 +20,7 @@
 - CB `sliding-window-type`: COUNT_BASED / TIME_BASED
 - 조건: `enabled: true` + `base-url` (수동 `@Bean` 있으면 수동 우선)
 
-**템플릿 예시:** `adapter-out/client/example-client` — `@DependsOn("resilientClientRegistry")`
+**adapter-out 배선:** 소비측 adapter-out 빈은 `@DependsOn("resilientClientRegistry")`로 등록 순서 보장.
 
 ## 패키지
 
