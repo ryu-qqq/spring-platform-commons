@@ -367,6 +367,42 @@ class CommonVoTest {
         }
     }
 
+    @Nested
+    @DisplayName("SortDirection")
+    class SortDirectionTest {
+
+        @Test
+        @DisplayName("defaultDirection은 DESC")
+        void defaultDirection() {
+            assertThat(SortDirection.defaultDirection()).isEqualTo(SortDirection.DESC);
+        }
+
+        @Test
+        @DisplayName("isAscending은 ASC에서만 true")
+        void isAscending() {
+            assertThat(SortDirection.ASC.isAscending()).isTrue();
+            assertThat(SortDirection.DESC.isAscending()).isFalse();
+        }
+
+        @Test
+        @DisplayName("reverse는 ASC↔DESC 반전")
+        void reverse() {
+            assertThat(SortDirection.ASC.reverse()).isEqualTo(SortDirection.DESC);
+            assertThat(SortDirection.DESC.reverse()).isEqualTo(SortDirection.ASC);
+        }
+
+        @Test
+        @DisplayName("fromString은 정확한 enum명만 허용(대소문자·공백 무시), 그 외 DESC 폴백")
+        void fromString() {
+            assertThat(SortDirection.fromString("asc")).isEqualTo(SortDirection.ASC);
+            assertThat(SortDirection.fromString("  DESC ")).isEqualTo(SortDirection.DESC);
+            assertThat(SortDirection.fromString(null)).isEqualTo(SortDirection.DESC);
+            assertThat(SortDirection.fromString("")).isEqualTo(SortDirection.DESC);
+            assertThat(SortDirection.fromString("   ")).isEqualTo(SortDirection.DESC);
+            assertThat(SortDirection.fromString("ASCENDING")).isEqualTo(SortDirection.DESC);
+        }
+    }
+
     private static final class VersionedHolder implements Versioned {
 
         private final long version;
