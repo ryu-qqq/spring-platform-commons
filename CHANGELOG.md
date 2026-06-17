@@ -38,6 +38,8 @@
 - **(breaking)** `platform-outbox` SPI `PerItemOutboxAdapter`의 `OutboxStatus outboxStatus(O)` →
   `boolean isTerminalFailure(O)`. 릴레이가 status에서 실제 필요로 하는 "종착 실패 여부" 하나만 노출(ISP).
   소비측 어댑터는 자기 status를 이 불리언으로 매핑한다.
+- **(breaking)** `platform-common-domain`: `PageMeta.totalCount` → `totalElements` (Spring Data 표준 정합, ADR-0007).
+- **(breaking)** `platform-common-domain`: `DeletionStatus`를 `deletedAt` 단일 필드 record로 정리, 정적 팩토리 `deleted(Instant)` → `deletedAt(Instant)` (ADR-0007).
 
 ### Removed
 - **(breaking)** `platform-common-domain`의 `com.ryuqqq.platform.common.outbox.OutboxStatus` enum 제거.
@@ -46,6 +48,7 @@
 - 헥사고날 템플릿 스켈레톤(`domain`·`application`·`adapter-in`·`adapter-out`·`bootstrap` 모듈,
   `example-client` 포함) 제거 — 이 레포는 **SDK 전용**으로 수렴. 템플릿은 발행 아티팩트가 아니라
   소비측 영향 없음. `architecture-tests`는 유지(플랫폼 SDK 레이어 게이트 `PlatformSdkLayerArchTest`).
+- **(breaking)** `platform-common-domain`: `DeletionStatus`의 `boolean deleted` 컴포넌트·`deleted()` 접근자 제거 (`isDeleted()` = `deletedAt != null`로 파생, ADR-0003/0007).
 
 ## [0.2.0] - 2026-06-15
 
