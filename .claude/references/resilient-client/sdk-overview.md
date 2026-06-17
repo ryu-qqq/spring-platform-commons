@@ -51,7 +51,9 @@ JitPack: `com.github.ryu-qqq.spring-platform-commons:<module>:v0.2.0` (태그 �
 ## 변경 시 검증
 
 ```bash
-./gradlew :resilient-client:resilient-client-core:test
+./gradlew :resilient-client:resilient-client-core:test \
+          :resilient-client:resilient-client-metrics:test \
+          :resilient-client:resilient-client-spring-boot-starter:test
 ```
 
 starter 변경 시 `ResilientClientAutoConfigurationTest` 포함.
