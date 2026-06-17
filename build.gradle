@@ -40,7 +40,7 @@ subprojects {
     // AOSP(4-space)로 기존 스타일과 정렬. spotlessCheck는 check→build에 자동 연결.
     spotless {
         java {
-            target 'src/**/*.java'
+            // 명시적 target 생략 — Gradle 소스셋 기본(main/test)을 따라 build/generated 코드는 제외.
             ratchetFrom 'origin/main'
             googleJavaFormat('1.22.0').aosp()
             removeUnusedImports()
