@@ -115,7 +115,7 @@ base 수명주기에 건별 dispatch·4분기 전이를 더한다. 타입 파라
 | 메서드 | 책임 |
 |--------|------|
 | `taskId(O)` / `preloadTasks(ids)` | 부모 작업 N+1 회피 batch 조회. |
-| `outboxStatus(O)` | defer 후 FAILED 전이 감지용. |
+| `isTerminalFailure(O)` | defer 후 종착 실패(dead-letter) 전이 감지용. |
 | `callbackUrl(O)` / `createdAt(O)` | 발송 URL · 외부 생성 시각 (로그·경과시간). |
 | `idempotencyKey(O)` | 발송 멱등키. |
 | `buildPayload(O, T)` | 발송 페이로드 빌드. |

@@ -26,7 +26,11 @@ public record PageMeta(int page, int size, long totalCount) {
     }
 
     public int totalPages() {
-        return (int) ((totalCount + size - 1) / size);
+        long pages = totalCount / size;
+        if (totalCount % size != 0) {
+            pages++;
+        }
+        return pages > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) pages;
     }
 
     public boolean hasNext() {
