@@ -13,6 +13,7 @@ publishing {
 
 dependencies {
     api project(':platform-common-application')
+    implementation project(':platform-observability')
 
     implementation platform(libs.spring.boot.dependencies)
     implementation libs.spring.boot.autoconfigure

@@ -16,6 +16,7 @@ dependencies {
 
     testImplementation platform(libs.spring.boot.dependencies)
     testImplementation 'org.springframework:spring-context'
+    testImplementation project(':platform-common-domain')
     testImplementation platform(libs.junit.bom)
     testImplementation libs.bundles.testing
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

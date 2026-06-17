@@ -1,6 +1,5 @@
 package com.ryuqqq.platform.outbox.spi;
 
-import com.ryuqqq.platform.common.outbox.OutboxStatus;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -21,8 +20,13 @@ public interface PerItemOutboxAdapter<O, T, P> extends OutboxStore<O> {
     /** 페이로드 빌드를 위한 부모 작업 ID — preloadTasks 의 키. */
     String taskId(O outbox);
 
-    /** outbox 상태 (deferRetry 후 FAILED 전이 감지용). */
-    OutboxStatus outboxStatus(O outbox);
+    /**
+     * deferRetry 후 outbox가 종착 실패(재시도 소진 → dead-letter)로 전이됐는지.
+     *
+     * <p>릴레이는 이 불리언을 "연기 한도 초과 최종 실패" 로깅 판정에만 쓴다. 상태 어휘(enum·값 집합·
+     * 전이 의미)는 소비측 도메인이 소유한다 — SDK는 처리 상태를 알지 않는다.
+     */
+    boolean isTerminalFailure(O outbox);
 
     /** 발송 대상 URL — 로그·재시도 식별용. */
     String callbackUrl(O outbox);

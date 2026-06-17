@@ -11,8 +11,9 @@
 
 | 모듈 | 역할 | README |
 |------|------|--------|
-| **platform-common-domain** | 순수 도메인 타입(VO·페이징·`OutboxStatus`·`MdcKeys`·예외) — 프레임워크 비의존 | [↗](platform-common-domain/README.md) |
+| **platform-common-domain** | 순수 도메인 타입(VO·페이징·키 마커·예외) — 프레임워크 비의존 | [↗](platform-common-domain/README.md) |
 | **platform-common-application** | 아웃바운드 포트(`CachePort`·`DistributedLockPort`)·`SchedulerBatchProcessingResult`·`CommonVoFactory` | [↗](platform-common-application/README.md) |
+| **platform-observability** | 횡단 관측성 어휘 SSOT(`MdcKeys` — MDC 키·트레이스 헤더) — 의존성 0 | [↗](platform-observability/README.md) |
 | **platform-web** | adapter-in 웹 코어 — `ApiResponse`·`GlobalExceptionHandler`·`RequestContextFilter` | [↗](platform-web/README.md) |
 | **platform-bootstrap** | 조립 레이어 — logback JSON·actuator·bootstrap yml | [↗](platform-bootstrap/README.md) |
 | **platform-persistence-jpa** | JPA adapter-out — audit·soft delete·`@Version`·`JPAQueryFactory` | [↗](platform-persistence-jpa/README.md) |
@@ -20,7 +21,7 @@
 | **platform-scheduler** | `@SchedulerJob` AOP — TraceId/MDC·로깅·메트릭·`SchedulerBatchProcessingResult` | [↗](platform-scheduler/README.md) |
 | **platform-security** | Service Token 인증 필터·ProblemDetail 핸들러·자동설정(servlet) | [↗](platform-security/README.md) |
 | **platform-outbox** | 트랜스포트 중립 outbox relay — Batch/PerItem 템플릿·`OutboxStore` SPI | [↗](platform-outbox/README.md) |
-| **platform-archrules** | 이식 가능 ArchUnit 규칙 3종(헥사고날 경계) + self-test | [↗](platform-archrules/README.md) |
+| **platform-archrules** | 이식 가능 ArchUnit 규칙(헥사고날 경계 + 도메인 작성 컨벤션) + 건강 리포트(`DomainHealthReporter`) | [↗](platform-archrules/README.md) |
 | **resilient-client** | Resilience4j CB+Retry+Timeout+메트릭 (core·metrics·starter) | [↗](resilient-client/README.md) |
 
 > 각 모듈의 역할·확장점·사용 예시는 모듈 README에 있다. 의존하는 법은 아래 **외부에서 가져다 쓰기** 참고.
@@ -78,8 +79,8 @@ resilient:
         retry: { max-attempts: 2 }
 ```
 
-→ `{clientKey}ResilientClient` 빈 + `ResilientClientRegistry` 자동 등록. adapter-out 패턴은
-`adapter-out/client/example-client`(`@DependsOn("resilientClientRegistry")`) 참고.
+→ `{clientKey}ResilientClient` 빈 + `ResilientClientRegistry` 자동 등록. adapter-out 빈은
+`@DependsOn("resilientClientRegistry")`로 등록 순서를 보장한다.
 레포 가이드: [`docs/sdk/resilient-client.md`](docs/sdk/resilient-client.md).
 
 ## Harness · Engineering OS · 자가 감사 fleet

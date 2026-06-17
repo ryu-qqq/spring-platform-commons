@@ -14,9 +14,6 @@ allprojects {
 def sdkProjects = { project ->
     project.path.startsWith(':resilient-client') || project.path.startsWith(':platform-')
 }
-def templateLibraryProjects = { project ->
-    project.path in [':domain', ':application', ':adapter-in:rest-api']
-}
 
 subprojects {
     apply plugin: 'java'
@@ -100,6 +97,4 @@ configure(subprojects.findAll(sdkProjects)) {
     }
 }
 
-configure(subprojects.findAll(templateLibraryProjects)) {
-    apply plugin: 'java-library'
-}
+// architecture-tests는 test-only 모듈 — java 플러그인만(subprojects 블록에서 적용).

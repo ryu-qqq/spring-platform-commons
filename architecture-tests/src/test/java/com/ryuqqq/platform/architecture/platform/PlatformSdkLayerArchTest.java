@@ -1,11 +1,15 @@
 package com.ryuqqq.platform.architecture.platform;
 
 import static com.ryuqqq.platform.architecture.support.ArchitectureRules.allPackages;
+import static com.ryuqqq.platform.architecture.support.ArchitectureRules.COMMON_DOMAIN_ALLOWED_PACKAGES;
 import static com.ryuqqq.platform.architecture.support.ArchitectureRules.FRAMEWORK_PACKAGES_FORBIDDEN_IN_DOMAIN;
+import static com.ryuqqq.platform.architecture.support.ArchitectureRules.OBSERVABILITY_PACKAGES_FORBIDDEN_IN_DOMAIN;
 import static com.ryuqqq.platform.architecture.support.ArchitectureRules.PERSISTENCE_PACKAGES;
 import static com.ryuqqq.platform.architecture.support.ArchitectureRules.PLATFORM_ADAPTER_IN_PACKAGES;
+import static com.ryuqqq.platform.architecture.support.ArchitectureRules.PLATFORM_ADAPTER_OUT_PACKAGES;
 import static com.ryuqqq.platform.architecture.support.ArchitectureRules.PLATFORM_BOOTSTRAP_PACKAGES;
 import static com.ryuqqq.platform.architecture.support.ModuleClasses.importProductionClasses;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 import com.tngtech.archunit.core.domain.JavaClasses;
@@ -26,6 +30,7 @@ class PlatformSdkLayerArchTest {
 
     private static JavaClasses commonDomainClasses;
     private static JavaClasses commonApplicationClasses;
+    private static JavaClasses platformObservabilityClasses;
     private static JavaClasses platformWebClasses;
     private static JavaClasses platformBootstrapClasses;
     private static JavaClasses platformPersistenceJpaClasses;
@@ -34,9 +39,48 @@ class PlatformSdkLayerArchTest {
     static void setUp() {
         commonDomainClasses = importProductionClasses("platform-common-domain");
         commonApplicationClasses = importProductionClasses("platform-common-application");
+        platformObservabilityClasses = importProductionClasses("platform-observability");
         platformWebClasses = importProductionClasses("platform-web");
         platformBootstrapClasses = importProductionClasses("platform-bootstrap");
         platformPersistenceJpaClasses = importProductionClasses("platform-persistence-jpa");
+    }
+
+    @Nested
+    @DisplayName("platform-observability (Independent layer)")
+    class ObservabilityRules {
+
+        @Test
+        @DisplayName("must not depend on Spring, JPA, or Jackson")
+        void observability_MustNotDependOnFrameworks() {
+            ArchRule rule =
+                    noClasses()
+                            .should()
+                            .dependOnClassesThat()
+                            .resideInAnyPackage(allPackages(FRAMEWORK_PACKAGES_FORBIDDEN_IN_DOMAIN))
+                            .allowEmptyShould(true)
+                            .because(
+                                    "platform-observability is a zero-dependency vocabulary SSOT — no framework deps (ADR-0006)");
+
+            rule.check(platformObservabilityClasses);
+        }
+
+        @Test
+        @DisplayName("must not depend on any other platform SDK module")
+        void observability_MustNotDependOnOtherModules() {
+            ArchRule rule =
+                    noClasses()
+                            .should()
+                            .dependOnClassesThat()
+                            .resideInAnyPackage(
+                                    allPackages(
+                                            new String[] {"com.ryuqqq.platform.common.."},
+                                            PLATFORM_ADAPTER_IN_PACKAGES,
+                                            PLATFORM_BOOTSTRAP_PACKAGES))
+                            .allowEmptyShould(true)
+                            .because("Independent layer must not depend on other SDK modules (ADR-0006)");
+
+            rule.check(platformObservabilityClasses);
+        }
     }
 
     @Nested
@@ -44,15 +88,37 @@ class PlatformSdkLayerArchTest {
     class CommonDomainRules {
 
         @Test
-        @DisplayName("must not depend on Spring, JPA, or Jackson")
+        @DisplayName("must not depend on Spring, JPA, Jackson, or logging/metrics")
         void commonDomain_MustNotDependOnFrameworks() {
             ArchRule rule =
                     noClasses()
                             .should()
                             .dependOnClassesThat()
-                            .resideInAnyPackage(allPackages(FRAMEWORK_PACKAGES_FORBIDDEN_IN_DOMAIN))
+                            .resideInAnyPackage(
+                                    allPackages(
+                                            FRAMEWORK_PACKAGES_FORBIDDEN_IN_DOMAIN,
+                                            OBSERVABILITY_PACKAGES_FORBIDDEN_IN_DOMAIN))
                             .allowEmptyShould(true)
-                            .because("platform-common-domain is pure Java — no framework deps (wiki layers/domain)");
+                            .because(
+                                    "platform-common-domain is pure Java — no framework/observability deps (ADR-0006)");
+
+            rule.check(commonDomainClasses);
+        }
+
+        @Test
+        @DisplayName("입주 기준 — vo·exception·domain 패키지에만 거주(횡단 인프라 어휘 금지)")
+        void commonDomain_OnlyAllowedPackages() {
+            ArchRule rule =
+                    classes()
+                            .that()
+                            .resideInAPackage("com.ryuqqq.platform.common..")
+                            .should()
+                            .resideInAnyPackage(allPackages(COMMON_DOMAIN_ALLOWED_PACKAGES))
+                            .allowEmptyShould(true)
+                            .as("platform-common-domain 입주 기준")
+                            .because(
+                                    "도메인 커널은 vo·exception·domain 만 — 횡단 인프라 어휘(로깅·헤더·메트릭)는 금지."
+                                            + " 새 패키지 입주는 ADR로 허용목록을 갱신해야 한다 (ADR-0006)");
 
             rule.check(commonDomainClasses);
         }
@@ -130,9 +196,7 @@ class PlatformSdkLayerArchTest {
                             .should()
                             .dependOnClassesThat()
                             .resideInAnyPackage(
-                                    allPackages(
-                                            PERSISTENCE_PACKAGES,
-                                            new String[] {"com.ryuqqq.platform.template.adapter.out.."}))
+                                    allPackages(PERSISTENCE_PACKAGES, PLATFORM_ADAPTER_OUT_PACKAGES))
                             .allowEmptyShould(true)
                             .because("Adapter-In must not depend on persistence or adapter-out (wiki overview)");
 
@@ -174,8 +238,7 @@ class PlatformSdkLayerArchTest {
                             .that()
                             .resideInAnyPackage(
                                     "com.ryuqqq.platform.common..",
-                                    "com.ryuqqq.platform.web..",
-                                    "com.ryuqqq.platform.template..")
+                                    "com.ryuqqq.platform.web..")
                             .should()
                             .dependOnClassesThat()
                             .resideInAnyPackage(allPackages(PLATFORM_BOOTSTRAP_PACKAGES))

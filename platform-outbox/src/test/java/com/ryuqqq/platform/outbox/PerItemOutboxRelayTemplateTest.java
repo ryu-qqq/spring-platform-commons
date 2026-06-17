@@ -2,7 +2,6 @@ package com.ryuqqq.platform.outbox;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.ryuqqq.platform.common.outbox.OutboxStatus;
 import com.ryuqqq.platform.common.scheduler.SchedulerBatchProcessingResult;
 import com.ryuqqq.platform.outbox.exception.OutboxDispatchDeferredException;
 import com.ryuqqq.platform.outbox.exception.OutboxDispatchPermanentException;
@@ -31,7 +30,7 @@ class PerItemOutboxRelayTemplateTest {
         final String idem;
         final Instant createdAt;
         String outcome = "success"; // success | deferred | permanent | fail | notask
-        OutboxStatus status = OutboxStatus.PROCESSING;
+        boolean terminalFailure = false; // deferRetry 후 종착 실패로 전이됐는지
 
         TestOutbox(String outboxId, String taskId) {
             this.outboxId = outboxId;
@@ -64,7 +63,7 @@ class PerItemOutboxRelayTemplateTest {
         @Override public void bulkReleaseToPending(List<String> ids) { released.addAll(ids); }
 
         @Override public String taskId(TestOutbox o) { return o.taskId; }
-        @Override public OutboxStatus outboxStatus(TestOutbox o) { return o.status; }
+        @Override public boolean isTerminalFailure(TestOutbox o) { return o.terminalFailure; }
         @Override public String callbackUrl(TestOutbox o) { return o.url; }
         @Override public Instant createdAt(TestOutbox o) { return o.createdAt; }
         @Override public String idempotencyKey(TestOutbox o) { return o.idem; }
@@ -164,11 +163,11 @@ class PerItemOutboxRelayTemplateTest {
     }
 
     @Test
-    @DisplayName("deferRetry 후 OutboxStatus.FAILED 면 최종 실패 로깅 경로(예외 없이 통과)")
+    @DisplayName("deferRetry 후 종착 실패면 최종 실패 로깅 경로(예외 없이 통과)")
     void deferThenFailedDetected() {
         FakeAdapter a = new FakeAdapter();
         TestOutbox o = claim(a, "o1", "t1", "deferred");
-        o.status = OutboxStatus.FAILED;
+        o.terminalFailure = true;
 
         SchedulerBatchProcessingResult r = template.relay(10, a);
 
