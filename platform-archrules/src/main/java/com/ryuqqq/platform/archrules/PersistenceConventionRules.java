@@ -1,9 +1,15 @@
 package com.ryuqqq.platform.archrules;
 
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
+import com.tngtech.archunit.core.domain.JavaClass;
+import com.tngtech.archunit.core.domain.JavaMethod;
 import com.tngtech.archunit.junit.ArchTest;
+import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ArchRule;
+import com.tngtech.archunit.lang.ConditionEvents;
+import com.tngtech.archunit.lang.SimpleConditionEvent;
 
 /**
  * 소비측 영속(adapter-out) 레이어 작성 컨벤션 ArchUnit 룰. <b>상대 패키지 매처</b>로 root 패키지 무관.
@@ -19,6 +25,41 @@ public final class PersistenceConventionRules {
     private static final String APPLICATION = "..application..";
     private static final String ADAPTER_IN = "..adapter.in..";
     private static final String ADAPTER_OUT = "..adapter.out..";
+
+    /** Repository 인터페이스가 직접 선언한 메서드는 save/saveAll만 허용한다. */
+    private static final ArchCondition<JavaClass> ONLY_DECLARE_COMMAND_METHODS =
+            new ArchCondition<>("only declare save/saveAll methods") {
+                @Override
+                public void check(JavaClass item, ConditionEvents events) {
+                    for (JavaMethod method : item.getMethods()) {
+                        String name = method.getName();
+                        boolean isCommand = name.equals("save") || name.equals("saveAll");
+                        if (!isCommand) {
+                            events.add(
+                                    SimpleConditionEvent.violated(
+                                            method,
+                                            method.getFullName()
+                                                    + " declares non-command method '"
+                                                    + name
+                                                    + "' (save/saveAll만 허용)"));
+                        }
+                    }
+                }
+            };
+
+    /** R: adapter-out의 *Repository 인터페이스는 save/saveAll만 직접 선언한다(조회는 QueryDSL). */
+    public static final ArchRule REPOSITORY_COMMAND_ONLY =
+            classes()
+                    .that()
+                    .resideInAPackage(ADAPTER_OUT)
+                    .and()
+                    .areInterfaces()
+                    .and()
+                    .haveSimpleNameEndingWith("Repository")
+                    .should(ONLY_DECLARE_COMMAND_METHODS)
+                    .as("REPOSITORY_COMMAND_ONLY")
+                    .because("JpaRepository는 순수 저장 기능만 — 조회/파생 쿼리는 QueryDSL로 분리한다")
+                    .allowEmptyShould(true);
 
     /** QueryDSL·JPA 영속 스택은 adapter-out 안에서만 사용한다(게이트). */
     @ArchTest

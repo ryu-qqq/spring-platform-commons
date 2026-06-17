@@ -42,4 +42,18 @@ class PersistenceConventionRulesTest {
                                 .hasViolation())
                 .isTrue();
     }
+
+    @Test
+    @DisplayName("REPOSITORY_COMMAND_ONLY: compliant Repository는 통과 (GREEN)")
+    void repositoryCommandOnlyPassesOnCompliant() {
+        assertThat(PersistenceConventionRules.REPOSITORY_COMMAND_ONLY.evaluate(compliant).hasViolation())
+                .isFalse();
+    }
+
+    @Test
+    @DisplayName("REPOSITORY_COMMAND_ONLY: 파생 쿼리 선언 Repository는 걸린다 (RED)")
+    void repositoryCommandOnlyFailsOnViolation() {
+        assertThat(PersistenceConventionRules.REPOSITORY_COMMAND_ONLY.evaluate(violation).hasViolation())
+                .isTrue();
+    }
 }
