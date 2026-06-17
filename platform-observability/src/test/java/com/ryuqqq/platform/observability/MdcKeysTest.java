@@ -1,4 +1,4 @@
-package com.ryuqqq.platform.common.observability;
+package com.ryuqqq.platform.observability;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

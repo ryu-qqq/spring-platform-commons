@@ -1,6 +1,5 @@
 package com.ryuqqq.platform.outbox;
 
-import com.ryuqqq.platform.common.outbox.OutboxStatus;
 import com.ryuqqq.platform.common.scheduler.SchedulerBatchProcessingResult;
 import com.ryuqqq.platform.outbox.exception.OutboxDispatchDeferredException;
 import com.ryuqqq.platform.outbox.exception.OutboxDispatchPermanentException;
@@ -151,7 +150,7 @@ public class PerItemOutboxRelayTemplate {
         }
         for (O outbox : results.deferred) {
             adapter.deferRetry(outbox, now, maxDeferDuration);
-            if (adapter.outboxStatus(outbox) == OutboxStatus.FAILED) {
+            if (adapter.isTerminalFailure(outbox)) {
                 log.error(
                         "{} defer 한도 초과 최종 실패: outboxId={}, url={}, 경과={}분",
                         adapter.label(),

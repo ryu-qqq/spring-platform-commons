@@ -2,9 +2,10 @@
 
 **헥사고날 서비스가 공유하는 순수 도메인 타입 모음 — 프레임워크 비의존.**
 
-쿼리/페이징 VO, soft delete 상태, 멱등·캐시·락 키 마커, Outbox 상태, MDC 키 SSOT, 예외 베이스를
+쿼리/페이징 VO, soft delete 상태, 멱등·캐시·락 키 마커, 예외 베이스를
 한곳에 모은다. Spring·웹·persistence 어떤 인프라에도 의존하지 않으므로 도메인 레이어가 그대로
-import 할 수 있다.
+import 할 수 있다. **순수 도메인 커널** — 횡단 인프라 어휘(MDC 키·헤더 등)는 두지 않는다(ADR-0006,
+`platform-observability` 소유).
 
 ## 역할
 
@@ -23,8 +24,6 @@ import 할 수 있다.
 | 패키지 | 내용 |
 |--------|------|
 | `com.ryuqqq.platform.common.vo` | 쿼리·페이징·범위·soft delete·키 VO와 마커 |
-| `com.ryuqqq.platform.common.outbox` | `OutboxStatus` 상태 enum |
-| `com.ryuqqq.platform.common.observability` | `MdcKeys` — MDC 키·헤더 이름 SSOT |
 | `com.ryuqqq.platform.common.exception` | `ErrorCode` 계약 + `DomainException` 베이스 |
 | `com.ryuqqq.platform.common.domain` | `Versioned` — 낙관적 락 version 계약 |
 
@@ -69,37 +68,22 @@ String stored = "payment:" + key; // namespacing은 소비측 정책
 | `CursorPageRequest<C>(cursor, size)` | 커서 기반 요청. `cursor == null` 이면 첫 페이지 |
 | `PageMeta(page, size, totalCount)` | offset 응답 메타. `totalPages`·`hasNext`·`hasPrevious` |
 | `SliceMeta<C>(size, hasNext, nextCursor)` | 커서 응답 메타 |
-| `QueryContext<T extends SortKey>` | 정렬 + offset 페이징 + `includeDeleted` 묶음 |
-| `CursorQueryContext<T extends SortKey, C>` | 정렬 + 커서 페이징 묶음 |
+| `Page<T>(content, meta)` | offset 결과 — 콘텐츠 + `PageMeta` 묶음. `map()` 제공 |
+| `Slice<T, C>(content, meta)` | 커서 결과 — 콘텐츠 + `SliceMeta` 묶음. `map()` 제공 |
+| `SortOrder<T extends SortKey>(key, direction)` | 단일 정렬 항목 |
+| `Sort<T extends SortKey>(orders)` | 정렬 명세 — **복합 정렬**(`ORDER BY a DESC, b ASC`). `by(k,d)`·`of(...)` |
+| `QueryContext<T extends SortKey>` | `Sort` + offset 페이징 + `includeDeleted` 묶음 |
+| `CursorQueryContext<T extends SortKey, C>` | `Sort` + 커서 페이징 묶음 |
 | `DateRange(fromInclusive, toExclusive, dateField)` | `[from, to)` 날짜 범위 필터 |
 
-각 페이징 VO는 `of(...)` / `firstPage(...)` / `defaultOf(...)` 팩토리를 제공한다.
+각 페이징 VO는 `of(...)` / `firstPage(...)` / `defaultOf(...)` 팩토리를 제공한다. `QueryContext`·
+`CursorQueryContext`는 `Sort`를 직접 받거나 단일 정렬 편의 팩토리(`of(sortKey, direction, pageRequest)`)를
+함께 제공한다.
 
 ### Soft delete — `DeletionStatus`
 
 `(deleted, deletedAt)` `record`. Aggregate의 `delete(now)`/`restore()` 와 persistence 필터가 공유한다.
 `active()`·`deleted(now)`·`markDeleted(now)`·`restore()`·`isActive()` 제공.
-
-### Outbox 상태 — `OutboxStatus`
-
-```
-PENDING → PROCESSING → SENT | FAILED
-```
-
-`platform-outbox` 릴레이 SDK가 이 enum을 상태 모델로 쓴다.
-
-### MDC 키 SSOT — `MdcKeys`
-
-MDC 키·인바운드 헤더 이름의 단일 출처. 흩어진 문자열 리터럴을 한 곳으로 모은다.
-
-| 상수 | 값 | 소유 |
-|------|----|------|
-| `TRACE_ID` / `USER_ID` / `TENANT_ID` | `traceId` / `userId` / `tenantId` | servlet 필터가 게이트웨이 전달 헤더에서 채움 |
-| `SPAN_ID` | `spanId` | **분산추적 계측(Micrometer Tracing/OTel) 소유** — platform 필터는 set 안 함 |
-| `REQUEST_TYPE` / `ERROR_CODE` | `requestType` / `errorCode` | 앱·핸들러가 set |
-| `TRACE_ID_HEADER` / `USER_ID_HEADER` / `TENANT_ID_HEADER` | `X-Trace-Id` / `X-User-Id` / `X-Tenant-Id` | 인바운드 헤더 이름 |
-
-logback 등 XML은 Java 상수를 import 할 수 없어 동일 문자열을 mirror 하되, **이 클래스를 SSOT로 본다.**
 
 ### 예외 — `ErrorCode` · `DomainException`
 
@@ -118,7 +102,9 @@ throw new DomainException(ProductErrorCode.NOT_FOUND);
 
 ### 낙관적 락 — `Versioned`
 
-`long version()` + `void refreshVersion(long)` 계약. Outbox·Aggregate가 conform 한다.
+`long version()` **읽기 전용** 계약. Aggregate가 자기 낙관적 락 version을 노출하고, version 반영은
+영속성 매퍼가 재구성 시 주입한다(ADR-0006). `platform-persistence-jpa`의 `BaseVersionedEntity`가
+`@Version`을 매핑한다.
 
 ## 의존성
 

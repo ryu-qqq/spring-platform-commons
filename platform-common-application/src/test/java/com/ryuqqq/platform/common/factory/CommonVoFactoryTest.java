@@ -9,6 +9,7 @@ import com.ryuqqq.platform.common.vo.CursorPageRequest;
 import com.ryuqqq.platform.common.vo.CursorQueryContext;
 import com.ryuqqq.platform.common.vo.PageRequest;
 import com.ryuqqq.platform.common.vo.QueryContext;
+import com.ryuqqq.platform.common.vo.Sort;
 import com.ryuqqq.platform.common.vo.SortDirection;
 import com.ryuqqq.platform.common.vo.SortKey;
 
@@ -49,8 +50,7 @@ class CommonVoFactoryTest {
             QueryContext<TestSortKey> context = factory.createQueryContext(
                     TestSortKey.CREATED_AT, SortDirection.ASC, pageRequest, true);
 
-            assertThat(context.sortKey()).isEqualTo(TestSortKey.CREATED_AT);
-            assertThat(context.sortDirection()).isEqualTo(SortDirection.ASC);
+            assertThat(context.sort()).isEqualTo(Sort.by(TestSortKey.CREATED_AT, SortDirection.ASC));
             assertThat(context.page()).isEqualTo(1);
             assertThat(context.size()).isEqualTo(10);
             assertThat(context.includeDeleted()).isTrue();
