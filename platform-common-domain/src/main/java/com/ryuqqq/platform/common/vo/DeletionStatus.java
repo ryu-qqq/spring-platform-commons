@@ -10,6 +10,15 @@ import java.time.Instant;
  */
 public record DeletionStatus(boolean deleted, Instant deletedAt) {
 
+    public DeletionStatus {
+        if (deleted && deletedAt == null) {
+            throw new IllegalArgumentException("deletedAt must be present when deleted");
+        }
+        if (!deleted && deletedAt != null) {
+            throw new IllegalArgumentException("deletedAt must be null when active");
+        }
+    }
+
     public static DeletionStatus active() {
         return new DeletionStatus(false, null);
     }

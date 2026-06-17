@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import com.ryuqqq.platform.common.domain.Versioned;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 class CommonVoTest {
 
@@ -220,6 +221,50 @@ class CommonVoTest {
             assertThat(deleted.deletedAt()).isEqualTo(now);
 
             assertThat(deleted.restore().isActive()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("불변식 검증")
+    class InvariantValidationTest {
+
+        @Test
+        @DisplayName("PageRequest는 음수 page를 거부한다")
+        void pageRequestRejectsNegativePage() {
+            assertThatIllegalArgumentException().isThrownBy(() -> PageRequest.of(-1, 10));
+        }
+
+        @Test
+        @DisplayName("PageRequest는 0 이하 size를 거부한다")
+        void pageRequestRejectsNonPositiveSize() {
+            assertThatIllegalArgumentException().isThrownBy(() -> PageRequest.of(0, 0));
+        }
+
+        @Test
+        @DisplayName("CursorPageRequest는 0 이하 size를 거부한다")
+        void cursorPageRequestRejectsNonPositiveSize() {
+            assertThatIllegalArgumentException().isThrownBy(() -> CursorPageRequest.of(null, 0));
+        }
+
+        @Test
+        @DisplayName("PageMeta는 음수 page·0 이하 size·음수 totalCount를 거부한다")
+        void pageMetaRejectsInvalidValues() {
+            assertThatIllegalArgumentException().isThrownBy(() -> PageMeta.of(-1, 10, 0));
+            assertThatIllegalArgumentException().isThrownBy(() -> PageMeta.of(0, 0, 0));
+            assertThatIllegalArgumentException().isThrownBy(() -> PageMeta.of(0, 10, -1));
+        }
+
+        @Test
+        @DisplayName("DeletionStatus는 deleted=true인데 deletedAt이 null이면 거부한다")
+        void deletionStatusRejectsDeletedWithoutTimestamp() {
+            assertThatIllegalArgumentException().isThrownBy(() -> new DeletionStatus(true, null));
+        }
+
+        @Test
+        @DisplayName("DeletionStatus는 active인데 deletedAt이 있으면 거부한다")
+        void deletionStatusRejectsActiveWithTimestamp() {
+            Instant now = Instant.parse("2026-05-25T12:00:00Z");
+            assertThatIllegalArgumentException().isThrownBy(() -> new DeletionStatus(false, now));
         }
     }
 

@@ -10,6 +10,12 @@ public record CursorPageRequest<C>(C cursor, int size) {
 
     private static final int DEFAULT_SIZE = 20;
 
+    public CursorPageRequest {
+        if (size <= 0) {
+            throw new IllegalArgumentException("size must be positive: " + size);
+        }
+    }
+
     public static <C> CursorPageRequest<C> of(C cursor, int size) {
         return new CursorPageRequest<>(cursor, size);
     }
