@@ -193,7 +193,7 @@ class CommonVoTest {
             Page<String> page = Page.of(java.util.List.of("a", "b"), PageMeta.of(0, 10, 2));
 
             assertThat(page.content()).containsExactly("a", "b");
-            assertThat(page.meta().totalCount()).isEqualTo(2L);
+            assertThat(page.meta().totalElements()).isEqualTo(2L);
         }
 
         @Test
@@ -368,7 +368,7 @@ class CommonVoTest {
         }
 
         @Test
-        @DisplayName("PageMeta는 음수 page·0 이하 size·음수 totalCount를 거부한다")
+        @DisplayName("PageMeta는 음수 page·0 이하 size·음수 totalElements를 거부한다")
         void pageMetaRejectsInvalidValues() {
             assertThatIllegalArgumentException().isThrownBy(() -> PageMeta.of(-1, 10, 0));
             assertThatIllegalArgumentException().isThrownBy(() -> PageMeta.of(0, 0, 0));
@@ -435,7 +435,7 @@ class CommonVoTest {
             PageMeta meta = PageMeta.empty();
             assertThat(meta.page()).isZero();
             assertThat(meta.size()).isEqualTo(20);
-            assertThat(meta.totalCount()).isZero();
+            assertThat(meta.totalElements()).isZero();
         }
 
         @Test
@@ -444,7 +444,7 @@ class CommonVoTest {
             PageMeta meta = PageMeta.empty(50);
             assertThat(meta.page()).isZero();
             assertThat(meta.size()).isEqualTo(50);
-            assertThat(meta.totalCount()).isZero();
+            assertThat(meta.totalElements()).isZero();
         }
 
         @Test

@@ -5,9 +5,9 @@ package com.ryuqqq.platform.common.vo;
  *
  * @param page 0-based page index
  * @param size page size
- * @param totalCount 전체 건수
+ * @param totalElements 전체 건수
  */
-public record PageMeta(int page, int size, long totalCount) {
+public record PageMeta(int page, int size, long totalElements) {
 
     private static final int DEFAULT_SIZE = 20;
 
@@ -18,18 +18,26 @@ public record PageMeta(int page, int size, long totalCount) {
         if (size <= 0) {
             throw new IllegalArgumentException("size must be positive: " + size);
         }
-        if (totalCount < 0) {
-            throw new IllegalArgumentException("totalCount must not be negative: " + totalCount);
+        if (totalElements < 0) {
+            throw new IllegalArgumentException("totalElements must not be negative: " + totalElements);
         }
     }
 
-    public static PageMeta of(int page, int size, long totalCount) {
-        return new PageMeta(page, size, totalCount);
+    public static PageMeta of(int page, int size, long totalElements) {
+        return new PageMeta(page, size, totalElements);
+    }
+
+    public static PageMeta empty(int size) {
+        return of(0, size, 0);
+    }
+
+    public static PageMeta empty() {
+        return empty(DEFAULT_SIZE);
     }
 
     public int totalPages() {
-        long pages = totalCount / size;
-        if (totalCount % size != 0) {
+        long pages = totalElements / size;
+        if (totalElements % size != 0) {
             pages++;
         }
         return pages > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) pages;
@@ -41,13 +49,5 @@ public record PageMeta(int page, int size, long totalCount) {
 
     public boolean hasPrevious() {
         return page > 0;
-    }
-
-    public static PageMeta empty(int size) {
-        return of(0, size, 0);
-    }
-
-    public static PageMeta empty() {
-        return empty(DEFAULT_SIZE);
     }
 }
