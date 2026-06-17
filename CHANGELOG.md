@@ -7,6 +7,9 @@
 ## [Unreleased]
 
 ### Added
+- **도메인 건강 리포트 CI** — `DomainHealthReporter`를 PR마다 돌려 점수·핫스팟을 sticky 코멘트로 게시
+  (`domain-health.yml`, 비차단). `:architecture-tests:domainHealth` Gradle task가 마크다운 생성.
+  이 레포는 SDK라 자기 점검(dogfood)이며, 메커니즘은 소비 서비스 레포에 그대로 재사용 가능.
 - **Spotless 포맷 게이트** (google-java-format AOSP·4-space) — `ratchetFrom 'origin/main'`으로
   **main 대비 바뀐/새 `.java`만** 검사(레거시 grandfather, 전체 재포맷 없음). `spotlessCheck`가
   `check`→`build`에 연결돼 CI에서 자동 강제. CI checkout `fetch-depth: 0`(ratchet 비교용).

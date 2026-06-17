@@ -1,0 +1,42 @@
+name: Domain Health
+
+# 도메인 컨벤션 건강 리포트를 PR에 코멘트로 게시(비차단). 빌드 게이트가 아니라 진단이다.
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE']
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: domain-health-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Generate domain health report
+        run: ./gradlew :architecture-tests:domainHealth --build-cache
+
+      - name: Post sticky PR comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: domain-health
+          path: architecture-tests/build/domain-health.md

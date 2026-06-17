@@ -7,6 +7,7 @@ dependencies {
     testImplementation project(':platform-web')
     testImplementation project(':platform-bootstrap')
     testImplementation project(':platform-persistence-jpa')
+    testImplementation project(':platform-archrules')
 
     testImplementation platform(libs.junit.bom)
     testImplementation libs.bundles.testing
@@ -14,13 +15,26 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+def platformClassTasks = [
+    ':platform-common-domain:classes',
+    ':platform-common-application:classes',
+    ':platform-observability:classes',
+    ':platform-web:classes',
+    ':platform-bootstrap:classes',
+    ':platform-persistence-jpa:classes'
+]
+
 tasks.test {
-    dependsOn(
-        ':platform-common-domain:classes',
-        ':platform-common-application:classes',
-        ':platform-observability:classes',
-        ':platform-web:classes',
-        ':platform-bootstrap:classes',
-        ':platform-persistence-jpa:classes'
-    )
+    dependsOn(platformClassTasks)
+}
+
+// 도메인 컨벤션 건강 리포트(DomainHealthReporter) — CI가 PR 코멘트로 게시. 빌드를 죽이지 않는다.
+tasks.register('domainHealth', JavaExec) {
+    group = 'verification'
+    description = 'DomainHealthReporter로 도메인 컨벤션 건강 점수·findings 마크다운 생성'
+    dependsOn('testClasses')
+    dependsOn(platformClassTasks)
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.ryuqqq.platform.architecture.DomainHealthMain'
+    args = [layout.buildDirectory.file('domain-health.md').get().asFile.path]
 }
