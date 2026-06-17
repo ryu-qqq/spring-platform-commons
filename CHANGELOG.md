@@ -6,6 +6,12 @@
 
 ## [Unreleased]
 
+### Added
+- **Spotless 포맷 게이트** (google-java-format AOSP·4-space) — `ratchetFrom 'origin/main'`으로
+  **main 대비 바뀐/새 `.java`만** 검사(레거시 grandfather, 전체 재포맷 없음). `spotlessCheck`가
+  `check`→`build`에 연결돼 CI에서 자동 강제. CI checkout `fetch-depth: 0`(ratchet 비교용).
+  새 코드 포맷은 `./gradlew spotlessApply`.
+
 ## [0.2.0] - 2026-06-15
 
 > 전 플랫폼 모듈의 **최초 JitPack 배포**. `v0.1.0`은 resilient-client만 포함했고, 이번 릴리스로

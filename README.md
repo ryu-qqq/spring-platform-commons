@@ -56,8 +56,9 @@ implementation 'com.github.ryu-qqq.spring-platform-commons:resilient-client-spri
 ## 모노레포 빌드
 
 ```bash
-./gradlew build          # 전체 빌드·테스트(archrules 포함)
+./gradlew build          # 전체 빌드·테스트(archrules·spotless 포맷 게이트 포함)
 ./gradlew :platform-redis:test
+./gradlew spotlessApply   # 새/바뀐 코드 포맷(google-java-format AOSP). ratchet: main 대비 변경분만 강제
 ```
 
 ## Platform SDK 상세 — resilient-client
