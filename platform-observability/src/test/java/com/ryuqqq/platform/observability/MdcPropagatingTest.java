@@ -2,6 +2,7 @@ package com.ryuqqq.platform.observability;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -68,10 +69,25 @@ class MdcPropagatingTest {
     }
 
     @Test
+    @DisplayName("wrap(Callable): MDC 전파 + 반환값 보존")
+    void callablePropagatesAndReturns() throws Exception {
+        MDC.put("traceId", "C-9");
+        Callable<String> task = () -> MDC.get("traceId");
+        ExecutorService pool = Executors.newSingleThreadExecutor();
+        try {
+            String result = pool.submit(MdcPropagating.wrap(task)).get();
+            assertThat(result).isEqualTo("C-9");
+        } finally {
+            pool.shutdown();
+            pool.awaitTermination(5, TimeUnit.SECONDS);
+        }
+    }
+
+    @Test
     @DisplayName("wrap(Runnable): 작업이 예외를 던져도 제출 스레드 MDC는 보존")
     void runnableRestoresOnException() {
         MDC.put("traceId", "T-1");
-        Runnable wrapped = MdcPropagating.wrap(() -> {
+        Runnable wrapped = MdcPropagating.wrap((Runnable) () -> {
             throw new RuntimeException("boom");
         });
         try {

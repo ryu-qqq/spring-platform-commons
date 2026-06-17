@@ -1,6 +1,7 @@
 package com.ryuqqq.platform.observability;
 
 import java.util.Map;
+import java.util.concurrent.Callable;
 import org.slf4j.MDC;
 
 /**
@@ -23,6 +24,20 @@ public final class MdcPropagating {
             setOrClear(captured);
             try {
                 task.run();
+            } finally {
+                setOrClear(backup);
+            }
+        };
+    }
+
+    /** 제출 시점 MDC 스냅샷을 워커 스레드에 복원해 실행하는 Callable로 감싼다. */
+    public static <V> Callable<V> wrap(Callable<V> task) {
+        Map<String, String> captured = MDC.getCopyOfContextMap();
+        return () -> {
+            Map<String, String> backup = MDC.getCopyOfContextMap();
+            setOrClear(captured);
+            try {
+                return task.call();
             } finally {
                 setOrClear(backup);
             }
