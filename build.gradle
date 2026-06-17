@@ -1,3 +1,7 @@
+plugins {
+    alias(libs.plugins.spotless) apply false
+}
+
 allprojects {
     group = 'com.ryuqqq.platform'
     version = '0.2.0'
@@ -13,6 +17,7 @@ def sdkProjects = { project ->
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'com.diffplug.spotless'
 
     java {
         sourceCompatibility = JavaVersion.VERSION_21
@@ -26,6 +31,19 @@ subprojects {
 
     test {
         useJUnitPlatform()
+    }
+
+    // 포맷 게이트 — ratchet: main 대비 바뀐/새 .java만 검사(레거시 grandfather, big-bang 재포맷 없음).
+    // AOSP(4-space)로 기존 스타일과 정렬. spotlessCheck는 check→build에 자동 연결.
+    spotless {
+        java {
+            // 명시적 target 생략 — Gradle 소스셋 기본(main/test)을 따라 build/generated 코드는 제외.
+            ratchetFrom 'origin/main'
+            googleJavaFormat('1.22.0').aosp()
+            removeUnusedImports()
+            trimTrailingWhitespace()
+            endWithNewline()
+        }
     }
 }
 

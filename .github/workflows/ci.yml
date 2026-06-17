@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # spotless ratchetFrom 'origin/main' 비교용 (shallow clone엔 ref 없음)
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4

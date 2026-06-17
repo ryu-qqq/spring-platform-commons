@@ -7,6 +7,10 @@
 ## [Unreleased]
 
 ### Added
+- **Spotless 포맷 게이트** (google-java-format AOSP·4-space) — `ratchetFrom 'origin/main'`으로
+  **main 대비 바뀐/새 `.java`만** 검사(레거시 grandfather, 전체 재포맷 없음). `spotlessCheck`가
+  `check`→`build`에 연결돼 CI에서 자동 강제. CI checkout `fetch-depth: 0`(ratchet 비교용).
+  새 코드 포맷은 `./gradlew spotlessApply`.
 - platform-archrules: **도메인 작성 컨벤션 룰 + 건강 리포트**(하이브리드). `DomainConventionRules`
   11종(시간 주입·setter·DomainException 상속·aggregate 정의·일급 컬렉션·타입 형태·패키지 슬라이스,
   상대 매처 `..domain..`)과 `DomainHealthReporter`(빌드 안 죽이고 score+findings 산출) + `Severity`·
