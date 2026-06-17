@@ -20,7 +20,7 @@
 | **platform-scheduler** | `@SchedulerJob` AOP — TraceId/MDC·로깅·메트릭·`SchedulerBatchProcessingResult` | [↗](platform-scheduler/README.md) |
 | **platform-security** | Service Token 인증 필터·ProblemDetail 핸들러·자동설정(servlet) | [↗](platform-security/README.md) |
 | **platform-outbox** | 트랜스포트 중립 outbox relay — Batch/PerItem 템플릿·`OutboxStore` SPI | [↗](platform-outbox/README.md) |
-| **platform-archrules** | 이식 가능 ArchUnit 규칙 3종(헥사고날 경계) + self-test | [↗](platform-archrules/README.md) |
+| **platform-archrules** | 이식 가능 ArchUnit 규칙(헥사고날 경계 + 도메인 작성 컨벤션) + 건강 리포트(`DomainHealthReporter`) | [↗](platform-archrules/README.md) |
 | **resilient-client** | Resilience4j CB+Retry+Timeout+메트릭 (core·metrics·starter) | [↗](resilient-client/README.md) |
 
 > 각 모듈의 역할·확장점·사용 예시는 모듈 README에 있다. 의존하는 법은 아래 **외부에서 가져다 쓰기** 참고.

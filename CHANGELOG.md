@@ -6,6 +6,13 @@
 
 ## [Unreleased]
 
+### Added
+- platform-archrules: **도메인 작성 컨벤션 룰 + 건강 리포트**(하이브리드). `DomainConventionRules`
+  11종(시간 주입·setter·DomainException 상속·aggregate 정의·일급 컬렉션·타입 형태·패키지 슬라이스,
+  상대 매처 `..domain..`)과 `DomainHealthReporter`(빌드 안 죽이고 score+findings 산출) + `Severity`·
+  `HealthReport`. CRITICAL(프레임워크·Lombok)은 게이트, 나머지는 리포트. 작성 룰은 자작(marketplace 귀납).
+- platform-archrules: `DOMAIN_FRAMEWORK_FREE`에 `lombok..` 금지 추가(도메인 Lombok 차단).
+
 ## [0.2.0] - 2026-06-15
 
 > 전 플랫폼 모듈의 **최초 JitPack 배포**. `v0.1.0`은 resilient-client만 포함했고, 이번 릴리스로
