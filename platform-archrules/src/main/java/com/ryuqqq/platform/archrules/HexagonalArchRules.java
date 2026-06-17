@@ -47,9 +47,10 @@ public final class HexagonalArchRules {
                             "org.hibernate..",
                             "com.fasterxml.jackson..",
                             "jakarta.servlet..",
-                            "com.querydsl..")
+                            "com.querydsl..",
+                            "lombok..")
                     .as("도메인은 프레임워크에 의존하지 않는다")
-                    .because("헥사고날: 도메인은 Spring/JPA/Jackson/Servlet을 몰라야 한다")
+                    .because("헥사고날: 도메인은 Spring/JPA/Jackson/Servlet/Lombok을 몰라야 한다")
                     .allowEmptyShould(true);
 
     /** 애플리케이션은 웹/영속 스택에 직접 의존하지 않는다 (포트로만 통신). */

@@ -10,6 +10,15 @@ public record PageRequest(int page, int size) {
 
     private static final int DEFAULT_SIZE = 20;
 
+    public PageRequest {
+        if (page < 0) {
+            throw new IllegalArgumentException("page must not be negative: " + page);
+        }
+        if (size <= 0) {
+            throw new IllegalArgumentException("size must be positive: " + size);
+        }
+    }
+
     public static PageRequest of(int page, int size) {
         return new PageRequest(page, size);
     }

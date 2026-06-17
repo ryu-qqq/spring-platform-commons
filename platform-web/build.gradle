@@ -11,6 +11,7 @@ publishing {
 
 dependencies {
     api project(':platform-common-domain')
+    implementation project(':platform-observability')
 
     implementation platform(libs.spring.boot.dependencies)
     implementation libs.spring.boot.starter.web

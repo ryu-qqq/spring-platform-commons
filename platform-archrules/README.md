@@ -115,6 +115,46 @@ freeze.refreeze=false                                # 신규 위반을 store에
 
 freezing 동작은 `FreezingBehaviorTest`가 in-memory store로 검증한다(레거시 동결·신규 위반 차단·prune 후 회귀 차단). frozen/strict 한 줄 표면은 `FrozenSuiteArchTest`·`StrictSuiteArchTest`가 compliant 픽스처로 end-to-end 확인한다.
 
+## 도메인 작성 컨벤션 + 건강 리포트 (하이브리드)
+
+레이어 경계 룰(위)과 별개로, **도메인 레이어 작성 컨벤션**을 `DomainConventionRules`로 제공한다.
+전달은 **하이브리드** — 심각한 위반만 빌드를 막고, 나머지는 빌드를 죽이지 않고 **진단·점수화**한다.
+
+> **출처:** 우아한형제들 근거는 계층 구조 원칙뿐이며(= `DOMAIN_FRAMEWORK_FREE`와 정렬), 아래 작성
+> 룰은 marketplace 코드 전수조사로 귀납한 **자작** 컨벤션이다.
+
+### 룰 (상대 매처 `..domain..`·`..aggregate..` 등)
+
+| 룰 | severity | 의미 |
+|----|----------|------|
+| `NO_TIME_IN_DOMAIN` | HIGH | 도메인은 `Instant.now()` 등 현재 시각을 직접 읽지 않고 주입받는다 |
+| `DOMAIN_EXCEPTIONS_EXTEND_BASE` | HIGH | `*Exception`은 `DomainException` 상속 |
+| `DOMAIN_PACKAGE_SLICES` | HIGH | 도메인은 `aggregate/vo/id/exception/query` 슬라이스만(`.event` 금지) |
+| `NO_SETTERS_IN_DOMAIN` | MEDIUM | `set*` 금지(불변) |
+| `AGGREGATE_IS_CLASS` | MEDIUM | Aggregate는 record가 아닌 class |
+| `AGGREGATE_CTORS_NOT_PUBLIC` | MEDIUM | 생성자 private(정적 팩토리 강제) |
+| `NO_RAW_COLLECTION_FIELDS_IN_AGGREGATE` | MEDIUM | 일급 컬렉션(raw `Collection`/`Map` 필드 금지) |
+| `VO_FIELDS_NOT_PUBLIC` | MEDIUM | VO public 필드 금지 |
+| `ID_TYPES_ARE_RECORDS` | LOW | `..id..`는 record |
+| `ERRORCODE_TYPES_ARE_ENUMS` | LOW | `*ErrorCode`는 enum |
+| `SORT_SEARCH_KEYS_ARE_ENUMS` | LOW | `*SortKey`/`*SearchField`는 enum |
+
+`CRITICAL`(프레임워크 의존·Lombok)은 위 `DOMAIN_FRAMEWORK_FREE` 게이트가 빌드 실패로 막는다.
+
+### 건강 점수
+
+빌드를 죽이지 않고 진단한다. 점수는 **실패한 컨벤션 차원** 기준(룰당 1회 감점, HIGH −10·MEDIUM −5·
+LOW −2)이라 한 클래스의 다발 위반으로 폭발하지 않는다. 위반 개수·핫스팟은 `findings`에서 본다.
+
+```java
+JavaClasses classes = new ClassFileImporter().importPackages("com.ryuq.myservice");
+HealthReport report = DomainHealthReporter.report(classes, DomainConventionRules.all());
+System.out.println(report.toJson());   // {"score":83,"findings":[...]} → 스코어카드/CI 아티팩트
+```
+
+게이트(빌드 실패)가 필요하면 strict 표면(`ArchTests.in(HexagonalArchRules.class)`)이 CRITICAL을 막고,
+특정 작성 룰을 승격하려면 소비측이 해당 `ArchRule` 상수를 `@ArchTest`로 직접 추가한다.
+
 ## 의존성
 
 런타임은 ArchUnit JUnit5 확장만 `api` 로 전이한다 (소비측 테스트 클래스패스에 노출).

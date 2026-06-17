@@ -9,15 +9,28 @@ package com.ryuqqq.platform.common.vo;
  */
 public record PageMeta(int page, int size, long totalCount) {
 
+    public PageMeta {
+        if (page < 0) {
+            throw new IllegalArgumentException("page must not be negative: " + page);
+        }
+        if (size <= 0) {
+            throw new IllegalArgumentException("size must be positive: " + size);
+        }
+        if (totalCount < 0) {
+            throw new IllegalArgumentException("totalCount must not be negative: " + totalCount);
+        }
+    }
+
     public static PageMeta of(int page, int size, long totalCount) {
         return new PageMeta(page, size, totalCount);
     }
 
     public int totalPages() {
-        if (size <= 0) {
-            return 0;
+        long pages = totalCount / size;
+        if (totalCount % size != 0) {
+            pages++;
         }
-        return (int) ((totalCount + size - 1) / size);
+        return pages > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) pages;
     }
 
     public boolean hasNext() {
