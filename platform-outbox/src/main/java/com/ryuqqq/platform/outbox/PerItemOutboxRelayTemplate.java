@@ -37,6 +37,7 @@ public class PerItemOutboxRelayTemplate {
 
     private final Duration maxDeferDuration;
     private final ExecutorService executor;
+
     /** nullable — null 이면 메트릭 no-op. */
     private final MeterRegistry meterRegistry;
 
@@ -90,7 +91,10 @@ public class PerItemOutboxRelayTemplate {
                                 outbox ->
                                         CompletableFuture.runAsync(
                                                 MdcPropagating.wrap(
-                                                        () -> dispatchOne(outbox, taskById, adapter, results)),
+                                                        () ->
+                                                                dispatchOne(
+                                                                        outbox, taskById, adapter,
+                                                                        results)),
                                                 executor))
                         .toList();
         CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();

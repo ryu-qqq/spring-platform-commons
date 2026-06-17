@@ -18,9 +18,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.junit.jupiter.api.AfterEach;
-import org.slf4j.MDC;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
 
 class PerItemOutboxRelayTemplateTest {
 
@@ -57,19 +57,65 @@ class PerItemOutboxRelayTemplateTest {
         boolean preloadThrows = false;
         boolean preloadReturnsNull = false;
 
-        @Override public String label() { return "테스트콜백"; }
-        @Override public String pipeline() { return "callback"; }
-        @Override public String outboxId(TestOutbox o) { return o.outboxId; }
-        @Override public List<TestOutbox> claimPendingMessages(int batchSize) { return toClaim; }
-        @Override public void bulkMarkSent(List<String> ids, Instant now) { markedSent.addAll(ids); }
-        @Override public void bulkMarkFailed(List<String> ids, Instant now, String msg) { markedFailed.addAll(ids); }
-        @Override public void bulkReleaseToPending(List<String> ids) { released.addAll(ids); }
+        @Override
+        public String label() {
+            return "테스트콜백";
+        }
 
-        @Override public String taskId(TestOutbox o) { return o.taskId; }
-        @Override public boolean isTerminalFailure(TestOutbox o) { return o.terminalFailure; }
-        @Override public String callbackUrl(TestOutbox o) { return o.url; }
-        @Override public Instant createdAt(TestOutbox o) { return o.createdAt; }
-        @Override public String idempotencyKey(TestOutbox o) { return o.idem; }
+        @Override
+        public String pipeline() {
+            return "callback";
+        }
+
+        @Override
+        public String outboxId(TestOutbox o) {
+            return o.outboxId;
+        }
+
+        @Override
+        public List<TestOutbox> claimPendingMessages(int batchSize) {
+            return toClaim;
+        }
+
+        @Override
+        public void bulkMarkSent(List<String> ids, Instant now) {
+            markedSent.addAll(ids);
+        }
+
+        @Override
+        public void bulkMarkFailed(List<String> ids, Instant now, String msg) {
+            markedFailed.addAll(ids);
+        }
+
+        @Override
+        public void bulkReleaseToPending(List<String> ids) {
+            released.addAll(ids);
+        }
+
+        @Override
+        public String taskId(TestOutbox o) {
+            return o.taskId;
+        }
+
+        @Override
+        public boolean isTerminalFailure(TestOutbox o) {
+            return o.terminalFailure;
+        }
+
+        @Override
+        public String callbackUrl(TestOutbox o) {
+            return o.url;
+        }
+
+        @Override
+        public Instant createdAt(TestOutbox o) {
+            return o.createdAt;
+        }
+
+        @Override
+        public String idempotencyKey(TestOutbox o) {
+            return o.idem;
+        }
 
         @Override
         public Map<String, String> preloadTasks(List<String> taskIds) {
@@ -80,17 +126,23 @@ class PerItemOutboxRelayTemplateTest {
             return m;
         }
 
-        @Override public String buildPayload(TestOutbox o, String task) { return "payload:" + task; }
+        @Override
+        public String buildPayload(TestOutbox o, String task) {
+            return "payload:" + task;
+        }
 
         @Override
         public void notify(String url, String payload, String idempotencyKey) {
             notifyTraceIds.add(String.valueOf(MDC.get("traceId")));
-            TestOutbox o = toClaim.stream().filter(x -> x.url.equals(url)).findFirst().orElseThrow();
+            TestOutbox o =
+                    toClaim.stream().filter(x -> x.url.equals(url)).findFirst().orElseThrow();
             switch (o.outcome) {
                 case "deferred" -> throw new OutboxDispatchDeferredException("CB OPEN");
                 case "permanent" -> throw new OutboxDispatchPermanentException("4xx");
                 case "fail" -> throw new RuntimeException("5xx");
-                default -> { /* success */ }
+                default -> {
+                    /* success */
+                }
             }
         }
 
@@ -134,7 +186,8 @@ class PerItemOutboxRelayTemplateTest {
     }
 
     @Test
-    @DisplayName("4분기: success→markSent, fail→markFailed, deferred→deferRetry, permanent→markFailedPermanently")
+    @DisplayName(
+            "4분기: success→markSent, fail→markFailed, deferred→deferRetry, permanent→markFailedPermanently")
     void fourOutcomes() {
         FakeAdapter a = new FakeAdapter();
         claim(a, "o1", "t1", "success");
@@ -246,7 +299,11 @@ class PerItemOutboxRelayTemplateTest {
     }
 
     private double counter(String result) {
-        return registry.get("outbox.relay").tag("pipeline", "callback").tag("result", result).counter().count();
+        return registry.get("outbox.relay")
+                .tag("pipeline", "callback")
+                .tag("result", result)
+                .counter()
+                .count();
     }
 
     @Test
@@ -254,7 +311,8 @@ class PerItemOutboxRelayTemplateTest {
     void nullMeterRegistry() {
         ExecutorService ex = Executors.newSingleThreadExecutor();
         try {
-            PerItemOutboxRelayTemplate t = new PerItemOutboxRelayTemplate(Duration.ofHours(6), ex, null);
+            PerItemOutboxRelayTemplate t =
+                    new PerItemOutboxRelayTemplate(Duration.ofHours(6), ex, null);
             FakeAdapter a = new FakeAdapter();
             claim(a, "o1", "t1", "success");
 
