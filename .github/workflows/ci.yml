@@ -3,8 +3,10 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE']
   pull_request:
     branches: [main]
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE']
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -24,10 +26,12 @@ jobs:
         with:
           java-version: '21'
           distribution: temurin
-          cache: gradle
+
+      - name: Set up Gradle (dependency + build cache, persisted across runs)
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build and test
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build --build-cache
 
       - name: Upload test reports
         if: always()
