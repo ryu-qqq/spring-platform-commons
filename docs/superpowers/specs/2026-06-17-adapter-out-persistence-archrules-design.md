@@ -1,5 +1,7 @@
 # AdapterOut Persistence ArchUnit 룰 — 설계
 
+> **스냅샷:** 2026-06-17
+
 > platform-archrules에 영속(adapter-out) 레이어 컨벤션 룰 4종을 추가한다.
 > 작성: 2026-06-17 · 상태: 승인됨(설계) → 구현 계획 단계
 
@@ -85,3 +87,7 @@
 - 변경: `platform-archrules` 1개 모듈(main 클래스 1개 + test fixture/테스트). 다른 모듈·소비측 무영향.
 - 소비측은 기존 `DomainHealthReporter` 호출에 `PersistenceConventionRules.all()`을 추가로 넘기거나
   별도 리포트로 호출하면 됨(소비측 변경은 본 작업 범위 밖, 후속).
+
+---
+
+*최종 갱신: 2026-06-17 — 초판(설계 승인)*

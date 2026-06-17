@@ -1,5 +1,7 @@
 # connectly 핸드오버 진행 상황 (다음 세션 이어서 작업용)
 
+> **스냅샷:** 2026-06-17
+
 > 개인 인큐베이터(`com.ryuqqq.platform`)에서 다듬은 모듈을 회사(`com.connectly.platform`, GitLab)로
 > **단계적 독립 핸드오프**. 이 문서만 보면 다음 세션에서 바로 이어갈 수 있다.
 
@@ -105,3 +107,7 @@ curl -s --header "PRIVATE-TOKEN: <read_api 토큰>" \
 archrules production 의존성은 `archunit-junit5` **하나뿐**. 룰은 전부 문자열 패키지 매처(`..adapter.out..`)라
 도메인 타입 import 0. `common-domain`은 fixture용 `testImplementation`이라 소비측에 안 따라옴.
 → persistence 룰은 archrules에 추가해도 의존성 누수 없음.
+
+---
+
+*최종 갱신: 2026-06-17 — persistence-jpa v0.2.0 승격·push 완료, archrules persistence 룰 백로그·의존성 분리 해소 반영*

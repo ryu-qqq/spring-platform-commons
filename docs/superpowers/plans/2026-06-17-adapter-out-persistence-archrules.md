@@ -1,5 +1,7 @@
 # AdapterOut Persistence ArchUnit 룰 Implementation Plan
 
+> **스냅샷:** 2026-06-17
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** platform-archrules에 영속(adapter-out) 레이어 컨벤션 룰 4종을 `PersistenceConventionRules` 클래스로 추가하고, 도메인 룰과 동일한 하이브리드(게이트 1 + 감점 3) 전달 방식으로 검증한다.
@@ -713,3 +715,7 @@ git commit -m "feat(archrules): PersistenceConventionRules.all() + 건강 점수
 **Type consistency:** `all()`은 감점 3개만 반환(게이트 제외) → 점수 100−17=83 일관. `DomainRule(id, rule, severity)`·`Finding::ruleId`·`HealthReport.score()` 기존 시그니처와 일치.
 
 **알려진 순서 의존:** Task 2의 `GoodRepository`가 Task 4의 `GoodEntity`를 참조 → 순차 실행 시 Task 4 완료 후 전체 컴파일 성공. Task 2 단독 검증이 필요하면 Step 1 노트대로 임시 `Object` 사용.
+
+---
+
+*최종 갱신: 2026-06-17 — 초판(구현 계획)*
