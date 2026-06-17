@@ -62,7 +62,7 @@ public final class PersistenceConventionRules {
                     .haveSimpleNameEndingWith("Repository")
                     .should(ONLY_DECLARE_COMMAND_METHODS)
                     .as("REPOSITORY_COMMAND_ONLY")
-                    .because("JpaRepository는 순수 저장 기능만 — 조회/파생 쿼리는 QueryDSL로 분리한다")
+                    .because("Repository 인터페이스는 순수 저장 기능만 — 조회/파생 쿼리는 QueryDSL로 분리한다")
                     .allowEmptyShould(true);
 
     /** QueryDSL 조건 타입(BooleanExpression/Predicate)을 반환하는 메서드. */
