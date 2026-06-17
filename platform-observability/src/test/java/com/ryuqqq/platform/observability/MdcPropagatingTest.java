@@ -3,6 +3,8 @@ package com.ryuqqq.platform.observability;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -81,6 +83,27 @@ class MdcPropagatingTest {
             pool.shutdown();
             pool.awaitTermination(5, TimeUnit.SECONDS);
         }
+    }
+
+    @Test
+    @DisplayName("wrap(Executor): 감싼 Executor의 execute가 MDC 자동 전파")
+    void executorPropagates() throws Exception {
+        MDC.put("traceId", "E-7");
+        AtomicReference<String> seen = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
+        ExecutorService pool = Executors.newSingleThreadExecutor();
+        try {
+            Executor tracing = MdcPropagating.wrap((Executor) pool);
+            tracing.execute(() -> {
+                seen.set(MDC.get("traceId"));
+                latch.countDown();
+            });
+            latch.await(5, TimeUnit.SECONDS);
+        } finally {
+            pool.shutdown();
+            pool.awaitTermination(5, TimeUnit.SECONDS);
+        }
+        assertThat(seen.get()).isEqualTo("E-7");
     }
 
     @Test

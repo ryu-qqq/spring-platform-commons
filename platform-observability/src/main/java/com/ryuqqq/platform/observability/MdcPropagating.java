@@ -2,6 +2,7 @@ package com.ryuqqq.platform.observability;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
 import org.slf4j.MDC;
 
 /**
@@ -42,6 +43,11 @@ public final class MdcPropagating {
                 setOrClear(backup);
             }
         };
+    }
+
+    /** 모든 execute(Runnable) 호출에 MDC 전파를 자동 적용하는 Executor로 감싼다. */
+    public static Executor wrap(Executor delegate) {
+        return command -> delegate.execute(wrap(command));
     }
 
     private static void setOrClear(Map<String, String> context) {
