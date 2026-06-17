@@ -1,15 +1,13 @@
 package com.ryuqqq.platform.common.vo;
 
-import java.time.Instant;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
+import com.ryuqqq.platform.common.domain.Versioned;
+import java.time.Instant;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import com.ryuqqq.platform.common.domain.Versioned;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 class CommonVoTest {
 
@@ -90,7 +88,8 @@ class CommonVoTest {
         void defaultOf() {
             QueryContext<TestSortKey> context = QueryContext.defaultOf(TestSortKey.defaultKey());
 
-            assertThat(context.sort()).isEqualTo(Sort.by(TestSortKey.CREATED_AT, SortDirection.DESC));
+            assertThat(context.sort())
+                    .isEqualTo(Sort.by(TestSortKey.CREATED_AT, SortDirection.DESC));
             assertThat(context.page()).isZero();
             assertThat(context.size()).isEqualTo(20);
             assertThat(context.offset()).isZero();
@@ -100,8 +99,12 @@ class CommonVoTest {
         @Test
         @DisplayName("includeDeleted 전달 가능")
         void includeDeleted() {
-            QueryContext<TestSortKey> context = QueryContext.of(
-                    TestSortKey.CREATED_AT, SortDirection.ASC, PageRequest.firstPage(), true);
+            QueryContext<TestSortKey> context =
+                    QueryContext.of(
+                            TestSortKey.CREATED_AT,
+                            SortDirection.ASC,
+                            PageRequest.firstPage(),
+                            true);
 
             assertThat(context.includeDeleted()).isTrue();
         }
@@ -110,7 +113,8 @@ class CommonVoTest {
         @DisplayName("페이징 편의 메서드는 PageRequest에 위임")
         void pagingDelegation() {
             QueryContext<TestSortKey> context =
-                    QueryContext.of(TestSortKey.CREATED_AT, SortDirection.ASC, PageRequest.of(3, 5));
+                    QueryContext.of(
+                            TestSortKey.CREATED_AT, SortDirection.ASC, PageRequest.of(3, 5));
 
             assertThat(context.page()).isEqualTo(3);
             assertThat(context.size()).isEqualTo(5);
@@ -158,7 +162,10 @@ class CommonVoTest {
             org.assertj.core.api.Assertions.assertThatThrownBy(
                             () ->
                                     sort.orders()
-                                            .add(new SortOrder<>(TestSortKey.CREATED_AT, SortDirection.ASC)))
+                                            .add(
+                                                    new SortOrder<>(
+                                                            TestSortKey.CREATED_AT,
+                                                            SortDirection.ASC)))
                     .isInstanceOf(UnsupportedOperationException.class);
         }
 
@@ -286,7 +293,8 @@ class CommonVoTest {
             CursorQueryContext<TestSortKey, Long> context =
                     CursorQueryContext.defaultOf(TestSortKey.defaultKey());
 
-            assertThat(context.sort()).isEqualTo(Sort.by(TestSortKey.CREATED_AT, SortDirection.DESC));
+            assertThat(context.sort())
+                    .isEqualTo(Sort.by(TestSortKey.CREATED_AT, SortDirection.DESC));
             assertThat(context.isFirstPage()).isTrue();
             assertThat(context.includeDeleted()).isFalse();
         }

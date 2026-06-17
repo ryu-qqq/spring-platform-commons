@@ -23,8 +23,8 @@ public enum SortDirection {
     }
 
     /**
-     * 문자열을 방향으로 파싱한다. null/blank나 유효하지 않은 값은 {@link #defaultDirection()}으로 폴백.
-     * 정확한 enum명(대소문자·앞뒤 공백 무시)만 허용하며, 관용표기는 받지 않는다(어댑터 책임).
+     * 문자열을 방향으로 파싱한다. null/blank나 유효하지 않은 값은 {@link #defaultDirection()}으로 폴백. 정확한 enum명(대소문자·앞뒤 공백
+     * 무시)만 허용하며, 관용표기는 받지 않는다(어댑터 책임).
      */
     public static SortDirection fromString(String value) {
         if (value == null || value.isBlank()) {
