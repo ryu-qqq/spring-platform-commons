@@ -34,9 +34,10 @@ resilient:
 
 → `exampleResilientClient` 빈 + `ResilientClientRegistry`.
 
-## 템플릿 예시
+## adapter-out 배선
 
-`adapter-out/client/example-client` — HT6 reference wiring.
+소비측 adapter-out 빈은 `@DependsOn("resilientClientRegistry")`로 레지스트리 등록 후 생성되도록
+순서를 보장한다.
 
 ## 2레이어 resilience
 

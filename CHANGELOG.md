@@ -6,6 +6,11 @@
 
 ## [Unreleased]
 
+### Removed
+- 헥사고날 템플릿 스켈레톤(`domain`·`application`·`adapter-in`·`adapter-out`·`bootstrap` 모듈,
+  `example-client` 포함) 제거 — 이 레포는 **SDK 전용**으로 수렴. 템플릿은 발행 아티팩트가 아니라
+  소비측 영향 없음. `architecture-tests`는 유지(플랫폼 SDK 레이어 게이트 `PlatformSdkLayerArchTest`).
+
 ## [0.2.0] - 2026-06-15
 
 > 전 플랫폼 모듈의 **최초 JitPack 배포**. `v0.1.0`은 resilient-client만 포함했고, 이번 릴리스로
