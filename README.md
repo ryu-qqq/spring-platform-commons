@@ -11,7 +11,7 @@
 
 | 모듈 | 역할 | README |
 |------|------|--------|
-| **platform-common-domain** | 순수 도메인 타입(VO·페이징·`OutboxStatus`·`MdcKeys`·예외) — 프레임워크 비의존 | [↗](platform-common-domain/README.md) |
+| **platform-common-domain** | 순수 도메인 타입(VO·페이징·`MdcKeys`·예외) — 프레임워크 비의존 | [↗](platform-common-domain/README.md) |
 | **platform-common-application** | 아웃바운드 포트(`CachePort`·`DistributedLockPort`)·`SchedulerBatchProcessingResult`·`CommonVoFactory` | [↗](platform-common-application/README.md) |
 | **platform-web** | adapter-in 웹 코어 — `ApiResponse`·`GlobalExceptionHandler`·`RequestContextFilter` | [↗](platform-web/README.md) |
 | **platform-bootstrap** | 조립 레이어 — logback JSON·actuator·bootstrap yml | [↗](platform-bootstrap/README.md) |

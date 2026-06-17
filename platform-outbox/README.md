@@ -18,23 +18,29 @@ Outbox 테이블에 쌓인 PENDING 메시지를 주기적으로 claim 해서 외
   않게 한다. dispatch 인프라 예외는 retry 무차감으로 PENDING 복귀.
 - **메트릭 optional** — `MeterRegistry` 가 없으면 메트릭은 no-op. 로깅/전이는 메트릭에 의존하지 않는다.
 
-## 상태 모델 — `OutboxStatus`
+## 상태 모델 — 소비측 소유
+
+outbox 처리 상태는 **인프라 수명주기**이므로 SDK가 어휘를 강제하지 않는다. 상태 enum·값 집합·전이
+의미는 **소비측 도메인이 소유**한다(컨벤션상 `<Domain>OutboxStatus`). SDK는 SPI를 통해 수명주기 전이를
+호출하고, 단 한 가지 — "연기 한도 초과 종착 실패인가?" — 만 `boolean isTerminalFailure(O)` 로 질의한다.
+근거: [ADR-0005](../docs/adr/0005-outbox-status-shared-enum-vs-behavioral-spi.md).
+
+권장 상태 모델(강제 아님):
 
 ```
-PENDING → PROCESSING → SENT | FAILED
+PENDING → PROCESSING → COMPLETED | FAILED
 ```
-
-`platform-common-domain` 의 `com.ryuqqq.platform.common.outbox.OutboxStatus` 에 정의되어 있다.
 
 | 상태 | 의미 |
 |------|------|
 | `PENDING` | 발행 대기. claim 대상. |
 | `PROCESSING` | claim 되어 발송 진행 중. |
-| `SENT` | 발송 성공 (종결). |
-| `FAILED` | 재시도 한도 초과 또는 영구 실패 (dead-letter). |
+| `COMPLETED` | 발송 성공 (종결). |
+| `FAILED` | 재시도 한도 초과 또는 영구 실패 (dead-letter, `isTerminalFailure` 대상). |
 
 claim 은 `PENDING → PROCESSING` 원자 전이여야 한다(동시 릴레이 중복 방지). dispatch 인프라 예외 시에는
-`PROCESSING → PENDING` 으로 **retry_count 무차감** 복귀한다.
+`PROCESSING → PENDING` 으로 **retry_count 무차감** 복귀한다. 이 전이들의 구현·persist는 소비측 어댑터
+(`OutboxStore`/`PerItemOutboxAdapter`) 책임이다.
 
 ## 두 릴레이 템플릿
 
@@ -152,6 +158,5 @@ OutboxRetryPolicy.of(3, Duration.ofHours(2));
 implementation project(':platform-outbox')
 ```
 
-`platform-common-application`(→ `SchedulerBatchProcessingResult`, 그리고 transitively `platform-common-domain`
-의 `OutboxStatus`) 에 의존한다. 발행/저장
+`platform-common-application`(→ `SchedulerBatchProcessingResult`) 에 의존한다. 발행/저장
 구현은 소비측이 SPI 로 제공하므로 이 모듈은 트랜스포트 인프라(SQS·HTTP·JPA)에 직접 의존하지 않는다.

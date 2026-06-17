@@ -2,7 +2,7 @@
 
 **헥사고날 서비스가 공유하는 순수 도메인 타입 모음 — 프레임워크 비의존.**
 
-쿼리/페이징 VO, soft delete 상태, 멱등·캐시·락 키 마커, Outbox 상태, MDC 키 SSOT, 예외 베이스를
+쿼리/페이징 VO, soft delete 상태, 멱등·캐시·락 키 마커, MDC 키 SSOT, 예외 베이스를
 한곳에 모은다. Spring·웹·persistence 어떤 인프라에도 의존하지 않으므로 도메인 레이어가 그대로
 import 할 수 있다.
 
@@ -23,7 +23,6 @@ import 할 수 있다.
 | 패키지 | 내용 |
 |--------|------|
 | `com.ryuqqq.platform.common.vo` | 쿼리·페이징·범위·soft delete·키 VO와 마커 |
-| `com.ryuqqq.platform.common.outbox` | `OutboxStatus` 상태 enum |
 | `com.ryuqqq.platform.common.observability` | `MdcKeys` — MDC 키·헤더 이름 SSOT |
 | `com.ryuqqq.platform.common.exception` | `ErrorCode` 계약 + `DomainException` 베이스 |
 | `com.ryuqqq.platform.common.domain` | `Versioned` — 낙관적 락 version 계약 |
@@ -79,14 +78,6 @@ String stored = "payment:" + key; // namespacing은 소비측 정책
 
 `(deleted, deletedAt)` `record`. Aggregate의 `delete(now)`/`restore()` 와 persistence 필터가 공유한다.
 `active()`·`deleted(now)`·`markDeleted(now)`·`restore()`·`isActive()` 제공.
-
-### Outbox 상태 — `OutboxStatus`
-
-```
-PENDING → PROCESSING → SENT | FAILED
-```
-
-`platform-outbox` 릴레이 SDK가 이 enum을 상태 모델로 쓴다.
 
 ### MDC 키 SSOT — `MdcKeys`
 

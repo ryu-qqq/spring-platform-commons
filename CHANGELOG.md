@@ -6,6 +6,16 @@
 
 ## [Unreleased]
 
+### Removed
+- **(breaking)** `platform-common-domain`의 `com.ryuqqq.platform.common.outbox.OutboxStatus` enum 제거.
+  outbox 처리 상태는 인프라 수명주기이므로 도메인 커널이 아니라 소비측 도메인이 `<Domain>OutboxStatus`로
+  소유한다. 근거·대안 검토: [ADR-0005](docs/adr/0005-outbox-status-shared-enum-vs-behavioral-spi.md).
+
+### Changed
+- **(breaking)** `platform-outbox` SPI `PerItemOutboxAdapter`의 `OutboxStatus outboxStatus(O)` →
+  `boolean isTerminalFailure(O)`. 릴레이가 status에서 실제 필요로 하는 "종착 실패 여부" 하나만 노출(ISP).
+  소비측 어댑터는 자기 status를 이 불리언으로 매핑한다.
+
 ## [0.2.0] - 2026-06-15
 
 > 전 플랫폼 모듈의 **최초 JitPack 배포**. `v0.1.0`은 resilient-client만 포함했고, 이번 릴리스로
