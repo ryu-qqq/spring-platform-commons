@@ -30,10 +30,13 @@ public enum SortDirection {
         if (value == null || value.isBlank()) {
             return defaultDirection();
         }
-        try {
-            return valueOf(value.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException e) {
-            return defaultDirection();
+        String normalized = value.trim().toUpperCase(Locale.ROOT);
+        if (ASC.name().equals(normalized)) {
+            return ASC;
         }
+        if (DESC.name().equals(normalized)) {
+            return DESC;
+        }
+        return defaultDirection();
     }
 }

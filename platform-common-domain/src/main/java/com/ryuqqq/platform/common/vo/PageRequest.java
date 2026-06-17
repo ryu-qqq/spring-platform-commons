@@ -37,7 +37,7 @@ public record PageRequest(int page, int size) {
 
     /** 플랫폼 기본 페이지(page 0, 기본 size). fleet canonical 이름 — {@link #firstPage()}와 동일 결과의 별칭. */
     public static PageRequest defaultPage() {
-        return of(0, DEFAULT_SIZE);
+        return firstPage();
     }
 
     public boolean isFirst() {
