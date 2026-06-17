@@ -1,6 +1,7 @@
 package com.ryuqqq.platform.observability;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -123,5 +124,14 @@ class MdcPropagatingTest {
             // expected
         }
         assertThat(MDC.get("traceId")).isEqualTo("T-1");
+    }
+
+    @Test
+    @DisplayName("wrap: null 입력은 즉시 NPE(fail-fast)")
+    void wrapRejectsNull() {
+        assertThatNullPointerException().isThrownBy(() -> MdcPropagating.wrap((Runnable) null));
+        assertThatNullPointerException()
+                .isThrownBy(() -> MdcPropagating.wrap((Callable<Object>) null));
+        assertThatNullPointerException().isThrownBy(() -> MdcPropagating.wrap((Executor) null));
     }
 }

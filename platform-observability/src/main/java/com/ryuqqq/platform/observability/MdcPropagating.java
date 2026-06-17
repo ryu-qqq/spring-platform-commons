@@ -1,6 +1,7 @@
 package com.ryuqqq.platform.observability;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import org.slf4j.MDC;
@@ -19,6 +20,7 @@ public final class MdcPropagating {
 
     /** 제출 시점 MDC 스냅샷을 워커 스레드에 복원해 실행하는 Runnable로 감싼다. */
     public static Runnable wrap(Runnable task) {
+        Objects.requireNonNull(task, "task must not be null");
         Map<String, String> captured = MDC.getCopyOfContextMap();
         return () -> {
             Map<String, String> backup = MDC.getCopyOfContextMap();
@@ -33,6 +35,7 @@ public final class MdcPropagating {
 
     /** 제출 시점 MDC 스냅샷을 워커 스레드에 복원해 실행하는 Callable로 감싼다. */
     public static <V> Callable<V> wrap(Callable<V> task) {
+        Objects.requireNonNull(task, "task must not be null");
         Map<String, String> captured = MDC.getCopyOfContextMap();
         return () -> {
             Map<String, String> backup = MDC.getCopyOfContextMap();
@@ -47,6 +50,7 @@ public final class MdcPropagating {
 
     /** 모든 execute(Runnable) 호출에 MDC 전파를 자동 적용하는 Executor로 감싼다. */
     public static Executor wrap(Executor delegate) {
+        Objects.requireNonNull(delegate, "delegate must not be null");
         return command -> delegate.execute(wrap(command));
     }
 
