@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.ryuqqq.platform.common.exception.DomainException;
-import com.ryuqqq.platform.common.observability.MdcKeys;
+import com.ryuqqq.platform.observability.MdcKeys;
 
 /**
  * 글로벌 REST 예외 처리 — 성공 {@link com.ryuqqq.platform.web.dto.ApiResponse}, 실패 RFC 7807

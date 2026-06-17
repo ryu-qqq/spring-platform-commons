@@ -2,7 +2,7 @@ package com.ryuqqq.platform.web.filter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.ryuqqq.platform.common.observability.MdcKeys;
+import com.ryuqqq.platform.observability.MdcKeys;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.AfterEach;

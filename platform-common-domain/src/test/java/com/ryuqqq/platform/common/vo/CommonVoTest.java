@@ -144,11 +144,9 @@ class CommonVoTest {
     class VersionedTest {
 
         @Test
-        @DisplayName("refreshVersion으로 version 갱신")
-        void refreshVersion() {
-            VersionedHolder holder = new VersionedHolder(0L);
-
-            holder.refreshVersion(3L);
+        @DisplayName("version()으로 낙관적 락 버전 노출 (읽기 전용)")
+        void exposesVersion() {
+            VersionedHolder holder = new VersionedHolder(3L);
 
             assertThat(holder.version()).isEqualTo(3L);
         }
@@ -270,7 +268,7 @@ class CommonVoTest {
 
     private static final class VersionedHolder implements Versioned {
 
-        private long version;
+        private final long version;
 
         private VersionedHolder(long version) {
             this.version = version;
@@ -279,11 +277,6 @@ class CommonVoTest {
         @Override
         public long version() {
             return version;
-        }
-
-        @Override
-        public void refreshVersion(long version) {
-            this.version = version;
         }
     }
 }

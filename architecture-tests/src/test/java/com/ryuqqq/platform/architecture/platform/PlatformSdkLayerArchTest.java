@@ -26,6 +26,7 @@ class PlatformSdkLayerArchTest {
 
     private static JavaClasses commonDomainClasses;
     private static JavaClasses commonApplicationClasses;
+    private static JavaClasses platformObservabilityClasses;
     private static JavaClasses platformWebClasses;
     private static JavaClasses platformBootstrapClasses;
     private static JavaClasses platformPersistenceJpaClasses;
@@ -34,9 +35,48 @@ class PlatformSdkLayerArchTest {
     static void setUp() {
         commonDomainClasses = importProductionClasses("platform-common-domain");
         commonApplicationClasses = importProductionClasses("platform-common-application");
+        platformObservabilityClasses = importProductionClasses("platform-observability");
         platformWebClasses = importProductionClasses("platform-web");
         platformBootstrapClasses = importProductionClasses("platform-bootstrap");
         platformPersistenceJpaClasses = importProductionClasses("platform-persistence-jpa");
+    }
+
+    @Nested
+    @DisplayName("platform-observability (Independent layer)")
+    class ObservabilityRules {
+
+        @Test
+        @DisplayName("must not depend on Spring, JPA, or Jackson")
+        void observability_MustNotDependOnFrameworks() {
+            ArchRule rule =
+                    noClasses()
+                            .should()
+                            .dependOnClassesThat()
+                            .resideInAnyPackage(allPackages(FRAMEWORK_PACKAGES_FORBIDDEN_IN_DOMAIN))
+                            .allowEmptyShould(true)
+                            .because(
+                                    "platform-observability is a zero-dependency vocabulary SSOT — no framework deps (ADR-0006)");
+
+            rule.check(platformObservabilityClasses);
+        }
+
+        @Test
+        @DisplayName("must not depend on any other platform SDK module")
+        void observability_MustNotDependOnOtherModules() {
+            ArchRule rule =
+                    noClasses()
+                            .should()
+                            .dependOnClassesThat()
+                            .resideInAnyPackage(
+                                    allPackages(
+                                            new String[] {"com.ryuqqq.platform.common.."},
+                                            PLATFORM_ADAPTER_IN_PACKAGES,
+                                            PLATFORM_BOOTSTRAP_PACKAGES))
+                            .allowEmptyShould(true)
+                            .because("Independent layer must not depend on other SDK modules (ADR-0006)");
+
+            rule.check(platformObservabilityClasses);
+        }
     }
 
     @Nested

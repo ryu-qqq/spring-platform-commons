@@ -1,6 +1,6 @@
 package com.ryuqqq.platform.scheduler.aspect;
 
-import com.ryuqqq.platform.common.observability.MdcKeys;
+import com.ryuqqq.platform.observability.MdcKeys;
 import com.ryuqqq.platform.common.scheduler.SchedulerBatchProcessingResult;
 import com.ryuqqq.platform.scheduler.annotation.SchedulerJob;
 import io.micrometer.core.instrument.Counter;

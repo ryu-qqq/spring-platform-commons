@@ -8,6 +8,7 @@ dependencies {
     testImplementation project(':bootstrap:bootstrap-web-api')
     testImplementation project(':platform-common-domain')
     testImplementation project(':platform-common-application')
+    testImplementation project(':platform-observability')
     testImplementation project(':platform-web')
     testImplementation project(':platform-bootstrap')
     testImplementation project(':platform-persistence-jpa')
@@ -27,6 +28,7 @@ tasks.test {
         ':bootstrap:bootstrap-web-api:classes',
         ':platform-common-domain:classes',
         ':platform-common-application:classes',
+        ':platform-observability:classes',
         ':platform-web:classes',
         ':platform-bootstrap:classes',
         ':platform-persistence-jpa:classes'

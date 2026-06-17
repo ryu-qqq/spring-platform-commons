@@ -6,6 +6,18 @@
 
 ## [Unreleased]
 
+### Added
+- **platform-observability** 모듈 신설 — 횡단 관측성 어휘 SSOT(의존성 0, 패키지
+  `com.ryuqqq.platform.observability`). `MdcKeys`가 이 모듈로 이동. 근거:
+  [ADR-0006](docs/adr/0006-common-domain-kernel-vs-observability-module.md).
+
+### Changed
+- **(breaking)** `MdcKeys` 이동 — `com.ryuqqq.platform.common.observability.MdcKeys` →
+  `com.ryuqqq.platform.observability.MdcKeys`. 로깅 키·HTTP 헤더는 인프라 어휘이므로 도메인 커널이
+  아니라 `platform-observability` 소유. import 경로 변경 필요(소비측 web·security·scheduler 반영 완료).
+- **(breaking)** `Versioned` 읽기전용화 — `void refreshVersion(long)` 제거, `long version()`만 남김.
+  version 반영은 영속성 매퍼 책임. `platform-common-domain`이 순수 도메인 커널로 수렴(ADR-0006).
+
 ### Removed
 - **(breaking)** `platform-common-domain`의 `com.ryuqqq.platform.common.outbox.OutboxStatus` enum 제거.
   outbox 처리 상태는 인프라 수명주기이므로 도메인 커널이 아니라 소비측 도메인이 `<Domain>OutboxStatus`로
