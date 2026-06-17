@@ -40,5 +40,6 @@ public final class ArchitectureRules {
 
     public static final String[] PLATFORM_ADAPTER_OUT_PACKAGES = {
         "com.ryuqqq.platform.persistence.jpa..",
+        "com.ryuqqq.platform.redis..",
     };
 }
