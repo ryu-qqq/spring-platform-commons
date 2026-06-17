@@ -2,6 +2,7 @@ package com.ryuqqq.platform.common.vo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 import com.ryuqqq.platform.common.domain.Versioned;
 import java.time.Instant;
@@ -331,17 +332,22 @@ class CommonVoTest {
         @Test
         @DisplayName("active → markDeleted → restore")
         void lifecycle() {
-            Instant now = Instant.parse("2026-05-25T12:00:00Z");
             DeletionStatus active = DeletionStatus.active();
-
             assertThat(active.isActive()).isTrue();
+            assertThat(active.isDeleted()).isFalse();
 
+            Instant now = Instant.parse("2026-06-17T00:00:00Z");
             DeletionStatus deleted = active.markDeleted(now);
-
-            assertThat(deleted.deleted()).isTrue();
+            assertThat(deleted.isDeleted()).isTrue();
             assertThat(deleted.deletedAt()).isEqualTo(now);
 
             assertThat(deleted.restore().isActive()).isTrue();
+        }
+
+        @Test
+        @DisplayName("deletedAt 팩토리는 null을 거부한다")
+        void deletedAtRejectsNull() {
+            assertThatNullPointerException().isThrownBy(() -> DeletionStatus.deletedAt(null));
         }
     }
 
@@ -375,18 +381,6 @@ class CommonVoTest {
             assertThatIllegalArgumentException().isThrownBy(() -> PageMeta.of(0, 10, -1));
         }
 
-        @Test
-        @DisplayName("DeletionStatus는 deleted=true인데 deletedAt이 null이면 거부한다")
-        void deletionStatusRejectsDeletedWithoutTimestamp() {
-            assertThatIllegalArgumentException().isThrownBy(() -> new DeletionStatus(true, null));
-        }
-
-        @Test
-        @DisplayName("DeletionStatus는 active인데 deletedAt이 있으면 거부한다")
-        void deletionStatusRejectsActiveWithTimestamp() {
-            Instant now = Instant.parse("2026-05-25T12:00:00Z");
-            assertThatIllegalArgumentException().isThrownBy(() -> new DeletionStatus(false, now));
-        }
     }
 
     @Nested
