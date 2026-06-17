@@ -6,8 +6,8 @@ import java.util.concurrent.Executor;
 import org.slf4j.MDC;
 
 /**
- * 비동기 경계에서 MDC(traceId 등)를 워커 스레드로 전파한다. 제출 스레드의 MDC 스냅샷을 캡처해
- * 워커에서 복원하고, 작업 후 워커의 기존 컨텍스트를 원복한다(스레드풀 재사용 누수 방지).
+ * 비동기 경계에서 MDC(traceId 등)를 워커 스레드로 전파한다. 제출 스레드의 MDC 스냅샷을 캡처해 워커에서 복원하고, 작업 후 워커의 기존 컨텍스트를
+ * 원복한다(스레드풀 재사용 누수 방지).
  *
  * <pre>{@code
  * executor.submit(MdcPropagating.wrap(() -> doWork()));

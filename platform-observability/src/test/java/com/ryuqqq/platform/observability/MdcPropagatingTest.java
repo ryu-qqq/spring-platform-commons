@@ -94,10 +94,11 @@ class MdcPropagatingTest {
         ExecutorService pool = Executors.newSingleThreadExecutor();
         try {
             Executor tracing = MdcPropagating.wrap((Executor) pool);
-            tracing.execute(() -> {
-                seen.set(MDC.get("traceId"));
-                latch.countDown();
-            });
+            tracing.execute(
+                    () -> {
+                        seen.set(MDC.get("traceId"));
+                        latch.countDown();
+                    });
             latch.await(5, TimeUnit.SECONDS);
         } finally {
             pool.shutdown();
@@ -110,9 +111,12 @@ class MdcPropagatingTest {
     @DisplayName("wrap(Runnable): 작업이 예외를 던져도 제출 스레드 MDC는 보존")
     void runnableRestoresOnException() {
         MDC.put("traceId", "T-1");
-        Runnable wrapped = MdcPropagating.wrap((Runnable) () -> {
-            throw new RuntimeException("boom");
-        });
+        Runnable wrapped =
+                MdcPropagating.wrap(
+                        (Runnable)
+                                () -> {
+                                    throw new RuntimeException("boom");
+                                });
         try {
             wrapped.run();
         } catch (RuntimeException ignored) {
