@@ -76,8 +76,7 @@ class CommonVoTest {
         void defaultOf() {
             QueryContext<TestSortKey> context = QueryContext.defaultOf(TestSortKey.defaultKey());
 
-            assertThat(context.sortKey()).isEqualTo(TestSortKey.CREATED_AT);
-            assertThat(context.sortDirection()).isEqualTo(SortDirection.DESC);
+            assertThat(context.sort()).isEqualTo(Sort.by(TestSortKey.CREATED_AT, SortDirection.DESC));
             assertThat(context.page()).isZero();
             assertThat(context.size()).isEqualTo(20);
             assertThat(context.offset()).isZero();
@@ -102,6 +101,108 @@ class CommonVoTest {
             assertThat(context.page()).isEqualTo(3);
             assertThat(context.size()).isEqualTo(5);
             assertThat(context.offset()).isEqualTo(15L);
+        }
+    }
+
+    @Nested
+    @DisplayName("Sort / SortOrder")
+    class SortModelTest {
+
+        @Test
+        @DisplayName("Sort.by는 단일 정렬을 만든다")
+        void singleOrder() {
+            Sort<TestSortKey> sort = Sort.by(TestSortKey.CREATED_AT, SortDirection.DESC);
+
+            assertThat(sort.orders())
+                    .containsExactly(new SortOrder<>(TestSortKey.CREATED_AT, SortDirection.DESC));
+        }
+
+        @Test
+        @DisplayName("Sort.of는 복합 정렬을 순서대로 보존한다")
+        void multiOrder() {
+            Sort<TestSortKey> sort =
+                    Sort.of(
+                            new SortOrder<>(TestSortKey.CREATED_AT, SortDirection.DESC),
+                            new SortOrder<>(TestSortKey.CREATED_AT, SortDirection.ASC));
+
+            assertThat(sort.orders()).hasSize(2);
+            assertThat(sort.orders().get(0).direction()).isEqualTo(SortDirection.DESC);
+            assertThat(sort.orders().get(1).direction()).isEqualTo(SortDirection.ASC);
+        }
+
+        @Test
+        @DisplayName("빈 Sort는 거부된다")
+        void rejectsEmpty() {
+            assertThatIllegalArgumentException().isThrownBy(() -> Sort.of(java.util.List.of()));
+        }
+
+        @Test
+        @DisplayName("orders는 불변이다")
+        void ordersImmutable() {
+            Sort<TestSortKey> sort = Sort.by(TestSortKey.CREATED_AT, SortDirection.DESC);
+
+            org.assertj.core.api.Assertions.assertThatThrownBy(
+                            () ->
+                                    sort.orders()
+                                            .add(new SortOrder<>(TestSortKey.CREATED_AT, SortDirection.ASC)))
+                    .isInstanceOf(UnsupportedOperationException.class);
+        }
+
+        @Test
+        @DisplayName("QueryContext가 복합 정렬을 담는다")
+        void queryContextMultiSort() {
+            Sort<TestSortKey> sort =
+                    Sort.of(
+                            new SortOrder<>(TestSortKey.CREATED_AT, SortDirection.DESC),
+                            new SortOrder<>(TestSortKey.CREATED_AT, SortDirection.ASC));
+
+            QueryContext<TestSortKey> context = QueryContext.of(sort, PageRequest.firstPage());
+
+            assertThat(context.sort().orders()).hasSize(2);
+        }
+    }
+
+    @Nested
+    @DisplayName("Page / Slice")
+    class ResultWrapperTest {
+
+        @Test
+        @DisplayName("Page는 콘텐츠와 메타를 묶는다")
+        void pageWraps() {
+            Page<String> page = Page.of(java.util.List.of("a", "b"), PageMeta.of(0, 10, 2));
+
+            assertThat(page.content()).containsExactly("a", "b");
+            assertThat(page.meta().totalCount()).isEqualTo(2L);
+        }
+
+        @Test
+        @DisplayName("Page.content는 불변이다")
+        void pageContentImmutable() {
+            Page<String> page = Page.of(java.util.List.of("a"), PageMeta.of(0, 10, 1));
+
+            org.assertj.core.api.Assertions.assertThatThrownBy(() -> page.content().add("x"))
+                    .isInstanceOf(UnsupportedOperationException.class);
+        }
+
+        @Test
+        @DisplayName("Page.map은 콘텐츠를 변환하고 메타를 보존한다")
+        void pageMap() {
+            Page<String> page = Page.of(java.util.List.of("a", "bb"), PageMeta.of(0, 10, 2));
+
+            Page<Integer> mapped = page.map(String::length);
+
+            assertThat(mapped.content()).containsExactly(1, 2);
+            assertThat(mapped.meta()).isEqualTo(page.meta());
+        }
+
+        @Test
+        @DisplayName("Slice는 콘텐츠와 커서 메타를 묶는다")
+        void sliceWraps() {
+            Slice<String, Long> slice =
+                    Slice.of(java.util.List.of("a"), SliceMeta.of(20, true, 99L));
+
+            assertThat(slice.content()).containsExactly("a");
+            assertThat(slice.meta().nextCursor()).isEqualTo(99L);
         }
     }
 
@@ -171,7 +272,7 @@ class CommonVoTest {
             CursorQueryContext<TestSortKey, Long> context =
                     CursorQueryContext.defaultOf(TestSortKey.defaultKey());
 
-            assertThat(context.sortDirection()).isEqualTo(SortDirection.DESC);
+            assertThat(context.sort()).isEqualTo(Sort.by(TestSortKey.CREATED_AT, SortDirection.DESC));
             assertThat(context.isFirstPage()).isTrue();
             assertThat(context.includeDeleted()).isFalse();
         }

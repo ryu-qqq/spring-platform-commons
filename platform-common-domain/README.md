@@ -68,11 +68,17 @@ String stored = "payment:" + key; // namespacing은 소비측 정책
 | `CursorPageRequest<C>(cursor, size)` | 커서 기반 요청. `cursor == null` 이면 첫 페이지 |
 | `PageMeta(page, size, totalCount)` | offset 응답 메타. `totalPages`·`hasNext`·`hasPrevious` |
 | `SliceMeta<C>(size, hasNext, nextCursor)` | 커서 응답 메타 |
-| `QueryContext<T extends SortKey>` | 정렬 + offset 페이징 + `includeDeleted` 묶음 |
-| `CursorQueryContext<T extends SortKey, C>` | 정렬 + 커서 페이징 묶음 |
+| `Page<T>(content, meta)` | offset 결과 — 콘텐츠 + `PageMeta` 묶음. `map()` 제공 |
+| `Slice<T, C>(content, meta)` | 커서 결과 — 콘텐츠 + `SliceMeta` 묶음. `map()` 제공 |
+| `SortOrder<T extends SortKey>(key, direction)` | 단일 정렬 항목 |
+| `Sort<T extends SortKey>(orders)` | 정렬 명세 — **복합 정렬**(`ORDER BY a DESC, b ASC`). `by(k,d)`·`of(...)` |
+| `QueryContext<T extends SortKey>` | `Sort` + offset 페이징 + `includeDeleted` 묶음 |
+| `CursorQueryContext<T extends SortKey, C>` | `Sort` + 커서 페이징 묶음 |
 | `DateRange(fromInclusive, toExclusive, dateField)` | `[from, to)` 날짜 범위 필터 |
 
-각 페이징 VO는 `of(...)` / `firstPage(...)` / `defaultOf(...)` 팩토리를 제공한다.
+각 페이징 VO는 `of(...)` / `firstPage(...)` / `defaultOf(...)` 팩토리를 제공한다. `QueryContext`·
+`CursorQueryContext`는 `Sort`를 직접 받거나 단일 정렬 편의 팩토리(`of(sortKey, direction, pageRequest)`)를
+함께 제공한다.
 
 ### Soft delete — `DeletionStatus`
 

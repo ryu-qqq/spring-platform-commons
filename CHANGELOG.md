@@ -7,6 +7,9 @@
 ## [Unreleased]
 
 ### Added
+- **(breaking)** common-domain 정렬/결과 모델 보강 — `Sort<T>`·`SortOrder<T>`(복합 정렬
+  `ORDER BY a DESC, b ASC`), `Page<T>`·`Slice<T,C>`(콘텐츠+메타 결과 래퍼, `map()`). `QueryContext`·
+  `CursorQueryContext`의 `(sortKey, sortDirection)` 필드가 `Sort<T>`로 교체(단일 정렬 편의 팩토리 유지).
 - **platform-observability** 모듈 신설 — 횡단 관측성 어휘 SSOT(의존성 0, 패키지
   `com.ryuqqq.platform.observability`). `MdcKeys`가 이 모듈로 이동. 근거:
   [ADR-0006](docs/adr/0006-common-domain-kernel-vs-observability-module.md).
