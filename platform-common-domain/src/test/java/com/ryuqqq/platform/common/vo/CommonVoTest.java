@@ -417,6 +417,35 @@ class CommonVoTest {
         }
     }
 
+    @Nested
+    @DisplayName("PageMeta")
+    class PageMetaTest {
+
+        @Test
+        @DisplayName("empty()는 page0·size20·total0")
+        void emptyDefault() {
+            PageMeta meta = PageMeta.empty();
+            assertThat(meta.page()).isZero();
+            assertThat(meta.size()).isEqualTo(20);
+            assertThat(meta.totalCount()).isZero();
+        }
+
+        @Test
+        @DisplayName("empty(size)는 주어진 size·page0·total0")
+        void emptyWithSize() {
+            PageMeta meta = PageMeta.empty(50);
+            assertThat(meta.page()).isZero();
+            assertThat(meta.size()).isEqualTo(50);
+            assertThat(meta.totalCount()).isZero();
+        }
+
+        @Test
+        @DisplayName("empty는 hasNext false")
+        void emptyHasNoNext() {
+            assertThat(PageMeta.empty().hasNext()).isFalse();
+        }
+    }
+
     private static final class VersionedHolder implements Versioned {
 
         private final long version;
