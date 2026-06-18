@@ -73,3 +73,13 @@ crawling 은 platform 과 **이름이 같은 공통 타입 14종**(VO 12 + `Erro
 3. **P3 (설계 정합)**: 커서/QueryContext 의 불변 변형 메서드 흡수 + crawling 의 `Sort`(다중정렬)·`Page/Slice` 컨테이너 채택.
 
 각 항목은 platform 의 다른 소비처에도 영향을 주므로, 채택 전 abstraction-critic/ADR 로 "진짜 공용인지" 한 번 거르길 권장.
+
+---
+
+## 8. 진행 결과 (2026-06-17~18)
+
+- **P1 ✅ 흡수 완료**(PR #47): 두 게이트 통과 8개만 — `PageRequest.defaultPage·isFirst`, `PageMeta.empty·empty(int)`, `SortDirection.isAscending·reverse·defaultDirection·fromString`. 죽은 메서드·`MAX_SIZE`·표현계층(startElement/displayName)은 컷.
+- **P2 ✅ 확정·구현 완료**(ADR-0007, PR #50): `totalCount→totalElements`, `DeletionStatus` `deletedAt` 단일필드(boolean 제거), `errorCode()` 유지(입양처 정합).
+- **P3 🔴 흡수 보류**(2026-06-18, 두 게이트). abstraction-critic: REDESIGN(거의 전부 NO-GO) — `afterId(Long)`·`ofString(String)`·`cursorAsLong()`은 제네릭 `C`에 구체타입 누수(neutrality), `fetchSize`(size+1)·`count`는 어댑터 책임 누수(seam), wither 6종은 god 표면(isp), `next`/`nextPage`/`previousPage`는 요청/응답 책임 역전(yagni). decision-researcher 실측: 살려뒀던 `withPageSize`/`withIncludeDeleted`마저 **프로덕션 실호출 0건**(전부 자기 테스트, 복붙 선언). crawling은 platform VO **미입양**, connectly-services는 crawling 단일 BC. → **흡수 코드 0**.
+  - **발견된 후속 ADR 후보**(P3 흡수와 별개): ① `fetchSize`(size+1, hasNext 판정)가 fleet 전반 도메인 VO에 박힘 — "커서 페이징 책임 경계(도메인 vs 어댑터)" ADR감. ② Long-PK 커서가 fleet 사실상 표준(`afterId(Long)`) — 제네릭 `C` 유지 vs Long 전용 API 트레이드오프.
+  - **역방향**(crawling이 platform `Sort`/`Page/Slice` 채택)은 crawling 레포 작업이라 인큐베이터 범위 밖.
