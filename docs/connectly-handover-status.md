@@ -21,11 +21,14 @@
   · `platform-archrules` · `platform-outbox`
 - crawling-services 에서 `platform-common-domain`·`platform-archrules` 소비 정상 확인.
 
-## ✅ 완료 — v0.2.0 (push 완료, CI 배포 트리거됨)
-- `platform-persistence-jpa` 승격 — 빌드·테스트·publishToMavenLocal 검증 OK.
-- DST 커밋(`e9ae736`)·태그(`v0.2.0`) **push 완료** (main + 태그). GitLab CI publish 잡 트리거됨.
-- 배포 검증: 아래 "검증 한 줄"로 `platform-persistence-jpa/0.2.0` POM 확인(토큰 필요).
-- 추후 추상화 후보(아래 "추상화 백로그") 검토 중.
+## ✅ 완료 — v0.2.0 (push 완료)
+- `platform-persistence-jpa` 승격. DST 커밋 `e9ae736`·태그 `v0.2.0` push.
+
+## ✅ 완료 — v0.3.0 (2026-06-18, 변경분 재승격, push 완료)
+- **기존 4모듈 변경분 재발행**: archrules(영속 룰 4종)·common-domain(P1 편의메서드 + **P2 네이밍 breaking**)·observability(MdcPropagating)·outbox(dogfood). DST 커밋 `a540ad6`·태그 `v0.3.0` push, CI publish 트리거.
+- **재승격 절차(기존 모듈 변경분 — 첫 승격과 다름)**: `rm -rf "$DST/$M/src"` → `rsync -a --exclude build/ --exclude .gradle/ "$SRC/$M/" "$DST/$M/"` → `promote-module.sh "$DST/$M"`. **기존 com.connectly src를 먼저 비워야** com.ryuqqq+com.connectly 중복 방지. 버전은 단일(0.2.0→0.3.0), README 모듈설명·소비예시 갱신.
+- P2 breaking 소비 피해 0: crawling은 platform VO 미입양 + DST에 platform-web 없음(P2 머지 때 인큐베이터 platform-web만 깨졌음).
+- 배포 검증: 아래 "검증 한 줄"로 `<module>/0.3.0` POM 확인(토큰 필요).
 
 ## ⏭️ 남은 모듈 (전부 의존성 충족 — 아무 순서나 가능)
 
