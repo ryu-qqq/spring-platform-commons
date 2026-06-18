@@ -1,12 +1,14 @@
 name: CI
 
+# build job은 항상 돈다(브랜치 보호 required check "build"가 모든 PR에서 충족되도록).
+# docs/마크다운만 바뀐 경우 gradle build 스텝을 스킵해 비용을 줄인다.
+# (paths-ignore로 workflow 자체를 건너뛰면 required check가 영영 'expected' 상태가 돼
+#  docs-only PR이 머지 불가해진다 — 그 함정을 피하기 위한 구조.)
 on:
   push:
     branches: [main]
-    paths-ignore: ['**.md', 'docs/**', 'LICENSE']
   pull_request:
     branches: [main]
-    paths-ignore: ['**.md', 'docs/**', 'LICENSE']
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -21,22 +23,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # spotless ratchetFrom 'origin/main' 비교용 (shallow clone엔 ref 없음)
+          fetch-depth: 0   # spotless ratchetFrom 'origin/main' 비교용 + docs-only 판정 diff
+
+      - name: Detect code changes (docs-only면 build 스킵)
+        id: changes
+        run: |
+          BASE="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ] || ! git rev-parse --verify "$BASE" >/dev/null 2>&1; then
+            echo "code=true" >> "$GITHUB_OUTPUT"   # base 불명확 → 안전하게 build
+          elif git diff --name-only "$BASE" HEAD | grep -qvE '(\.md$|^docs/|^LICENSE$)'; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+            echo "docs-only change — gradle build skipped (required check 'build'는 success로 충족)"
+          fi
 
       - name: Set up JDK 21
+        if: steps.changes.outputs.code == 'true'
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: temurin
 
       - name: Set up Gradle (dependency + build cache, persisted across runs)
+        if: steps.changes.outputs.code == 'true'
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build and test
+        if: steps.changes.outputs.code == 'true'
         run: ./gradlew build --build-cache
 
       - name: Upload test & SpotBugs reports
-        if: always()
+        if: always() && steps.changes.outputs.code == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
