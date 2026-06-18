@@ -1,8 +1,7 @@
 package com.ryuqqq.platform.web.dto;
 
-import java.util.List;
-
 import com.ryuqqq.platform.common.vo.PageMeta;
+import java.util.List;
 
 /**
  * offset 페이징 REST 응답 envelope.
@@ -23,10 +22,11 @@ public record PageApiResponse<T>(
     }
 
     public static <T> PageApiResponse<T> of(List<T> content, PageMeta meta) {
-        return of(content, meta.page(), meta.size(), meta.totalCount());
+        return of(content, meta.page(), meta.size(), meta.totalElements());
     }
 
-    public static <T> PageApiResponse<T> of(List<T> content, int page, int size, long totalElements) {
+    public static <T> PageApiResponse<T> of(
+            List<T> content, int page, int size, long totalElements) {
         PageMeta meta = PageMeta.of(page, size, totalElements);
         int totalPages = meta.totalPages();
         boolean first = page == 0;
